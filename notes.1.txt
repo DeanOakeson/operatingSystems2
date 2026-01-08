@@ -1,0 +1,40 @@
+OPERATING SYSTEMS - USE C or C++
+
+You can use libraries, and existing functions.
+YOU CAN ALSO TRY TO IMPLEMENT ALL DATA STRUCTURES.
+
+	APPLICATION
+	OPERATING SYSTEM
+	NETWORK
+	DATA BASE
+
+Same Book as last time (Operating System Concepts, Abraham Silberschatz, Ninth Edition)
+
+Check out Reference BOOKS in Canvas
+	
+	Software Testing (Think about how to verify program before implementation)
+		Think about what you want your outcome to be!!!	
+
+	Software Engineering (To organize your code)
+	
+	Plan architicture with SKYLER.
+
+You can work alone or with a partner.
+
+Deadline is 11:59 pm, after that time the assigment will lose 20% every day.
+
+NO FINAL EXAM, FINAL PRESENTATION.
+
+YOU PRESENT AT EVERY MILESTONE.
+
+You submit source code and design document.
+
+
+DECIDE ON A PROGRAM TO RUN ----- compile assembly code to byte format
+
+	osX ENCODING uses 6 bytes
+	to read you jump 6 bytes and decode
+
+STEP 1: FIND OUT HOW TO READ A BYTE IN YOUR FAVORITE LANGUAGE (Could be int??).
+
+STEP2: FIND OUT HOW TO LOAD PROGRAM INTO MAIN MEMORY, nx6 byte locations.
