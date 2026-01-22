@@ -1,0 +1,17 @@
+all ops arithmitic
+MVI and MOV op in move
+1 op in branch
+all ops in logic
+
+I WILL HAVE 8 REGEISTERS I THINK, I decide what to implement.
+
+OVERLAP IS NOT ALLOWED. OUT OF BOUNDS IS NOT ALLOWED. errordump can throw back integers to indicate which case needs to be handled.
+
+At the end of the programs run there needs to be a way to signal the os to clear the table.
+
+THERE NEEDS TO BE AN ERROR MESSAGE FOR THE OUT OF BOUNDARY AND FOR THE OVERLAP. DO NOT RUN THE PROBLEM PROGRAMS ONLY RUN THE ONE WITH NO ERRORS.
+
+
+Implement a program that adds a couple numbers together.
+
+OS is boundry between software and hardware.

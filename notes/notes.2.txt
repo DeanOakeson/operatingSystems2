@@ -1,0 +1,51 @@
+Build a loader that loads the osX byte code into "memory"
+Implement an interpreter that can execute the fetch-decode-execute cycle
+
+1st three integers are listed for the size of the program, location of the first assembly file, and the loader address.
+
+The third number dictates where the in the main memory array the program will be loaded.
+SWI<imm>; Software Interrupt is lowkey the sytem calls to the "kernel"
+
+IMPLEMENT the faux kernel with a SWITCH statement.
+
+SWI(1) which will call print().
+SWI(2) Could will call cin()
+SWI(3) mutexlock()
+SWI(4) semaphore()
+
+SWI CAN CALL ANY FUNCTION IN THE HIGH LEVEL LANGUAGE.
+
+
+
+
+MAIN MEMORY
+
+    n X 6 array for the main memory construction.
+        or n X 1 to find the bounds of each byte.
+
+    for loop through byte code and read each bit into the memory then jump to next array.
+    add padding to the end of the arrays if you need to fill the space.
+    
+    send an error message if things are located in the same place.
+
+LOAD
+
+    Find a function to read a byte.
+
+    He defined the constants ie. the op codes
+    He defined register names
+    He defined strings
+
+    for load he reads the first three integers in.
+
+    then a for loop starts at PC until the SIZE of the file through and uses a switch statement to determine what instruction is used.
+
+    Seperate the load and execute in seperate functions.
+
+CORE DUMP
+    
+    Drops the main memory image. It zeroes it out.
+
+ERROR DUMP
+
+    Drops the program based on the program and its specific location.
