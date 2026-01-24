@@ -45,54 +45,57 @@ public:
   u_int32_t pc;
   int z;
 
+  // Main Memory
+  Ram MainMemory;
+
   void idleCPU();
-  void runProgram(Ram *pMainMemory) {
+  void runProgram() {
 
     // GET RID OF THIS EVENTUALLY//
-    int fileSize = 36;
-    int fileFirstInstruction = 12;
-    int fileLoadedAddress = 0;
+    int fileSize = MainMemory.fileSize;
+    int fileFirstInstruction = MainMemory.fileFirstInstruction;
+    int fileLoadedAddress = MainMemory.fileLoadAddress;
     u_int8_t opCode;
 
     for (pc = fileFirstInstruction; pc < fileSize + fileLoadedAddress; pc++) {
-      opCode = pMainMemory->mem[pc][0];
+      opCode = MainMemory.mem[pc][0];
       switch (opCode) {
 
         // ARITHMATIC //
       case ADD: // 16 // WORKS
-        reg[pMainMemory->mem[pc][1]] =
-            reg[pMainMemory->mem[pc][2]] + reg[pMainMemory->mem[pc][3]];
+        reg[MainMemory.mem[pc][1]] =
+            reg[MainMemory.mem[pc][2]] + reg[MainMemory.mem[pc][3]];
         break;
 
       case SUB: // 17 // WORKS
-        reg[pMainMemory->mem[pc][1]] =
-            reg[pMainMemory->mem[pc][2]] - reg[pMainMemory->mem[pc][3]];
+        reg[MainMemory.mem[pc][1]] =
+            reg[MainMemory.mem[pc][2]] - reg[MainMemory.mem[pc][3]];
         break;
 
       case MUL: { // 18 // WORKS
-        reg[pMainMemory->mem[pc][1]] =
-            reg[pMainMemory->mem[pc][2]] * reg[pMainMemory->mem[pc][3]];
+        reg[MainMemory.mem[pc][1]] =
+            reg[MainMemory.mem[pc][2]] * reg[MainMemory.mem[pc][3]];
         break;
       }
 
       case DIV: // 19
-        reg[pMainMemory->mem[pc][1]] =
-            reg[pMainMemory->mem[pc][2]] / reg[pMainMemory->mem[pc][3]];
+        reg[MainMemory.mem[pc][1]] =
+            reg[MainMemory.mem[pc][2]] / reg[MainMemory.mem[pc][3]];
         break;
 
         // MOVE DATA //
       case MOV: // WORKS
-        reg[pMainMemory->mem[pc][1]] = reg[pMainMemory->mem[pc][2]];
+        reg[MainMemory.mem[pc][1]] = reg[MainMemory.mem[pc][2]];
         break;
 
       case MVI:
-        reg[pMainMemory->mem[pc][1]] = pMainMemory->mem[pc][2];
+        reg[MainMemory.mem[pc][1]] = MainMemory.mem[pc][2];
         break;
 
       case ADR: // TEST // MAYBE IS DONE??? CHECK???
-        reg[pMainMemory->mem[pc][0]] =
-            (pMainMemory->mem[pc][1] << 24 | pMainMemory->mem[pc][2] << 16 |
-             pMainMemory->mem[pc][3] << 8 | pMainMemory->mem[pc][4]);
+        reg[MainMemory.mem[pc][0]] =
+            (MainMemory.mem[pc][1] << 24 | MainMemory.mem[pc][2] << 16 |
+             MainMemory.mem[pc][3] << 8 | MainMemory.mem[pc][4]);
 
         break;
       case STR:
@@ -107,12 +110,13 @@ public:
         // BREAK //
       case B: // TEST
         // bit shift to combine all uchars into an int
-        pc = (pMainMemory->mem[pc][1] << 24 | pMainMemory->mem[pc][2] << 16 |
-              pMainMemory->mem[pc][3] << 8 | pMainMemory->mem[pc][4]);
+        pc = (MainMemory.mem[pc][1] << 24 | MainMemory.mem[pc][2] << 16 |
+              MainMemory.mem[pc][3] << 8 | MainMemory.mem[pc][4]);
         break;
       case BL:
         break;
-      case BX:
+      case BX: // JUMP TO ADDRESS IN REG, pc <-- <reg>
+        pc = (MainMemory.mem[pc][1]);
         break;
       case BNE:
         break;
@@ -142,15 +146,11 @@ public:
     u_int8_t regId = 0;
 
     for (u_int8_t i = 0; i < 6; i++) {
-      printf("\n");
-
-      printf("[Debug] REG_%d:", regId);
-      printf("%d  ", reg[regId]);
+      printf("\n-- reg::%d -- %d", regId, reg[regId]);
       regId += 1;
     }
 
-    printf("\n[Debug] PC:%d\n", pc);
-    printf("[Debug] Z:%d\n\n", z);
+    printf("\n-- reg::pc - %d\n-- reg::z -- %d\n\n", pc, z);
   }
 };
 

@@ -3,8 +3,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unordered_map>
 
@@ -12,64 +10,84 @@
 
 class Ram {
 public:
-  char mem[MEM_SIZE_KB][6];
-  u_int32_t memTable[10][2];
+  // OBJECTS//
+  char mem[MEM_SIZE_KB][7];
+  std::string filePath;
+  u_int32_t fileSize = 0;
+  u_int32_t fileFirstInstruction = 0;
+  u_int32_t fileLoadAddress = 0;
 
-  void loadProgram(std::string FilePath, Ram *pMainMemory) {
+  // loadProgram returns 0 on success, 1 on memory override, and 2 on memory
+  // overflow
+  int loadProgram(std::string FilePath) {
     std::ifstream file(FilePath, std::ios::binary);
 
     // FIRST READ THE FIRST 3 INTS FOR YOUR HEADER VARIABLES //
-    u_int32_t fileSize;
     file.read(reinterpret_cast<char *>(&fileSize), sizeof(int));
-    printf("fileSize = %d\n", fileSize);
-    u_int32_t fileFirstInstruction;
     file.read(reinterpret_cast<char *>(&fileFirstInstruction), sizeof(int));
-    printf("fileFirstInstructionOffset = %d\n", fileFirstInstruction);
-    u_int32_t fileLoadAddress;
     file.read(reinterpret_cast<char *>(&fileLoadAddress), sizeof(int));
-    printf("fileLoaderAddress = %d\n", fileLoadAddress);
 
-    // CREATE ERROR HANDELING WITH VERIFYLOAD//
-    this->updateMemoryTable(fileLoadAddress, fileSize);
+    if (fileLoadAddress + fileSize > MEM_SIZE_KB) {
+      return 2;
+    }
 
-    // LOAD //
-    for (u_int32_t i = fileLoadAddress + fileFirstInstruction;
-         i < fileSize + fileLoadAddress; i++) {
-      for (u_int32_t j = 0; j < 6; j++) {
-        file.read(&this->mem[i][j], sizeof(u_char));
+    bool memoryIsUnoccupied = this->verifyMemoryIsUnoccupied();
+
+    if (memoryIsUnoccupied == true) {
+      for (u_int32_t i = fileLoadAddress + fileFirstInstruction;
+           i < fileSize + fileLoadAddress; i++) {
+        for (u_int32_t j = 0; j < 6; j++) {
+          file.read(&this->mem[i][j], sizeof(u_char));
+        }
+      }
+      updateMemoryIndicators();
+
+      filePath =
+          FilePath; // THIS CHANGES THE MOST RECENT FILEPATH LOADED FOR PRINTING
+    } else {
+      return 1; // Failure due to memory override
+    }
+    return 0; // Returns successfully
+  }
+
+  int memDump() {
+    if (fileSize == 0) { // IF NO FILE HAS BEEN LOADED
+      printf("\n --NO LOADED PROGRAM-- \n");
+    } else { // IF SOMETHING HAS BEEN LOADED
+      printf("\nMEMORY ADDRESSES %d --- %d\n PROGRAM: %s", fileLoadAddress,
+             fileLoadAddress + fileSize, filePath.c_str());
+      for (int i = fileLoadAddress; i < fileLoadAddress + fileSize; i++) {
+        printf("\n-- addr::%d -- ", i);
+        for (int j = 0; j <= 6; j++) {
+          printf("%d ", mem[i][j]);
+        }
+      }
+    };
+
+    printf("\n\n");
+    return 0;
+  }
+
+private:
+  // CHECKS ALL POSITIONS THE POTENTIAL PROGRAM WOULD OCCUPY TO MAKE SURE THAT
+  // IT IS FREE, returns false if occupied
+  bool verifyMemoryIsUnoccupied() {
+    for (u_int32_t i = fileLoadAddress; i <= fileLoadAddress + fileSize; i++) {
+      if (mem[i][6] == 1) {
+        return false;
       }
     }
-  }
-
-  // PSUEDO MEMORY MANAGMENT//
-  void updateMemoryTable(u_int32_t fileLoadAddress, u_int32_t fileSize) {
-    if (verifyLoad(fileLoadAddress, fileSize) == false)
-      printf("PROGRAM CANNOT BE LOADED IN MEMORY");
-    else {
-      memTable[1][0] = fileLoadAddress;
-      memTable[1][1] = fileSize;
-    }
-  }
-
-  bool verifyLoad(u_int32_t fileLoadAddress, u_int32_t fileSize) {
-    int newLoad = fileLoadAddress;
-    int newEnd = fileLoadAddress + fileSize;
-
-    for (int i; i <= 10; i++) {
-      int oldLoad = memTable[i][0];
-      int oldEnd =
-          oldLoad +
-          memTable[i][1]; // already loaded program's load position and size
-      if (newLoad >= oldLoad && newLoad <= oldEnd)
-        return false;
-      if (newEnd >= oldLoad && newEnd < +oldEnd)
-        return false;
-      if (oldEnd >= newLoad && oldEnd <= newEnd)
-        return false;
-      if (newEnd > MEM_SIZE_KB)
-        return false; // MAYBE THROW A DIFFERENT ERROR CODE??
-    }
     return true;
+  }
+
+  // FLIPS THE MEMORY OCCUPATION BIT no return
+  void updateMemoryIndicators() {
+    for (u_int32_t i = fileLoadAddress; i <= fileLoadAddress + fileSize; i++) {
+      if (mem[i][6] == 0)
+        mem[i][6] = 1;
+      else if (mem[i][6] == 1)
+        mem[i][6] = 0;
+    }
   }
 };
 #endif

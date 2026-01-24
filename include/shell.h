@@ -3,148 +3,128 @@
 
 #include "ram.h"
 #include "vm.h"
-#include <fstream>
 #include <hashtable.h>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
+
+// create asm to loop thru 1 to 100
+// kernel mode for SWI
+// document
+// watch the other lecture i feel i am missing something others are not.
+// location.`` ask tim how he implemented the kernel?? finish implementing my
 
 class Shell {
 public:
   VirtualMachine Machine;
-  Ram MainMemory;
 
-  void initShell(VirtualMachine NewMachine, Ram NewMainMemory) {
+  std::unordered_map<std::string, int (Shell::*)(std::vector<std::string>)>
+      functionMap;
+
+  // inits my unordered_map and path to vm
+  void initPath(VirtualMachine NewMachine) {
     Machine = NewMachine;
-    MainMemory = NewMainMemory;
+    functionMap["run"] = &Shell::runProgram;
+    functionMap["load"] = &Shell::loadProgram;
+    functionMap["exit"] = &Shell::exitShell;
+    functionMap["help"] = &Shell::printHelp;
+    functionMap["clear"] = &Shell::printClear;
+    functionMap["coredump"] = &Shell::coreDump;
+    functionMap["errordump"] = &Shell::errorDump;
   }
 
-  void load(std::string filePath) {
-    printf("load");
-    MainMemory.loadProgram(filePath, &MainMemory);
+  // takes command input string and converts it to an array of strings returns
+  // array
+  std::vector<std::string>
+  commandStringToArrayOfStrings(std::string commandString) {
+    std::vector<std::string> commandArray;
+    std::istringstream strstm(commandString);
+    std::string token;
+    while (strstm >> token) {
+      commandArray.push_back(token);
+    }
+    return commandArray;
   }
 
-  void run() { Machine.runProgram(&MainMemory); }
+  // main loop returns an int 1 for failure 0 for success
 
-  void clear() {
+  int shellLoop() {
+
+    while (true) {
+      printf("SHELL-->> ");
+      std::string command;
+      std::getline(std::cin, command);
+
+      std::vector<std::string> commandArray =
+          commandStringToArrayOfStrings(command);
+
+      if (functionMap.find(commandArray[0]) != functionMap.end()) {
+        int returnCode = (this->*functionMap[commandArray[0]])(commandArray);
+        if (returnCode == 9) { // EXIT CODE
+          return 0;
+        }
+      } else { // IF FUNCTION IS NOT FOUND IN THE LIST PRINT AND RUN LOOP
+        printf("Command not found. Try 'help'\n");
+      }
+    }
+  }
+
+  int loadProgram(std::vector<std::string> argList) {
+    if (argList.size() <= 1) {
+      printf("ERROR --NO FILE PATH PROVIDED--\n");
+      return 1;
+    } else {
+      u_int8_t returnCode = Machine.MainMemory.loadProgram(argList[1]);
+      if (returnCode == 1) {
+        printf("ERROR --MEMORY IS OCCUPIED--\n");
+        return 1;
+      }
+      if (returnCode == 2) {
+        printf("ERROR --MEMORY OVERFLOW--\n");
+        return 1;
+      }
+    }
+    return 0;
+  }
+
+  // COMMAND PROGRAMS//
+
+  int runProgram(std::vector<std::string> argList) {
+    Machine.runProgram();
+    return 0;
+  }
+
+  int printClear(std::vector<std::string> argList) {
     for (int i = 0; i < 100; i++) {
       printf("\n");
     }
+    return 0;
   }
 
-  void coredump() { Machine.coreDump(); }
-
-  void help() {
-    printf("\n--HELP--\n");
-    printf("\nrun [-v] ------ runs a loaded specified program\n");
-    printf("load [-v]------ loads a binary file from an input file path\n");
-    printf("clear --------- clears the terminal screen\n");
-    printf("coredump ------ lists the current values contained in REGISTERS\n");
-    printf("errordump ----- IDK YET???\n");
-    printf("exit ---------- exits terminal\n");
+  int coreDump(std::vector<std::string> argList) {
+    Machine.coreDump();
+    return 0;
   }
 
-  void errordump() {
-    printf("\n\nERRORDUMP\n");
-    printf("%d ", MainMemory.mem[12][0]);
-    printf("%d ", MainMemory.mem[12][1]);
-    printf("%d ", MainMemory.mem[12][2]);
-    printf("%d ", MainMemory.mem[12][3]);
-    printf("%d ", MainMemory.mem[12][4]);
-    printf("%d\n", MainMemory.mem[12][5]);
+  int printHelp(std::vector<std::string> argList) {
+    printf("\n--HELP--\n"
+           "\nrun [-v] ------ runs a loaded specified program\n"
+           "load [-v]------ loads a binary file from an input file path\n"
+           "clear --------- clears the terminal screen\n"
+           "clear --------- clears the terminal screen\n"
+           "coredump ------ lists the current values contained in REGISTERS\n"
+           "errordump ----- IDK YET???\n"
+           "exit ---------- exits terminal\n");
+    return 0;
+  }
 
-    printf("%d ", MainMemory.mem[13][0]);
-    printf("%d ", MainMemory.mem[13][1]);
-    printf("%d ", MainMemory.mem[13][2]);
-    printf("%d ", MainMemory.mem[13][3]);
-    printf("%d ", MainMemory.mem[13][4]);
-    printf("%d\n", MainMemory.mem[13][5]);
+  int errorDump(std::vector<std::string> argList) {
+    Machine.MainMemory.memDump();
+    return 0;
+  }
 
-    printf("%d ", MainMemory.mem[14][0]);
-    printf("%d ", MainMemory.mem[14][1]);
-    printf("%d ", MainMemory.mem[14][2]);
-    printf("%d ", MainMemory.mem[14][3]);
-    printf("%d ", MainMemory.mem[14][4]);
-    printf("%d\n", MainMemory.mem[14][5]);
-
-    printf("%d ", MainMemory.mem[15][0]);
-    printf("%d ", MainMemory.mem[15][1]);
-    printf("%d ", MainMemory.mem[15][2]);
-    printf("%d ", MainMemory.mem[15][3]);
-    printf("%d ", MainMemory.mem[15][4]);
-    printf("%d\n", MainMemory.mem[15][5]);
-
-    printf("%d ", MainMemory.mem[16][0]);
-    printf("%d ", MainMemory.mem[16][1]);
-    printf("%d ", MainMemory.mem[16][2]);
-    printf("%d ", MainMemory.mem[16][3]);
-    printf("%d ", MainMemory.mem[16][4]);
-    printf("%d\n", MainMemory.mem[16][5]);
-
-    printf("%d ", MainMemory.mem[17][0]);
-    printf("%d ", MainMemory.mem[17][1]);
-    printf("%d ", MainMemory.mem[17][2]);
-    printf("%d ", MainMemory.mem[17][3]);
-    printf("%d ", MainMemory.mem[17][4]);
-    printf("%d\n", MainMemory.mem[17][5]);
-  };
-
-  int shellLoop() {
-    std::cout << "SHELL-->> ";
-    std::string input;
-    std::string command;
-    std::string arg;
-    while (true) {
-      std::cin >> command;
-
-      if (command == "coredump") {
-        coredump();
-        shellLoop();
-        return 0;
-      }
-
-      if (command == "run") {
-        run();
-        shellLoop();
-        return 0;
-      }
-
-      if (command == "load") {
-        load(arg);
-        shellLoop();
-        return 0;
-      }
-
-      if (command == "exit") {
-        printf("EXITING SHELL..\n");
-        return 0;
-      }
-
-      if (command == "errordump") {
-        errordump();
-        shellLoop();
-        return 0;
-      }
-
-      if (command == "clear") {
-        clear();
-        shellLoop();
-        return 0;
-      }
-
-      if (command == "help") {
-        help();
-        shellLoop();
-        return 0;
-      }
-
-      else {
-        printf("\ntype help for all available commands\n\n");
-        shellLoop();
-        return 0;
-      }
-    }
+  int exitShell(std::vector<std::string> argList) {
+    printf("EXITING...\n");
+    return 9;
   }
 };
 
