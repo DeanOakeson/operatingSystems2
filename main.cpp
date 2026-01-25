@@ -8,9 +8,8 @@ int main() {
 
   Kernel Kernel;
   Shell Shell;
-  Ram MainMemory;
   VirtualMachine Cpu;
-  Kernel.initHardware(Cpu, MainMemory);
+  Kernel.initHardware(Cpu);
   Shell.initPath();
   Shell.shellLoop();
   return 0;

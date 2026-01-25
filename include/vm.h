@@ -48,10 +48,14 @@ public:
   int SL;
   int Z;
   int SB;
+  int byteOffset;
+  int swiOpCode;
+
+  Ram MainMemory;
 
   // Main Memory
 
-  int runCpu(Ram MainMemory) {
+  int runCpu() {
     int userMode = 0;
     PC = MainMemory.fileLoadAddress;
 
@@ -101,12 +105,13 @@ public:
         break;
       // BRANCH //
       case B:
-        PC = (int32_t)(((uint32_t)MainMemory.mem[PC][4] << 24 |
-                        (uint32_t)MainMemory.mem[PC][3] << 16 |
-                        (uint32_t)MainMemory.mem[PC][2] << 8 |
-                        (uint32_t)MainMemory.mem[PC][1])) +
-             MainMemory.fileLoadAddress;
-        printf("JUMP TO addr::%d\n", PC);
+        byteOffset = (int32_t)(((uint32_t)MainMemory.mem[PC][4] << 24 |
+                                (uint32_t)MainMemory.mem[PC][3] << 16 |
+                                (uint32_t)MainMemory.mem[PC][2] << 8 |
+                                (uint32_t)MainMemory.mem[PC][1]));
+        // TRANSLATE INTO 6 BYTE ADDRESS SPACE
+        PC = byteOffset / 6 + MainMemory.fileLoadAddress;
+        printf("JUMP TO AADR::%d\n", PC);
         incrementPC = false;
         break;
       case BL:
@@ -131,8 +136,16 @@ public:
         break;
       case EOR:
         break;
-      case SWI: // swi 10 = halt
-        break;
+      case SWI: // SWI 10 = HALT
+        swiOpCode = (int32_t)(((uint32_t)MainMemory.mem[PC][4] << 24 |
+                               (uint32_t)MainMemory.mem[PC][3] << 16 |
+                               (uint32_t)MainMemory.mem[PC][2] << 8 |
+                               (uint32_t)MainMemory.mem[PC][1]));
+        switch (swiOpCode) {
+        case 1:
+          printf("SWI1 INNTERUPT..\n");
+          break;
+        }
       }
 
       // Only increment PC if we didn't branch

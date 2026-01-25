@@ -9,7 +9,6 @@
 // create asm to loop thru 1 to 100
 // kernel mode for SWI
 // document
-// watch the other lecture i feel i am missing something others are not.
 
 class Shell {
 public:
@@ -29,8 +28,10 @@ public:
     functionMap["errordump"] = &Shell::shellErrorDump;
   }
 
-  // takes command input string and converts it to an array of strings returns
-  // array
+  //////////////////////////////////////
+  // INPUT ARGUMENT TO ARGUMENT ARRAY //
+  //////////////////////////////////////
+
   std::vector<std::string>
   commandStringToArrayOfStrings(std::string commandString) {
     std::vector<std::string> commandArray;
@@ -42,7 +43,9 @@ public:
     return commandArray;
   }
 
-  // main loop returns an int 1 for failure 0 for success
+  ///////////////
+  // MAIN LOOP //
+  ///////////////
 
   int shellLoop() {
 
@@ -54,53 +57,27 @@ public:
       std::vector<std::string> commandArray =
           commandStringToArrayOfStrings(command);
 
-      if (functionMap.find(commandArray[0]) != functionMap.end()) {
-        int returnCode = (this->*functionMap[commandArray[0]])(commandArray);
-        if (returnCode == 9) { // EXIT CODE
-          return 0;
-        }
-      } else { // IF FUNCTION IS NOT FOUND IN THE LIST PRINT AND RUN LOOP
-        printf("Command not found. Try 'help'\n");
+      if (functionMap.find(commandArray[0]) == functionMap.end()) {
+        // IF FUNCTION IS NOT FOUND IN THE LIST PRINT AND RUN LOOP
+        printf("try 'help'\n");
+        continue;
+      }
+
+      int returnCode = (this->*functionMap[commandArray[0]])(commandArray);
+      if (returnCode == 9) { // EXIT CODE
+        return 0;
       }
     }
   }
 
-  int shellLoadProgram(std::vector<std::string> argList) {
-    if (argList.size() <= 1) {
-      printf("ERROR --NO FILE PATH PROVIDED--\n");
-      return 1;
-    } else {
-      u_int8_t returnCode = MainKernel.loadProgram(argList[1]);
-      if (returnCode == 1) {
-        printf("ERROR --MEMORY IS OCCUPIED--\n");
-        return 1;
-      }
-      if (returnCode == 2) {
-        printf("ERROR --MEMORY OVERFLOW--\n");
-        return 1;
-      }
-    }
-    printf("FILE END = %d\n", MainKernel.MainMemory.fileLoadAddress +
-                                  MainKernel.MainMemory.fileSize);
-    return 0;
-  }
-
-  // COMMAND PROGRAMS//
-
-  int shellRunProgram(std::vector<std::string> argList) {
-    MainKernel.runProgram();
-    return 0;
-  }
+  //////////////////////////////
+  // CONSOLE CONTROL PROGRAMS //
+  //////////////////////////////
 
   int shellPrintClear(std::vector<std::string> argList) {
     for (int i = 0; i < 100; i++) {
       printf("\n");
     }
-    return 0;
-  }
-
-  int shellCoreDump(std::vector<std::string> argList) {
-    MainKernel.coreDump();
     return 0;
   }
 
@@ -116,14 +93,79 @@ public:
     return 0;
   }
 
+  int shellExitShell(std::vector<std::string> argList) {
+    printf("EXITING...\n");
+    return 9;
+  }
+
+  /////////////////////////////
+  // MEMORY CONTROL PROGRAMS //
+  /////////////////////////////
+
+  int shellLoadProgram(std::vector<std::string> argList) {
+    u_int8_t returnCode;
+    if (argList.size() <= 1) {
+      printf("ERROR --NO FILE PATH PROVIDED--\n");
+      return 1;
+    }
+
+    if (argList[1] == "-v" && argList.size() == 2) {
+      printf("ERROR --NO FILE PATH PROVIDED--\n");
+      return 1;
+    }
+
+    if (argList[1] == "-v" && argList.size() > 2) {
+      returnCode = MainKernel.loadProgram(argList[2]);
+      MainKernel.memDump();
+      return 0;
+    }
+
+    returnCode = MainKernel.loadProgram(argList[1]);
+
+    if (returnCode == 1) {
+      printf("ERROR --MEMORY IS OCCUPIED--\n");
+      return 1;
+    }
+
+    if (returnCode == 2) {
+      printf("ERROR --MEMORY OVERFLOW--\n");
+      return 1;
+    }
+
+    printf("FILE END = %d\n", MainKernel.Machine.MainMemory.fileLoadAddress +
+                                  MainKernel.Machine.MainMemory.fileSize);
+    return 0;
+  }
+
   int shellErrorDump(std::vector<std::string> argList) {
     MainKernel.memDump();
     return 0;
   }
 
-  int shellExitShell(std::vector<std::string> argList) {
-    printf("EXITING...\n");
-    return 9;
+  /////////////////////////////////////
+  // VIRTUAL MACHINE CONTROL PROGRAMS//
+  /////////////////////////////////////
+
+  int shellRunProgram(std::vector<std::string> argList) {
+
+    if (argList.size() == 1) {
+
+      // DEFAULT NO ARGUMENTS//
+      MainKernel.runProgram();
+      return 0;
+    }
+
+    if (argList.size() >= 2 && argList[1] == "-v") {
+      MainKernel.runProgram();
+      MainKernel.coreDump();
+      return 0;
+    }
+    return 1;
+  }
+
+  int shellCoreDump(std::vector<std::string> argList) {
+    MainKernel.coreDump();
+    return 0;
   }
 };
 
