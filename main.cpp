@@ -1,14 +1,17 @@
+#include "include/kernel.h"
 #include "include/shell.h"
-#include "include/vm.h"
 #include <bits/stdc++.h>
 #include <hashtable.h>
 #include <stdlib.h>
 
 int main() {
 
-  VirtualMachine Machine;
+  Kernel Kernel;
   Shell Shell;
-  Shell.initPath(Machine);
+  Ram MainMemory;
+  VirtualMachine Cpu;
+  Kernel.initHardware(Cpu, MainMemory);
+  Shell.initPath();
   Shell.shellLoop();
   return 0;
 }

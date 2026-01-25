@@ -1,8 +1,7 @@
 #ifndef SHELL_H
 #define SHELL_H
 
-#include "ram.h"
-#include "vm.h"
+#include "kernel.h"
 #include <hashtable.h>
 #include <iostream>
 #include <string>
@@ -11,25 +10,23 @@
 // kernel mode for SWI
 // document
 // watch the other lecture i feel i am missing something others are not.
-// location.`` ask tim how he implemented the kernel?? finish implementing my
 
 class Shell {
 public:
-  VirtualMachine Machine;
+  Kernel MainKernel;
 
   std::unordered_map<std::string, int (Shell::*)(std::vector<std::string>)>
       functionMap;
 
   // inits my unordered_map and path to vm
-  void initPath(VirtualMachine NewMachine) {
-    Machine = NewMachine;
-    functionMap["run"] = &Shell::runProgram;
-    functionMap["load"] = &Shell::loadProgram;
-    functionMap["exit"] = &Shell::exitShell;
-    functionMap["help"] = &Shell::printHelp;
-    functionMap["clear"] = &Shell::printClear;
-    functionMap["coredump"] = &Shell::coreDump;
-    functionMap["errordump"] = &Shell::errorDump;
+  void initPath() {
+    functionMap["run"] = &Shell::shellRunProgram;
+    functionMap["load"] = &Shell::shellLoadProgram;
+    functionMap["exit"] = &Shell::shellExitShell;
+    functionMap["help"] = &Shell::shellPrintHelp;
+    functionMap["clear"] = &Shell::shellPrintClear;
+    functionMap["coredump"] = &Shell::shellCoreDump;
+    functionMap["errordump"] = &Shell::shellErrorDump;
   }
 
   // takes command input string and converts it to an array of strings returns
@@ -68,12 +65,12 @@ public:
     }
   }
 
-  int loadProgram(std::vector<std::string> argList) {
+  int shellLoadProgram(std::vector<std::string> argList) {
     if (argList.size() <= 1) {
       printf("ERROR --NO FILE PATH PROVIDED--\n");
       return 1;
     } else {
-      u_int8_t returnCode = Machine.MainMemory.loadProgram(argList[1]);
+      u_int8_t returnCode = MainKernel.loadProgram(argList[1]);
       if (returnCode == 1) {
         printf("ERROR --MEMORY IS OCCUPIED--\n");
         return 1;
@@ -83,29 +80,31 @@ public:
         return 1;
       }
     }
+    printf("FILE END = %d\n", MainKernel.MainMemory.fileLoadAddress +
+                                  MainKernel.MainMemory.fileSize);
     return 0;
   }
 
   // COMMAND PROGRAMS//
 
-  int runProgram(std::vector<std::string> argList) {
-    Machine.runProgram();
+  int shellRunProgram(std::vector<std::string> argList) {
+    MainKernel.runProgram();
     return 0;
   }
 
-  int printClear(std::vector<std::string> argList) {
+  int shellPrintClear(std::vector<std::string> argList) {
     for (int i = 0; i < 100; i++) {
       printf("\n");
     }
     return 0;
   }
 
-  int coreDump(std::vector<std::string> argList) {
-    Machine.coreDump();
+  int shellCoreDump(std::vector<std::string> argList) {
+    MainKernel.coreDump();
     return 0;
   }
 
-  int printHelp(std::vector<std::string> argList) {
+  int shellPrintHelp(std::vector<std::string> argList) {
     printf("\n--HELP--\n"
            "\nrun [-v] ------ runs a loaded specified program\n"
            "load [-v]------ loads a binary file from an input file path\n"
@@ -117,12 +116,12 @@ public:
     return 0;
   }
 
-  int errorDump(std::vector<std::string> argList) {
-    Machine.MainMemory.memDump();
+  int shellErrorDump(std::vector<std::string> argList) {
+    MainKernel.memDump();
     return 0;
   }
 
-  int exitShell(std::vector<std::string> argList) {
+  int shellExitShell(std::vector<std::string> argList) {
     printf("EXITING...\n");
     return 9;
   }

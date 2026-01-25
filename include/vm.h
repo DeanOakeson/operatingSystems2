@@ -41,62 +41,55 @@ public:
   static const u_int8_t SWI = 20;
 
   // REGISTERS//
-  int reg[6];
-  u_int32_t pc;
-  int z;
+  int32_t reg[6];
+  int32_t PC;
+  int SP;
+  int FP;
+  int SL;
+  int Z;
+  int SB;
 
   // Main Memory
-  Ram MainMemory;
 
-  void idleCPU();
-  void runProgram() {
+  int runCpu(Ram MainMemory) {
+    int userMode = 0;
+    PC = MainMemory.fileLoadAddress;
 
-    // GET RID OF THIS EVENTUALLY//
-    int fileSize = MainMemory.fileSize;
-    int fileFirstInstruction = MainMemory.fileFirstInstruction;
-    int fileLoadedAddress = MainMemory.fileLoadAddress;
-    u_int8_t opCode;
+    while (PC < MainMemory.fileSize + MainMemory.fileLoadAddress) {
+      uint8_t opcode = MainMemory.mem[PC][0];
+      bool incrementPC = true; // Flag to control PC increment
 
-    for (pc = fileFirstInstruction; pc < fileSize + fileLoadedAddress; pc++) {
-      opCode = MainMemory.mem[pc][0];
-      switch (opCode) {
-
-        // ARITHMATIC //
+      switch (opcode) {
+      // ARITHMATIC //
       case ADD: // 16 // WORKS
-        reg[MainMemory.mem[pc][1]] =
-            reg[MainMemory.mem[pc][2]] + reg[MainMemory.mem[pc][3]];
+        reg[MainMemory.mem[PC][1]] =
+            reg[MainMemory.mem[PC][2]] + reg[MainMemory.mem[PC][3]];
         break;
-
       case SUB: // 17 // WORKS
-        reg[MainMemory.mem[pc][1]] =
-            reg[MainMemory.mem[pc][2]] - reg[MainMemory.mem[pc][3]];
+        reg[MainMemory.mem[PC][1]] =
+            reg[MainMemory.mem[PC][2]] - reg[MainMemory.mem[PC][3]];
         break;
-
       case MUL: { // 18 // WORKS
-        reg[MainMemory.mem[pc][1]] =
-            reg[MainMemory.mem[pc][2]] * reg[MainMemory.mem[pc][3]];
+        reg[MainMemory.mem[PC][1]] =
+            reg[MainMemory.mem[PC][2]] * reg[MainMemory.mem[PC][3]];
         break;
       }
-
       case DIV: // 19
-        reg[MainMemory.mem[pc][1]] =
-            reg[MainMemory.mem[pc][2]] / reg[MainMemory.mem[pc][3]];
+        reg[MainMemory.mem[PC][1]] =
+            reg[MainMemory.mem[PC][2]] / reg[MainMemory.mem[PC][3]];
         break;
-
-        // MOVE DATA //
+      // MOVE DATA //
       case MOV: // WORKS
-        reg[MainMemory.mem[pc][1]] = reg[MainMemory.mem[pc][2]];
+        reg[MainMemory.mem[PC][1]] = reg[MainMemory.mem[PC][2]];
         break;
-
       case MVI:
-        reg[MainMemory.mem[pc][1]] = MainMemory.mem[pc][2];
+        reg[MainMemory.mem[PC][1]] =
+            (int32_t)((uint32_t)MainMemory.mem[PC][5] << 24 |
+                      (uint32_t)MainMemory.mem[PC][4] << 16 |
+                      (uint32_t)MainMemory.mem[PC][3] << 8 |
+                      (uint32_t)MainMemory.mem[PC][2]);
         break;
-
-      case ADR: // TEST // MAYBE IS DONE??? CHECK???
-        reg[MainMemory.mem[pc][0]] =
-            (MainMemory.mem[pc][1] << 24 | MainMemory.mem[pc][2] << 16 |
-             MainMemory.mem[pc][3] << 8 | MainMemory.mem[pc][4]);
-
+      case ADR:
         break;
       case STR:
         break;
@@ -106,17 +99,20 @@ public:
         break;
       case LDRB:
         break;
-
-        // BREAK //
-      case B: // TEST
-        // bit shift to combine all uchars into an int
-        pc = (MainMemory.mem[pc][1] << 24 | MainMemory.mem[pc][2] << 16 |
-              MainMemory.mem[pc][3] << 8 | MainMemory.mem[pc][4]);
+      // BRANCH //
+      case B:
+        PC = (int32_t)(((uint32_t)MainMemory.mem[PC][4] << 24 |
+                        (uint32_t)MainMemory.mem[PC][3] << 16 |
+                        (uint32_t)MainMemory.mem[PC][2] << 8 |
+                        (uint32_t)MainMemory.mem[PC][1])) +
+             MainMemory.fileLoadAddress;
+        printf("JUMP TO addr::%d\n", PC);
+        incrementPC = false;
         break;
       case BL:
         break;
-      case BX: // JUMP TO ADDRESS IN REG, pc <-- <reg>
-        pc = (MainMemory.mem[pc][1]);
+        PC = reg[MainMemory.mem[PC][1]];
+        incrementPC = false;
         break;
       case BNE:
         break;
@@ -126,8 +122,7 @@ public:
         break;
       case BEQ:
         break;
-
-        // LOGICAL //
+      // LOGICAL //
       case CMP:
         break;
       case AND:
@@ -139,18 +134,13 @@ public:
       case SWI: // swi 10 = halt
         break;
       }
+
+      // Only increment PC if we didn't branch
+      if (incrementPC) {
+        PC++;
+      }
     }
-  }
-
-  void coreDump() {
-    u_int8_t regId = 0;
-
-    for (u_int8_t i = 0; i < 6; i++) {
-      printf("\n-- reg::%d -- %d", regId, reg[regId]);
-      regId += 1;
-    }
-
-    printf("\n-- reg::pc - %d\n-- reg::z -- %d\n\n", pc, z);
+    return 0;
   }
 };
 

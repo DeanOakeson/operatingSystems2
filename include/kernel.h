@@ -1,0 +1,121 @@
+#ifndef KERNEL_H
+#define KERNEL_H
+
+#include "ram.h"
+#include "vm.h"
+#include <bits/stdc++.h>
+#include <hashtable.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+class Kernel {
+public:
+  VirtualMachine Machine;
+  Ram MainMemory;
+  std::string filePath;
+
+  void initHardware(VirtualMachine newMachine, Ram newRam) {
+    Machine = newMachine;
+    MainMemory = newRam;
+  }
+
+  // CPU SYSTEM CALLS //
+
+  void coreDump() {
+    u_int8_t regId = 0;
+
+    printf("\nCPU REGISTERS");
+    for (u_int8_t i = 0; i < 6; i++) {
+      printf("\n-- reg::%d -- %d", regId, Machine.reg[regId]);
+      regId += 1;
+    }
+
+    printf("\n-- reg::pc - %d\n-- reg::z -- %d\n\n", Machine.PC, Machine.Z);
+  }
+
+  void runProgram() { Machine.runCpu(MainMemory); }
+
+  // MEM SYSTEM CALLS //
+
+  int loadProgram(std::string FilePath) {
+    std::ifstream file(FilePath, std::ios::binary);
+
+    // FIRST READ THE FIRST 3 INTS FOR YOUR HEADER VARIABLES //
+    file.read(reinterpret_cast<char *>(&MainMemory.fileSize),
+              sizeof(u_int32_t));
+    file.read(reinterpret_cast<char *>(&MainMemory.fileFirstInstruction),
+              sizeof(u_int32_t));
+    file.read(reinterpret_cast<char *>(&MainMemory.fileLoadAddress),
+              sizeof(u_int32_t));
+
+    if (MainMemory.fileLoadAddress + MainMemory.fileSize > MEM_SIZE_KB) {
+      return 2;
+    }
+
+    bool memoryIsUnoccupied = this->verifyMemoryIsUnoccupied();
+
+    if (memoryIsUnoccupied == true) {
+      for (u_int32_t i = MainMemory.fileLoadAddress;
+           i < MainMemory.fileSize + MainMemory.fileLoadAddress; i++) {
+        for (u_int32_t j = 0; j < 6; j++) {
+          file.read(reinterpret_cast<char *>(&MainMemory.mem[i][j]),
+                    sizeof(unsigned char));
+        }
+      }
+      updateMemoryIndicators();
+
+      filePath =
+          FilePath; // THIS CHANGES THE MOST RECENT FILEPATH LOADED FOR PRINTING
+    } else {
+      return 1; // Failure due to memory override
+    }
+    return 0; // Returns successfully
+  }
+
+  int memDump() {
+    if (MainMemory.fileSize == 0) { // IF NO FILE HAS BEEN LOADED
+      printf("\n --NO LOADED PROGRAM-- \n");
+    } else { // IF SOMETHING HAS BEEN LOADED
+      printf("\nMEMORY ADDRESSES %d --- %d\n PROGRAM: %s",
+             MainMemory.fileLoadAddress,
+             MainMemory.fileLoadAddress + MainMemory.fileSize,
+             filePath.c_str());
+      for (int i = MainMemory.fileLoadAddress;
+           i < MainMemory.fileLoadAddress + MainMemory.fileSize; i++) {
+        printf("\n-- addr::%d -- ", i);
+        for (int j = 0; j <= 6; j++) {
+          printf("%d ", MainMemory.mem[i][j]);
+        }
+      }
+    };
+
+    printf("\n\n");
+    return 0;
+  }
+
+private:
+  // CHECKS ALL POSITIONS THE POTENTIAL PROGRAM WOULD OCCUPY TO MAKE SURE THAT
+  // IT IS FREE, returns false if occupied
+  bool verifyMemoryIsUnoccupied() {
+    for (u_int32_t i = MainMemory.fileLoadAddress;
+         i <= MainMemory.fileLoadAddress + MainMemory.fileSize; i++) {
+      if (MainMemory.mem[i][6] == 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // FLIPS THE MEMORY OCCUPATION BIT no return
+  void updateMemoryIndicators() {
+    for (u_int32_t i = MainMemory.fileLoadAddress;
+         i <= MainMemory.fileLoadAddress + MainMemory.fileSize; i++) {
+      if (MainMemory.mem[i][6] == 0)
+        MainMemory.mem[i][6] = 1;
+      else if (MainMemory.mem[i][6] == 1)
+        MainMemory.mem[i][6] = 0;
+    }
+  }
+};
+
+#endif
