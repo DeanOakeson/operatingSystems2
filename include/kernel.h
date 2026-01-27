@@ -15,7 +15,9 @@ public:
 
   void initHardware(VirtualMachine newMachine) { Machine = newMachine; }
 
+  //////////////////////
   // CPU SYSTEM CALLS //
+  //////////////////////
 
   void coreDump() {
     u_int8_t regId = 0;
@@ -31,7 +33,9 @@ public:
 
   void runProgram() { Machine.runCpu(); }
 
+  //////////////////////
   // MEM SYSTEM CALLS //
+  //////////////////////
 
   int loadProgram(std::string FilePath) {
     std::ifstream file(FilePath, std::ios::binary);
@@ -96,8 +100,11 @@ public:
   }
 
 private:
-  // CHECKS ALL POSITIONS THE POTENTIAL PROGRAM WOULD OCCUPY TO MAKE SURE THAT
-  // IT IS FREE, returns false if occupied
+  /////////////////////////////
+  // MEMORY HELPER FUNCTIONS //
+  /////////////////////////////
+
+  // CHECKS ALL POSITIONS FOR THE TO BE LOADED PROGRAM //
   bool verifyMemoryIsUnoccupied() {
     for (u_char i = Machine.MainMemory.fileLoadAddress;
          i <= Machine.MainMemory.fileLoadAddress + Machine.MainMemory.fileSize;
@@ -109,7 +116,7 @@ private:
     return true;
   }
 
-  // FLIPS THE MEMORY OCCUPATION BIT
+  // FLIPS THE MEMORY OCCUPATION BIT //
   void updateMemoryIndicators() {
     for (u_int32_t i = Machine.MainMemory.fileLoadAddress;
          i <= Machine.MainMemory.fileLoadAddress + Machine.MainMemory.fileSize;

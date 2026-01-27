@@ -12,7 +12,8 @@ class Ram {
 public:
   // OBJECTS//
   unsigned char mem[MEM_SIZE_KB][7];
-  // VMEM
+
+  // CREATE VMEM //
   u_int32_t fileSize = 0;
   u_int32_t fileFirstInstruction = 0;
   u_int32_t fileLoadAddress = 0;

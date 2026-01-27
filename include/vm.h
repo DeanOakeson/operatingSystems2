@@ -9,6 +9,10 @@
 
 class VirtualMachine {
 public:
+  ///////////////////
+  // STATIC CONSTS //
+  ///////////////////
+
   // ARTIHMATIC
   static const u_int8_t ADD = 16;
   static const u_int8_t SUB = 17;
@@ -41,8 +45,8 @@ public:
   static const u_int8_t SWI = 20;
 
   // REGISTERS//
-  int32_t reg[6];
-  int32_t PC;
+  int reg[6];
+  int PC;
   int SP;
   int FP;
   int SL;
@@ -53,7 +57,9 @@ public:
 
   Ram MainMemory;
 
-  // Main Memory
+  ////////////////////
+  // CPU OPERATIONS //
+  ////////////////////
 
   int runCpu() {
     int userMode = 0;
@@ -61,32 +67,31 @@ public:
 
     while (PC < MainMemory.fileSize + MainMemory.fileLoadAddress) {
       uint8_t opcode = MainMemory.mem[PC][0];
-      bool incrementPC = true; // Flag to control PC increment
+      bool incrementPC = true;
 
       switch (opcode) {
       // ARITHMATIC //
-      case ADD: // 16 // WORKS
+      case ADD: // ADDS reg<1> <-- reg<2> + reg<3>
         reg[MainMemory.mem[PC][1]] =
             reg[MainMemory.mem[PC][2]] + reg[MainMemory.mem[PC][3]];
         break;
-      case SUB: // 17 // WORKS
+      case SUB: // SUB reg<1> <-- reg<2> - reg<3>
         reg[MainMemory.mem[PC][1]] =
             reg[MainMemory.mem[PC][2]] - reg[MainMemory.mem[PC][3]];
         break;
-      case MUL: { // 18 // WORKS
+      case MUL: { // MUL reg<1> <-- reg<2> * reg<3>
         reg[MainMemory.mem[PC][1]] =
             reg[MainMemory.mem[PC][2]] * reg[MainMemory.mem[PC][3]];
         break;
       }
-      case DIV: // 19
+      case DIV: // DIV reg<1> <-- reg<2> / reg<3>
         reg[MainMemory.mem[PC][1]] =
             reg[MainMemory.mem[PC][2]] / reg[MainMemory.mem[PC][3]];
         break;
-      // MOVE DATA //
-      case MOV: // WORKS
+      case MOV: // MOVE reg<1> <-- reg<2>
         reg[MainMemory.mem[PC][1]] = reg[MainMemory.mem[PC][2]];
         break;
-      case MVI:
+      case MVI: // MOVE IMM reg<1> <-- reg<2> | reg<3> |
         reg[MainMemory.mem[PC][1]] =
             (int32_t)((uint32_t)MainMemory.mem[PC][5] << 24 |
                       (uint32_t)MainMemory.mem[PC][4] << 16 |

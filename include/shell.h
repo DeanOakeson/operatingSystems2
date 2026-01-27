@@ -7,7 +7,6 @@
 #include <string>
 
 // create asm to loop thru 1 to 100
-// kernel mode for SWI
 // document
 
 class Shell {
@@ -132,8 +131,6 @@ public:
       return 1;
     }
 
-    printf("FILE END = %d\n", MainKernel.Machine.MainMemory.fileLoadAddress +
-                                  MainKernel.Machine.MainMemory.fileSize);
     return 0;
   }
 
