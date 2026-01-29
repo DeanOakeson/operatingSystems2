@@ -14,8 +14,8 @@ public:
   unsigned char mem[MEM_SIZE_KB][7];
 
   // CREATE VMEM //
-  u_int32_t fileSize = 0;
-  u_int32_t fileFirstInstruction = 0;
-  u_int32_t fileLoadAddress = 0;
+  int fileSize = 0;
+  int fileFirstInstruction = 0;
+  int fileLoadAddress = 0;
 };
 #endif

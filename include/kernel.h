@@ -27,17 +27,17 @@ public:
   static const u_int32_t MEM_DUMP_NO_PROGRAM = 301;
 
   void errorDump() {
-    printf("\nERROR_DUMP  \n=========\n");
+    printf("\n[OS] --ERROR_DUMP  \n=================\n");
     for (const int &i : errorList) {
       switch (i) {
       case CPU_EARLY_TERMINATION:
-        printf("ERROR[100] --cpu early termination");
+        printf("[OS][100] --cpu early termination\n");
         break;
       case MEM_OVERFLOW:
-        printf("ERROR::[201] --memory overflow--\n");
+        printf("[OS][201] --memory overflow--\n");
         break;
       case MEM_OVERWRITE:
-        printf("ERROR [202] --attempted memory overwrite--\n");
+        printf("[OS][202] --attempted memory overwrite--\n");
         break;
       case MEM_FSTREAM_ERR_1:
         break;
@@ -46,7 +46,7 @@ public:
       case MEM_FSTREAM_ERR_3:
         break;
       case MEM_DUMP_NO_PROGRAM:
-        printf("ERROR [301] --attempted memDump() no loaded program--\n");
+        printf("[OS][301] --attempted memDump() no loaded program--\n");
         break;
       }
     }
@@ -64,12 +64,13 @@ public:
   void coreDump() {
     u_int8_t regId = 0;
 
-    printf("\nCORE_DUMP  \n=========");
+    printf("\n[OS] --CORE_DUMP  \n================");
     for (u_int8_t i = 0; i < 6; i++) {
       printf("\nREGISTER:: [ %d ] -- [ %d ]", regId, Machine.reg[regId]);
       regId += 1;
     }
-    printf("\nREGISTER:: [ PC ] -- [ %d ] \nREGISTER:: [ Z ] -- [ %d ]\n\n",
+    printf("\nREGISTER:: [ PC ] -- [ %d ] \nREGISTER:: [ Z ] -- "
+           "[ %d ]\n\n",
            Machine.PC, Machine.Z);
   }
 
@@ -89,6 +90,7 @@ public:
   /// MEM ERRORS 200 -- 300
 
   int loadProgram(std::string FilePath) {
+
     std::ifstream file(FilePath, std::ios::binary);
     // FIGURE THIS SHIT OUT
 
@@ -124,7 +126,7 @@ public:
     // MEMORY OVERFLOW
     if (Machine.MainMemory.fileLoadAddress + Machine.MainMemory.fileSize >
         MEM_SIZE_KB) {
-      printf("ERROR::[201] memory overflow, load "
+      printf("[OS][201] --memory overflow, load "
              "cancelled\n");
       errorList.push_back(MEM_OVERFLOW);
       return MEM_OVERFLOW;
@@ -133,7 +135,7 @@ public:
     // MEMORY IS OCCUPIED
     if (verifyMemoryIsUnoccupied() != true) {
       errorList.push_back(MEM_OVERWRITE);
-      printf("ERROR::[202] attempted to overwrite existing memory, load "
+      printf("[OS][202] --attempted to overwrite existing memory, load "
              "cancelled\n");
       return MEM_OVERWRITE;
     }
@@ -155,11 +157,11 @@ public:
 
   int memDump() {
     if (Machine.MainMemory.fileSize == 0) { // IF NO FILE HAS BEEN LOADED
-      printf("ERROR::[301] attempted memDump() with no loaded program\n");
+      printf("[OS][301] --attempted memDump() with no loaded program\n");
       errorList.push_back(MEM_DUMP_NO_PROGRAM);
       return 301; // 1 memDump means no load
     }
-    printf("\nERROR_DUMP  \n===========\nADDRESSES::[ %d - "
+    printf("\n[OS] --MEM_DUMP  \n===========\nADDRESSES::[ %d - "
            "%d ]\nPROGRAM::[ %s ]\n",
            Machine.MainMemory.fileLoadAddress,
            Machine.MainMemory.fileLoadAddress + Machine.MainMemory.fileSize,
@@ -183,7 +185,7 @@ private:
 
   // CHECKS ALL POSITIONS FOR THE TO BE LOADED PROGRAM //
   bool verifyMemoryIsUnoccupied() {
-    for (u_char i = Machine.MainMemory.fileLoadAddress;
+    for (int i = Machine.MainMemory.fileLoadAddress;
          i <= Machine.MainMemory.fileLoadAddress + Machine.MainMemory.fileSize;
          i++) {
       if (Machine.MainMemory.mem[i][6] == 1) {
@@ -195,7 +197,7 @@ private:
 
   // FLIPS THE MEMORY OCCUPATION BIT //
   void updateMemoryIndicators() {
-    for (u_int32_t i = Machine.MainMemory.fileLoadAddress;
+    for (int i = Machine.MainMemory.fileLoadAddress;
          i <= Machine.MainMemory.fileLoadAddress + Machine.MainMemory.fileSize;
          i++) {
       if (Machine.MainMemory.mem[i][6] == 0)

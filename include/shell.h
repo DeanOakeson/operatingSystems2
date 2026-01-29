@@ -47,7 +47,7 @@ public:
   int shellLoop() {
 
     while (true) {
-      printf("SHELL-->> ");
+      std::cout << "[SHELL]-->> ";
       std::string command;
       std::getline(std::cin, command);
 
@@ -56,7 +56,7 @@ public:
 
       if (functionMap.find(commandArray[0]) == functionMap.end()) {
         // IF FUNCTION IS NOT FOUND IN THE LIST PRINT AND RUN LOOP
-        printf("try 'help'\n");
+        std::cout << "try 'help'\n";
         continue;
       }
 
@@ -77,19 +77,20 @@ public:
   }
 
   int shellPrintHelp(std::vector<std::string> argList) {
-    printf("\nHELP  \n========\n"
+    std::cout
+        << "\nHELP  \n========\n"
            "\nrun [-v] ------ runs a loaded specified program\n"
            "load [-v]------ loads a binary file from an input file path\n"
            "clear --------- clears the terminal screen\n"
            "clear --------- clears the terminal screen\n"
            "coredump ------ lists the current values contained in REGISTERS\n"
            "errordump ----- prints logged errors\n"
-           "exit ---------- exits terminal\n");
+           "exit ---------- exits terminal\n";
     return 0;
   }
 
   int shellExitShell(std::vector<std::string> argList) {
-    printf("EXITING...\n");
+    std::cout << "EXITING...\n";
     return 9;
   }
 
@@ -100,12 +101,12 @@ public:
   int shellLoadProgram(std::vector<std::string> argList) {
     u_int8_t returnCode;
     if (argList.size() <= 1) {
-      printf("SHELL_ERROR --no file path provided--\n");
+      std::cout << "[SHELL] --no file path provided--\n";
       return 1;
     }
 
     if (argList[1] == "-v" && argList.size() == 2) {
-      printf("SHELL_ERROR --no file path provided--\n");
+      std::cout << "[SHELL] --no file path provided--\n";
       return 1;
     }
 
@@ -118,12 +119,12 @@ public:
     returnCode = MainKernel.loadProgram(argList[1]);
 
     if (returnCode == 201) {
-      printf("KERNEL_ERROR::[201]\n");
+      std::cout << "[SHELL] -- error 201 returned by kernel\n";
       return 1;
     }
 
     if (returnCode == 202) {
-      printf("KERNEL_ERROR::[202]\n");
+      std::cout << "[SHELL] -- error 202 returned by kernel\n";
       return 1;
     }
 
@@ -144,7 +145,7 @@ public:
     if (argList.size() == 1) {
 
       if (MainKernel.runProgram() == 100) {
-        printf("KERNEL_ERROR::[100]");
+        std::cout << "KERNEL_ERROR::[100]\n";
         return 1;
       }
       return 0;
@@ -153,7 +154,7 @@ public:
     if (argList.size() >= 2 && argList[1] == "-v") {
 
       if (MainKernel.runProgram() == 100) {
-        printf("KERNEL_ERROR::[100]");
+        std::cout << "KERNEL_ERROR::[100]";
         return 1;
       }
 

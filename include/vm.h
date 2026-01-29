@@ -160,20 +160,43 @@ public:
                                (uint32_t)MainMemory.mem[PC][3] << 16 |
                                (uint32_t)MainMemory.mem[PC][2] << 8 |
                                (uint32_t)MainMemory.mem[PC][1]));
+        if (kernelMode == 0) {
+          std::string userInput;
 
-        printf("SWI1 INNTERUPT\nACTIVATE KERNELMODE? PRESS 1 FOR YES::\n");
-        std::cin >> kernelMode;
-        if (kernelMode != 1) {
-          printf("KERNEL MODE NOT ENTERED\n EXITING PROGRAM\n"); // EXIT
-          return 100;
+          while (true) {
+            std::cin.clear();
+            std::cout << "[OS] -- allow kernel access?, press y/n \n";
+            std::cin >> userInput;
+            std::cin.ignore();
+
+            if (userInput == "n" | userInput == "N") {
+              std::cout << "[OS] -- program not permitted to enter kernel "
+                           "mode. program "
+                           "terminated.\n";
+              std::cin.clear();
+              return 100;
+            }
+            if (userInput == "y" | userInput == "Y") {
+              kernelMode = 1;
+              std::cin.clear();
+              std::cout << "[OS] -- kernel mode entered\n";
+              break;
+            }
+            std::cout << "[OS] -- invalid input\n";
+          }
         }
-        printf("KERNELMODE ENTERED!!\n");
 
         switch (swiOpCode) {
         case 1:
-          printf("swi 1\n");
+          std::cout << "[OS][SWI 1] -- not yet defined\n";
           break;
+        case 2:
+          break;
+        case 10: // HALT SUCCESFULLY
+          std::cout << "[OS][SWI 10] -- halting program--\n";
+          return 0;
         }
+        break;
       }
 
       // Only increment PC if we didn't branch
@@ -181,6 +204,7 @@ public:
         PC++;
       }
     }
+    kernelMode = 0;
     return 0;
   }
 };
