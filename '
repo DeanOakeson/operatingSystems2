@@ -12,45 +12,17 @@ class Kernel {
 public:
   VirtualMachine Machine;
   std::string filePath;
-  std::vector<int> errorList = {};
+  std::vector<int> errorList;
 
   /////////////////////
   // ERROR HANDELING //
   /////////////////////
 
-  static const u_int32_t CPU_EARLY_TERMINATION = 100;
-  static const u_int32_t MEM_OVERFLOW = 201;
-  static const u_int32_t MEM_OVERWRITE = 202;
-  static const u_int32_t MEM_FSTREAM_ERR_1 = 203;
-  static const u_int32_t MEM_FSTREAM_ERR_2 = 204;
-  static const u_int32_t MEM_FSTREAM_ERR_3 = 205;
-  static const u_int32_t MEM_DUMP_NO_PROGRAM = 301;
-
   void errorDump() {
-    printf("\nERROR_DUMP  \n=========\n");
-    for (const int &i : errorList) {
-      switch (i) {
-      case CPU_EARLY_TERMINATION:
-        printf("ERROR[100] --cpu early termination");
-        break;
-      case MEM_OVERFLOW:
-        printf("ERROR::[201] --memory overflow--\n");
-        break;
-      case MEM_OVERWRITE:
-        printf("ERROR [202] --attempted memory overwrite--\n");
-        break;
-      case MEM_FSTREAM_ERR_1:
-        break;
-      case MEM_FSTREAM_ERR_2:
-        break;
-      case MEM_FSTREAM_ERR_3:
-        break;
-      case MEM_DUMP_NO_PROGRAM:
-        printf("ERROR [301] --attempted memDump() no loaded program--\n");
-        break;
-      }
+    printf("working\n");
+    for (int i = 0; i < sizeof(errorList); i++) {
+      printf("%d", errorList[i]);
     }
-    printf("\n");
   }
 
   void initHardware(VirtualMachine newMachine) { Machine = newMachine; }
@@ -59,7 +31,7 @@ public:
   // CPU SYSTEM CALLS //
   //////////////////////
   ///
-  /// CPU ERRORS 100 - 200
+  /// CPU ERRORS 1, 2, 3
 
   void coreDump() {
     u_int8_t regId = 0;
@@ -74,11 +46,7 @@ public:
   }
 
   int runProgram() {
-    int returnCode = Machine.runCpu();
-    if (returnCode == 100) {
-      errorList.push_back(10);
-      return 100;
-    }
+    Machine.runCpu();
     return 0;
   }
 
@@ -86,7 +54,7 @@ public:
   // MEM SYSTEM CALLS //
   //////////////////////
   ///
-  /// MEM ERRORS 200 -- 300
+  /// MEM ERRORS 4, 5 ,6
 
   int loadProgram(std::string FilePath) {
     std::ifstream file(FilePath, std::ios::binary);
@@ -96,16 +64,16 @@ public:
       std::ios_base::iostate state = file.rdstate();
 
       if (state & std::ios_base::eofbit) {
-        errorList.push_back(MEM_FSTREAM_ERR_1);
-        return MEM_FSTREAM_ERR_1; // END OF FILE REACHED FAIL
+        errorList.push_back(23);
+        return 23; // END OF FILE REACED FAIL
       }
       if (state & std::ios_base::failbit) {
-        errorList.push_back(MEM_FSTREAM_ERR_2);
-        return MEM_FSTREAM_ERR_2; // NON_FATAL I/O ERROR OCCURED
+        errorList.push_back(24);
+        return 24; // NON_FATAL I/O ERROR OCCURED
       }
       if (state & std::ios_base::failbit) {
-        errorList.push_back(MEM_FSTREAM_ERR_3);
-        return MEM_FSTREAM_ERR_3; // FATAL ERROR OCCURED
+        errorList.push_back(25);
+        return 25; // FATAL ERROR OCCURED
       }
     }
 
@@ -121,21 +89,17 @@ public:
     // TRANSLATE INTO 6 BYTE ADDRESS SPACE
     Machine.MainMemory.fileSize = Machine.MainMemory.fileSize / 6;
 
-    // MEMORY OVERFLOW
+    // FILE SIZE EXCEEDS MEMORY
     if (Machine.MainMemory.fileLoadAddress + Machine.MainMemory.fileSize >
         MEM_SIZE_KB) {
-      printf("ERROR::[201] memory overflow, load "
-             "cancelled\n");
-      errorList.push_back(MEM_OVERFLOW);
-      return MEM_OVERFLOW;
+      errorList.push_back(21);
+      return 21;
     }
 
     // MEMORY IS OCCUPIED
     if (verifyMemoryIsUnoccupied() != true) {
-      errorList.push_back(MEM_OVERWRITE);
-      printf("ERROR::[202] attempted to overwrite existing memory, load "
-             "cancelled\n");
-      return MEM_OVERWRITE;
+      errorList.push_back(22);
+      return 22;
     }
 
     for (u_int32_t i = Machine.MainMemory.fileLoadAddress;
@@ -145,6 +109,8 @@ public:
         file.read(reinterpret_cast<char *>(&Machine.MainMemory.mem[i][j]),
                   sizeof(unsigned char));
       }
+
+      return 0; // SUCCESS
     }
 
     updateMemoryIndicators();
@@ -155,9 +121,8 @@ public:
 
   int memDump() {
     if (Machine.MainMemory.fileSize == 0) { // IF NO FILE HAS BEEN LOADED
-      printf("ERROR::[301] attempted memDump() with no loaded program\n");
-      errorList.push_back(MEM_DUMP_NO_PROGRAM);
-      return 301; // 1 memDump means no load
+      printf("\n --NO LOADED PROGRAM-- \n");
+      return 1; // 1 memDump means no load
     }
     printf("\nERROR_DUMP  \n===========\nADDRESSES::[ %d - "
            "%d ]\nPROGRAM::[ %s ]\n",

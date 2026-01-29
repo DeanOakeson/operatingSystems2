@@ -2,12 +2,10 @@
 #define SHELL_H
 
 #include "kernel.h"
+#include <cstdlib>
 #include <hashtable.h>
 #include <iostream>
 #include <string>
-
-// create asm to loop thru 1 to 100
-// document
 
 class Shell {
 public:
@@ -74,20 +72,18 @@ public:
   //////////////////////////////
 
   int shellPrintClear(std::vector<std::string> argList) {
-    for (int i = 0; i < 100; i++) {
-      printf("\n");
-    }
+    system("clear");
     return 0;
   }
 
   int shellPrintHelp(std::vector<std::string> argList) {
-    printf("\n--HELP--\n"
+    printf("\nHELP  \n========\n"
            "\nrun [-v] ------ runs a loaded specified program\n"
            "load [-v]------ loads a binary file from an input file path\n"
            "clear --------- clears the terminal screen\n"
            "clear --------- clears the terminal screen\n"
            "coredump ------ lists the current values contained in REGISTERS\n"
-           "errordump ----- IDK YET???\n"
+           "errordump ----- prints logged errors\n"
            "exit ---------- exits terminal\n");
     return 0;
   }
@@ -104,12 +100,12 @@ public:
   int shellLoadProgram(std::vector<std::string> argList) {
     u_int8_t returnCode;
     if (argList.size() <= 1) {
-      printf("ERROR --NO FILE PATH PROVIDED--\n");
+      printf("SHELL_ERROR --no file path provided--\n");
       return 1;
     }
 
     if (argList[1] == "-v" && argList.size() == 2) {
-      printf("ERROR --NO FILE PATH PROVIDED--\n");
+      printf("SHELL_ERROR --no file path provided--\n");
       return 1;
     }
 
@@ -121,13 +117,13 @@ public:
 
     returnCode = MainKernel.loadProgram(argList[1]);
 
-    if (returnCode == 1) {
-      printf("ERROR --MEMORY IS OCCUPIED--\n");
+    if (returnCode == 201) {
+      printf("KERNEL_ERROR::[201]\n");
       return 1;
     }
 
-    if (returnCode == 2) {
-      printf("ERROR --MEMORY OVERFLOW--\n");
+    if (returnCode == 202) {
+      printf("KERNEL_ERROR::[202]\n");
       return 1;
     }
 
@@ -135,7 +131,7 @@ public:
   }
 
   int shellErrorDump(std::vector<std::string> argList) {
-    MainKernel.memDump();
+    MainKernel.errorDump();
     return 0;
   }
 
@@ -147,13 +143,20 @@ public:
 
     if (argList.size() == 1) {
 
-      // DEFAULT NO ARGUMENTS//
-      MainKernel.runProgram();
+      if (MainKernel.runProgram() == 100) {
+        printf("KERNEL_ERROR::[100]");
+        return 1;
+      }
       return 0;
     }
 
     if (argList.size() >= 2 && argList[1] == "-v") {
-      MainKernel.runProgram();
+
+      if (MainKernel.runProgram() == 100) {
+        printf("KERNEL_ERROR::[100]");
+        return 1;
+      }
+
       MainKernel.coreDump();
       return 0;
     }
@@ -162,6 +165,7 @@ public:
 
   int shellCoreDump(std::vector<std::string> argList) {
     MainKernel.coreDump();
+    MainKernel.memDump();
     return 0;
   }
 };

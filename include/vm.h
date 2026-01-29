@@ -46,14 +46,14 @@ public:
 
   // REGISTERS//
   int reg[6];
-  int PC;
-  int SP;
-  int FP;
-  int SL;
-  int Z;
-  int SB;
-  int byteOffset;
-  int swiOpCode;
+  int PC = 0;
+  int SP = 0;
+  int FP = 0;
+  int SL = 0;
+  int Z = 0;
+  int SB = 0;
+  int byteOffset = 0;
+  int swiOpCode = 0;
 
   Ram MainMemory;
 
@@ -61,8 +61,10 @@ public:
   // CPU OPERATIONS //
   ////////////////////
 
+  // 100 = CPU TERMINATION CODE
   int runCpu() {
     int userMode = 0;
+    int kernelMode = 0;
     PC = MainMemory.fileLoadAddress;
 
     while (PC < MainMemory.fileSize + MainMemory.fileLoadAddress) {
@@ -116,7 +118,6 @@ public:
                                 (uint32_t)MainMemory.mem[PC][1]));
         // TRANSLATE INTO 6 BYTE ADDRESS SPACE
         PC = byteOffset / 6 + MainMemory.fileLoadAddress;
-        printf("JUMP TO AADR::%d\n", PC);
         incrementPC = false;
         break;
       case BL:
@@ -125,6 +126,15 @@ public:
         incrementPC = false;
         break;
       case BNE:
+        byteOffset = (int32_t)(((uint32_t)MainMemory.mem[PC][4] << 24 |
+                                (uint32_t)MainMemory.mem[PC][3] << 16 |
+                                (uint32_t)MainMemory.mem[PC][2] << 8 |
+                                (uint32_t)MainMemory.mem[PC][1]));
+        if (Z == 1) {
+          PC = byteOffset / 6 + MainMemory.fileLoadAddress;
+          this->Z = 0;
+          incrementPC = false;
+        }
         break;
       case BGT:
         break;
@@ -133,7 +143,11 @@ public:
       case BEQ:
         break;
       // LOGICAL //
-      case CMP:
+      case CMP: // CMP <reg1> - <reg2>
+        if (reg[MainMemory.mem[PC][1]] == reg[MainMemory.mem[PC][2]]) {
+          Z = 1;
+          break;
+        }
         break;
       case AND:
         break;
@@ -146,9 +160,18 @@ public:
                                (uint32_t)MainMemory.mem[PC][3] << 16 |
                                (uint32_t)MainMemory.mem[PC][2] << 8 |
                                (uint32_t)MainMemory.mem[PC][1]));
+
+        printf("SWI1 INNTERUPT\nACTIVATE KERNELMODE? PRESS 1 FOR YES::\n");
+        std::cin >> kernelMode;
+        if (kernelMode != 1) {
+          printf("KERNEL MODE NOT ENTERED\n EXITING PROGRAM\n"); // EXIT
+          return 100;
+        }
+        printf("KERNELMODE ENTERED!!\n");
+
         switch (swiOpCode) {
         case 1:
-          printf("SWI1 INNTERUPT..\n");
+          printf("swi 1\n");
           break;
         }
       }
