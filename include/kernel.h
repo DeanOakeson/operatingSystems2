@@ -92,7 +92,11 @@ public:
   int loadProgram(std::string FilePath) {
 
     std::ifstream file(FilePath, std::ios::binary);
-    // FIGURE THIS SHIT OUT
+
+    // //
+    // FIGURE THESE ERRORS OUT
+    // FIGURE OUT HOW TO LOAD WORDS AT THE TOP OF TH ASSEMBLY
+    // //
 
     if (file.fail()) {
       std::ios_base::iostate state = file.rdstate();

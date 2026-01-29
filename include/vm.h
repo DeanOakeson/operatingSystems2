@@ -188,7 +188,7 @@ public:
 
         switch (swiOpCode) {
         case 1:
-          std::cout << "[OS][SWI 1] -- not yet defined\n";
+          std::cout << "[OS][SWI 10] -- not yet defined\n";
           break;
         case 2:
           break;

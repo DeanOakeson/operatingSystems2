@@ -78,19 +78,19 @@ public:
 
   int shellPrintHelp(std::vector<std::string> argList) {
     std::cout
-        << "\nHELP  \n========\n"
+        << "\n[SHELL] --HELP  \n==============\n"
            "\nrun [-v] ------ runs a loaded specified program\n"
            "load [-v]------ loads a binary file from an input file path\n"
            "clear --------- clears the terminal screen\n"
            "clear --------- clears the terminal screen\n"
            "coredump ------ lists the current values contained in REGISTERS\n"
            "errordump ----- prints logged errors\n"
-           "exit ---------- exits terminal\n";
+           "exit ---------- exits terminal\n\n";
     return 0;
   }
 
   int shellExitShell(std::vector<std::string> argList) {
-    std::cout << "EXITING...\n";
+    std::cout << "exiting...\n";
     return 9;
   }
 
@@ -124,7 +124,7 @@ public:
     }
 
     if (returnCode == 202) {
-      std::cout << "[SHELL] -- error 202 returned by kernel\n";
+      std::cout << "[SHELL] -- error [202] returned by kernel\n";
       return 1;
     }
 
@@ -145,7 +145,7 @@ public:
     if (argList.size() == 1) {
 
       if (MainKernel.runProgram() == 100) {
-        std::cout << "KERNEL_ERROR::[100]\n";
+        std::cout << "[SHELL] --error [100] returned by the kernel\n";
         return 1;
       }
       return 0;
@@ -154,7 +154,7 @@ public:
     if (argList.size() >= 2 && argList[1] == "-v") {
 
       if (MainKernel.runProgram() == 100) {
-        std::cout << "KERNEL_ERROR::[100]";
+        std::cout << "[SHELL] --error [100] returned by the kernel\n";
         return 1;
       }
 
