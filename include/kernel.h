@@ -14,6 +14,47 @@ public:
   std::string filePath;
   std::vector<int> errorList = {};
 
+  // --necessary--
+  // ADD PCB
+  //  -- prcID, prcArrivalTime, prcState, prcChild
+  //
+  // ADD FIVE STATES
+  //  -- new, ready, running, waiting, terminiated
+  //  -- run -v should print all states out as it transitions
+  //
+  // ADD QUEUES FOR EACH STATE
+  //
+  // ADD FORK AND EXECUTE
+  //  -- fork -> exec -> exit -> wait
+  //  -- utilizing prcID n prcChildID n shit
+  //  -- use one core UNLESS YOU JUST MAKE TWO MFERRRR
+  //  -- SWI (insert cool number here)
+  //  -- --instructions --
+  //  -- precompile a program with a dedicated shared area preloaded.
+  //  -- then fork and create a pcb and grab the pre loaded child to run
+  //  -- in this solution the parent will run to completetion before the child
+  //        runs
+  //  -- RR will take care of the swap problem later just do the simple
+  //  implementation
+  //  -- Child and Parent need to use an observer design pattern.
+  //
+  // ADD SHARED MEMORY SPACE -- serves as sudo "wait()" for our "fork()"
+  //  -- picture in phone, memloc need name, and memspace
+  //  -- could be also be implemented with MESSAGE PASSING.
+  //  -- possibly add an SWI call for this?
+
+  // RUN OSX COMPILER WITHIN THE SHELL
+  //  -- create a shell command that calls sys
+  //
+  // --extra--
+  // ADD CPU SCHEDULING FOR PRC
+  // ADD MULTICORE
+  //  -- you will need a data structure to track cores??
+  //  -- you WILL need a core scheduling algorithm
+  //  -- you will need states for the cpu
+  // ADD MULTITHREADING
+  //  -- you will need a data structure to track threads??
+
   /////////////////////
   // ERROR HANDELING //
   /////////////////////
@@ -92,11 +133,7 @@ public:
   int loadProgram(std::string FilePath) {
 
     std::ifstream file(FilePath, std::ios::binary);
-
-    // //
-    // FIGURE THESE ERRORS OUT
-    // FIGURE OUT HOW TO LOAD WORDS AT THE TOP OF TH ASSEMBLY
-    // //
+    // FIGURE THIS SHIT OUT
 
     if (file.fail()) {
       std::ios_base::iostate state = file.rdstate();

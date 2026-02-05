@@ -6,7 +6,7 @@
 #include <string.h>
 #include <unordered_map>
 
-#define MEM_SIZE_KB 512 * 1024 // 512 KB
+#define MEM_SIZE_KB 12 * 1024 // 512 KB
 
 class Ram {
 public:
