@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/dos.dir/src/main.cpp.o -o dos  src/shell/libshell.a src/kernel/libkernel.a src/hardware/libhardware.a 

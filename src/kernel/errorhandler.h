@@ -1,0 +1,29 @@
+#ifndef ERROR_H
+#define ERROR_H
+
+#include "../hardware/vm.h"
+#include <bits/stdc++.h>
+#include <hashtable.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static const u_int32_t CPU_EARLY_TERMINATION = 100;
+static const u_int32_t MEM_OVERFLOW = 201;
+static const u_int32_t MEM_OVERWRITE = 202;
+static const u_int32_t MEM_FSTREAM_ERR_1 = 203;
+static const u_int32_t MEM_FSTREAM_ERR_2 = 204;
+static const u_int32_t MEM_FSTREAM_ERR_3 = 205;
+static const u_int32_t MEM_DUMP_NO_PROGRAM = 301;
+
+class ErrorHandler {
+public:
+  VirtualMachine &machine;
+  std::string filePath = "";
+  std::vector<int> errorList = {};
+
+  ErrorHandler(VirtualMachine &machine);
+  void errorDump();
+  void coreDump();
+  int memDump();
+};
+#endif

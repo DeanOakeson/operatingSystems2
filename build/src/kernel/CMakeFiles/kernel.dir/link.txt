@@ -1,0 +1,2 @@
+/usr/bin/ar qc libkernel.a CMakeFiles/kernel.dir/kernel.cpp.o CMakeFiles/kernel.dir/loader.cpp.o CMakeFiles/kernel.dir/errorhandler.cpp.o CMakeFiles/kernel.dir/scheduler.cpp.o
+/usr/bin/ranlib libkernel.a
