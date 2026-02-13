@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dean/test
+CMAKE_SOURCE_DIR = /home/dean/operatingSystems2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dean/test/build
+CMAKE_BINARY_DIR = /home/dean/operatingSystems2/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,14 +87,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/dean/test/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles /home/dean/test/build/src/shell//CMakeFiles/progress.marks
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles 0
+	cd /home/dean/operatingSystems2/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles /home/dean/operatingSystems2/build/src/shell//CMakeFiles/progress.marks
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/clean
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +103,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/preinstall
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/preinstall
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/dean/test/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/dean/operatingSystems2/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 src/shell/CMakeFiles/shell.dir/rule:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/CMakeFiles/shell.dir/rule
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/CMakeFiles/shell.dir/rule
 .PHONY : src/shell/CMakeFiles/shell.dir/rule
 
 # Convenience name for target.
@@ -127,7 +127,7 @@ shell: src/shell/CMakeFiles/shell.dir/rule
 
 # fast build rule for target.
 shell/fast:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/shell/CMakeFiles/shell.dir/build.make src/shell/CMakeFiles/shell.dir/build
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/shell/CMakeFiles/shell.dir/build.make src/shell/CMakeFiles/shell.dir/build
 .PHONY : shell/fast
 
 shell.o: shell.cpp.o
@@ -135,7 +135,7 @@ shell.o: shell.cpp.o
 
 # target to build an object file
 shell.cpp.o:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/shell/CMakeFiles/shell.dir/build.make src/shell/CMakeFiles/shell.dir/shell.cpp.o
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/shell/CMakeFiles/shell.dir/build.make src/shell/CMakeFiles/shell.dir/shell.cpp.o
 .PHONY : shell.cpp.o
 
 shell.i: shell.cpp.i
@@ -143,7 +143,7 @@ shell.i: shell.cpp.i
 
 # target to preprocess a source file
 shell.cpp.i:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/shell/CMakeFiles/shell.dir/build.make src/shell/CMakeFiles/shell.dir/shell.cpp.i
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/shell/CMakeFiles/shell.dir/build.make src/shell/CMakeFiles/shell.dir/shell.cpp.i
 .PHONY : shell.cpp.i
 
 shell.s: shell.cpp.s
@@ -151,7 +151,7 @@ shell.s: shell.cpp.s
 
 # target to generate assembly for a file
 shell.cpp.s:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/shell/CMakeFiles/shell.dir/build.make src/shell/CMakeFiles/shell.dir/shell.cpp.s
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/shell/CMakeFiles/shell.dir/build.make src/shell/CMakeFiles/shell.dir/shell.cpp.s
 .PHONY : shell.cpp.s
 
 # Help Target
@@ -177,6 +177,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/dean/test/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/dean/operatingSystems2/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

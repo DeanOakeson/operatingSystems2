@@ -43,11 +43,15 @@ public:
 
   int shellErrorDump(std::vector<std::string> argList);
 
+  int shellMemDump(std::vector<std::string> argList);
+
   /////////////////////////////////////
   // VIRTUAL MACHINE CONTROL PROGRAMS//
   /////////////////////////////////////
 
-  int shellRunProgram(std::vector<std::string> argList);
+  int shellRun(std::vector<std::string> argList);
+
+  int shellExecute(std::vector<std::string> argList);
 
   int shellCoreDump(std::vector<std::string> argList);
 

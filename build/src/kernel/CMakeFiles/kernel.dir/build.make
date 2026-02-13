@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dean/test
+CMAKE_SOURCE_DIR = /home/dean/operatingSystems2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dean/test/build
+CMAKE_BINARY_DIR = /home/dean/operatingSystems2/build
 
 # Include any dependencies generated for this target.
 include src/kernel/CMakeFiles/kernel.dir/depend.make
@@ -70,60 +70,60 @@ include src/kernel/CMakeFiles/kernel.dir/progress.make
 include src/kernel/CMakeFiles/kernel.dir/flags.make
 
 src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o: src/kernel/CMakeFiles/kernel.dir/flags.make
-src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o: /home/dean/test/src/kernel/kernel.cpp
+src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o: /home/dean/operatingSystems2/src/kernel/kernel.cpp
 src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o: src/kernel/CMakeFiles/kernel.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dean/test/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o -MF CMakeFiles/kernel.dir/kernel.cpp.o.d -o CMakeFiles/kernel.dir/kernel.cpp.o -c /home/dean/test/src/kernel/kernel.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o"
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o -MF CMakeFiles/kernel.dir/kernel.cpp.o.d -o CMakeFiles/kernel.dir/kernel.cpp.o -c /home/dean/operatingSystems2/src/kernel/kernel.cpp
 
 src/kernel/CMakeFiles/kernel.dir/kernel.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kernel.dir/kernel.cpp.i"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dean/test/src/kernel/kernel.cpp > CMakeFiles/kernel.dir/kernel.cpp.i
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dean/operatingSystems2/src/kernel/kernel.cpp > CMakeFiles/kernel.dir/kernel.cpp.i
 
 src/kernel/CMakeFiles/kernel.dir/kernel.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kernel.dir/kernel.cpp.s"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/test/src/kernel/kernel.cpp -o CMakeFiles/kernel.dir/kernel.cpp.s
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/operatingSystems2/src/kernel/kernel.cpp -o CMakeFiles/kernel.dir/kernel.cpp.s
 
 src/kernel/CMakeFiles/kernel.dir/loader.cpp.o: src/kernel/CMakeFiles/kernel.dir/flags.make
-src/kernel/CMakeFiles/kernel.dir/loader.cpp.o: /home/dean/test/src/kernel/loader.cpp
+src/kernel/CMakeFiles/kernel.dir/loader.cpp.o: /home/dean/operatingSystems2/src/kernel/loader.cpp
 src/kernel/CMakeFiles/kernel.dir/loader.cpp.o: src/kernel/CMakeFiles/kernel.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dean/test/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object src/kernel/CMakeFiles/kernel.dir/loader.cpp.o"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/kernel/CMakeFiles/kernel.dir/loader.cpp.o -MF CMakeFiles/kernel.dir/loader.cpp.o.d -o CMakeFiles/kernel.dir/loader.cpp.o -c /home/dean/test/src/kernel/loader.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object src/kernel/CMakeFiles/kernel.dir/loader.cpp.o"
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/kernel/CMakeFiles/kernel.dir/loader.cpp.o -MF CMakeFiles/kernel.dir/loader.cpp.o.d -o CMakeFiles/kernel.dir/loader.cpp.o -c /home/dean/operatingSystems2/src/kernel/loader.cpp
 
 src/kernel/CMakeFiles/kernel.dir/loader.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kernel.dir/loader.cpp.i"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dean/test/src/kernel/loader.cpp > CMakeFiles/kernel.dir/loader.cpp.i
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dean/operatingSystems2/src/kernel/loader.cpp > CMakeFiles/kernel.dir/loader.cpp.i
 
 src/kernel/CMakeFiles/kernel.dir/loader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kernel.dir/loader.cpp.s"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/test/src/kernel/loader.cpp -o CMakeFiles/kernel.dir/loader.cpp.s
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/operatingSystems2/src/kernel/loader.cpp -o CMakeFiles/kernel.dir/loader.cpp.s
 
 src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o: src/kernel/CMakeFiles/kernel.dir/flags.make
-src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o: /home/dean/test/src/kernel/errorhandler.cpp
+src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o: /home/dean/operatingSystems2/src/kernel/errorhandler.cpp
 src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o: src/kernel/CMakeFiles/kernel.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dean/test/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o -MF CMakeFiles/kernel.dir/errorhandler.cpp.o.d -o CMakeFiles/kernel.dir/errorhandler.cpp.o -c /home/dean/test/src/kernel/errorhandler.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o"
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o -MF CMakeFiles/kernel.dir/errorhandler.cpp.o.d -o CMakeFiles/kernel.dir/errorhandler.cpp.o -c /home/dean/operatingSystems2/src/kernel/errorhandler.cpp
 
 src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kernel.dir/errorhandler.cpp.i"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dean/test/src/kernel/errorhandler.cpp > CMakeFiles/kernel.dir/errorhandler.cpp.i
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dean/operatingSystems2/src/kernel/errorhandler.cpp > CMakeFiles/kernel.dir/errorhandler.cpp.i
 
 src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kernel.dir/errorhandler.cpp.s"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/test/src/kernel/errorhandler.cpp -o CMakeFiles/kernel.dir/errorhandler.cpp.s
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/operatingSystems2/src/kernel/errorhandler.cpp -o CMakeFiles/kernel.dir/errorhandler.cpp.s
 
 src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o: src/kernel/CMakeFiles/kernel.dir/flags.make
-src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o: /home/dean/test/src/kernel/scheduler.cpp
+src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o: /home/dean/operatingSystems2/src/kernel/scheduler.cpp
 src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o: src/kernel/CMakeFiles/kernel.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dean/test/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o -MF CMakeFiles/kernel.dir/scheduler.cpp.o.d -o CMakeFiles/kernel.dir/scheduler.cpp.o -c /home/dean/test/src/kernel/scheduler.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o"
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o -MF CMakeFiles/kernel.dir/scheduler.cpp.o.d -o CMakeFiles/kernel.dir/scheduler.cpp.o -c /home/dean/operatingSystems2/src/kernel/scheduler.cpp
 
 src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kernel.dir/scheduler.cpp.i"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dean/test/src/kernel/scheduler.cpp > CMakeFiles/kernel.dir/scheduler.cpp.i
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dean/operatingSystems2/src/kernel/scheduler.cpp > CMakeFiles/kernel.dir/scheduler.cpp.i
 
 src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kernel.dir/scheduler.cpp.s"
-	cd /home/dean/test/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/test/src/kernel/scheduler.cpp -o CMakeFiles/kernel.dir/scheduler.cpp.s
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/operatingSystems2/src/kernel/scheduler.cpp -o CMakeFiles/kernel.dir/scheduler.cpp.s
 
 # Object files for target kernel
 kernel_OBJECTS = \
@@ -141,19 +141,19 @@ src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o
 src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o
 src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/build.make
 src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/dean/test/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX static library libkernel.a"
-	cd /home/dean/test/build/src/kernel && $(CMAKE_COMMAND) -P CMakeFiles/kernel.dir/cmake_clean_target.cmake
-	cd /home/dean/test/build/src/kernel && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/kernel.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX static library libkernel.a"
+	cd /home/dean/operatingSystems2/build/src/kernel && $(CMAKE_COMMAND) -P CMakeFiles/kernel.dir/cmake_clean_target.cmake
+	cd /home/dean/operatingSystems2/build/src/kernel && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/kernel.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 src/kernel/CMakeFiles/kernel.dir/build: src/kernel/libkernel.a
 .PHONY : src/kernel/CMakeFiles/kernel.dir/build
 
 src/kernel/CMakeFiles/kernel.dir/clean:
-	cd /home/dean/test/build/src/kernel && $(CMAKE_COMMAND) -P CMakeFiles/kernel.dir/cmake_clean.cmake
+	cd /home/dean/operatingSystems2/build/src/kernel && $(CMAKE_COMMAND) -P CMakeFiles/kernel.dir/cmake_clean.cmake
 .PHONY : src/kernel/CMakeFiles/kernel.dir/clean
 
 src/kernel/CMakeFiles/kernel.dir/depend:
-	cd /home/dean/test/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/dean/test /home/dean/test/src/kernel /home/dean/test/build /home/dean/test/build/src/kernel /home/dean/test/build/src/kernel/CMakeFiles/kernel.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/dean/operatingSystems2/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/dean/operatingSystems2 /home/dean/operatingSystems2/src/kernel /home/dean/operatingSystems2/build /home/dean/operatingSystems2/build/src/kernel /home/dean/operatingSystems2/build/src/kernel/CMakeFiles/kernel.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : src/kernel/CMakeFiles/kernel.dir/depend
 

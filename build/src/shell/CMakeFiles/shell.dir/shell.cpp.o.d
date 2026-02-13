@@ -1,10 +1,11 @@
 src/shell/CMakeFiles/shell.dir/shell.cpp.o: \
- /home/dean/test/src/shell/shell.cpp /usr/include/stdc-predef.h \
- /home/dean/test/src/shell/shell.h \
- /home/dean/test/src/shell/../kernel/kernel.h \
- /home/dean/test/src/shell/../kernel/../hardware/vm.h \
- /home/dean/test/src/shell/../kernel/../hardware/ram.h \
- /home/dean/test/src/shell/../kernel/../hardware/pcb.h \
+ /home/dean/operatingSystems2/src/shell/shell.cpp \
+ /usr/include/stdc-predef.h \
+ /home/dean/operatingSystems2/src/shell/shell.h \
+ /home/dean/operatingSystems2/src/shell/../kernel/kernel.h \
+ /home/dean/operatingSystems2/src/shell/../kernel/../hardware/vm.h \
+ /home/dean/operatingSystems2/src/shell/../kernel/../hardware/ram.h \
+ /home/dean/operatingSystems2/src/shell/../kernel/../hardware/pcb.h \
  /usr/include/x86_64-linux-gnu/c++/15/bits/stdc++.h \
  /usr/include/c++/15/cassert \
  /usr/include/x86_64-linux-gnu/c++/15/bits/c++config.h \
@@ -367,6 +368,6 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: \
  /usr/include/c++/15/latch /usr/include/c++/15/syncstream \
  /usr/include/c++/15/backward/hashtable.h \
  /usr/include/c++/15/backward/hash_fun.h /usr/include/c++/15/stdlib.h \
- /home/dean/test/src/shell/../kernel/errorhandler.h \
- /home/dean/test/src/shell/../kernel/loader.h \
- /home/dean/test/src/shell/../kernel/scheduler.h
+ /home/dean/operatingSystems2/src/shell/../kernel/errorhandler.h \
+ /home/dean/operatingSystems2/src/shell/../kernel/loader.h \
+ /home/dean/operatingSystems2/src/shell/../kernel/scheduler.h

@@ -8,14 +8,14 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/dean/test/src/main.cpp" "CMakeFiles/dos.dir/src/main.cpp.o" "gcc" "CMakeFiles/dos.dir/src/main.cpp.o.d"
+  "/home/dean/operatingSystems2/src/main.cpp" "CMakeFiles/dos.dir/src/main.cpp.o" "gcc" "CMakeFiles/dos.dir/src/main.cpp.o.d"
   )
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/dean/test/build/src/shell/CMakeFiles/shell.dir/DependInfo.cmake"
-  "/home/dean/test/build/src/kernel/CMakeFiles/kernel.dir/DependInfo.cmake"
-  "/home/dean/test/build/src/hardware/CMakeFiles/hardware.dir/DependInfo.cmake"
+  "/home/dean/operatingSystems2/build/src/shell/CMakeFiles/shell.dir/DependInfo.cmake"
+  "/home/dean/operatingSystems2/build/src/kernel/CMakeFiles/kernel.dir/DependInfo.cmake"
+  "/home/dean/operatingSystems2/build/src/hardware/CMakeFiles/hardware.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

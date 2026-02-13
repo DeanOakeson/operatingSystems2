@@ -1,4 +1,4 @@
-# Install script for directory: /home/dean/test/src/hardware
+# Install script for directory: /home/dean/operatingSystems2/src/hardware
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

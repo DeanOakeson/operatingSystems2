@@ -24,6 +24,7 @@ public:
   ErrorHandler(VirtualMachine &machine);
   void errorDump();
   void coreDump();
-  int memDump();
+  int memDumpAll();
+  int memDump(std::string filePath);
 };
 #endif

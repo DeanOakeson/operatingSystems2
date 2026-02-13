@@ -44,39 +44,40 @@ static const u_int8_t SWI = 20;
 
 // 100 = CPU TERMINATION CODE
 int VirtualMachine::runCpu(Pcb &process) {
-  PC = process.fileFirstInstruction;
 
-  while (PC < process.fileSize + process.fileLoadAddress) {
+  // CPU PREPERATION//
+  bool incrementPC = true;
+
+  while (PC <= process.fileSize + process.fileLoadAddress) {
     uint8_t opcode = ram.mem[PC][0];
-    bool incrementPC = true;
+    incrementPC = true;
 
     switch (opcode) {
     // ARITHMATIC //
-    case ADD: // ADDS reg<1> <-- reg<2> + reg<3>
-      reg[ram.mem[PC][1]] = reg[ram.mem[PC][2]] + reg[ram.mem[PC][3]];
+    case ADD: // ADDS Reg<1> <-- Reg<2> + Reg<3>
+      Reg[ram.mem[PC][1]] = Reg[ram.mem[PC][2]] + Reg[ram.mem[PC][3]];
       break;
-    case SUB: // SUB reg<1> <-- reg<2> - reg<3>
-      reg[ram.mem[PC][1]] = reg[ram.mem[PC][2]] - reg[ram.mem[PC][3]];
+    case SUB: // SUB Reg<1> <-- Reg<2> - Reg<3>
+      Reg[ram.mem[PC][1]] = Reg[ram.mem[PC][2]] - Reg[ram.mem[PC][3]];
       break;
-    case MUL: { // MUL reg<1> <-- reg<2> * reg<3>
-      reg[ram.mem[PC][1]] = reg[ram.mem[PC][2]] * reg[ram.mem[PC][3]];
+    case MUL: { // MUL Reg<1> <-- Reg<2> * Reg<3>
+      Reg[ram.mem[PC][1]] = Reg[ram.mem[PC][2]] * Reg[ram.mem[PC][3]];
       break;
     }
-    case DIV: // DIV reg<1> <-- reg<2> / reg<3>
-      reg[ram.mem[PC][1]] = reg[ram.mem[PC][2]] / reg[ram.mem[PC][3]];
+    case DIV: // DIV Reg<1> <-- Reg<2> / Reg<3>
+      Reg[ram.mem[PC][1]] = Reg[ram.mem[PC][2]] / Reg[ram.mem[PC][3]];
       break;
-    case MOV: // MOVE reg<1> <-- reg<2>
-      reg[ram.mem[PC][1]] = reg[ram.mem[PC][2]];
+    case MOV: // MOVE Reg<1> <-- Reg<2>
+      Reg[ram.mem[PC][1]] = Reg[ram.mem[PC][2]];
       break;
-    case MVI: // MOVE IMM reg<1> <-- reg<2> | reg<3> |
-      reg[ram.mem[PC][1]] =
+    case MVI: // MOVE IMM Reg<1> <-- Reg<2> | Reg<3> |
+      Reg[ram.mem[PC][1]] =
           (int32_t)((uint32_t)ram.mem[PC][5] << 24 |
                     (uint32_t)ram.mem[PC][4] << 16 |
                     (uint32_t)ram.mem[PC][3] << 8 | (uint32_t)ram.mem[PC][2]);
       break;
     case ADR:
-      wordOffset = ram.mem[PC][2] / 4;
-      reg[ram.mem[PC][1]] = (uint32_t)ram.mem[wordOffset][4] << 24 |
+      Reg[ram.mem[PC][1]] = (uint32_t)ram.mem[wordOffset][4] << 24 |
                             (uint32_t)ram.mem[wordOffset][3] << 16 |
                             (uint32_t)ram.mem[wordOffset][2] << 8 |
                             (uint32_t)ram.mem[wordOffset][1];
@@ -96,43 +97,86 @@ int VirtualMachine::runCpu(Pcb &process) {
           (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
           (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
       // TRANSLATE INTO 6 BYTE ADDRESS SPACE
-      PC = byteOffset / 6 + process.fileLoadAddress;
+      byteOffset = byteOffset - (process.fileFirstInstruction * 4);
+      byteOffset = byteOffset / 6;
+      byteOffset = byteOffset + process.fileFirstInstruction;
+      PC = byteOffset + process.fileLoadAddress;
       incrementPC = false;
       break;
+
     case BL:
+      PC = Reg[ram.mem[PC][1]];
       break;
-      PC = reg[ram.mem[PC][1]];
-      incrementPC = false;
-      break;
+
     case BNE:
       byteOffset = (int32_t)((
           (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
           (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
-      if (Z == 1) {
-        PC = byteOffset / 6 + process.fileLoadAddress;
-        this->Z = 0;
+      if (Z != 0) {
+        byteOffset = byteOffset - (process.fileFirstInstruction * 4);
+        byteOffset = byteOffset / 6;
+        byteOffset = byteOffset + process.fileFirstInstruction;
+        PC = byteOffset + process.fileLoadAddress;
+        printf("BNE = %d \n", PC);
         incrementPC = false;
       }
       break;
-    case BGT:
-      break;
-    case BLT:
-      break;
-    case BEQ:
-      break;
-    // LOGICAL //
-    case CMP: // CMP <reg1> - <reg2>
-      if (reg[ram.mem[PC][1]] == reg[ram.mem[PC][2]]) {
-        Z = 1;
-        break;
+
+    case BGT: // TEST
+      byteOffset = (int32_t)((
+          (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
+          (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
+      if (Z > 0) {
+        byteOffset = byteOffset - (process.fileFirstInstruction * 4);
+        byteOffset = byteOffset / 6;
+        byteOffset = byteOffset + process.fileFirstInstruction;
+        PC = byteOffset + process.fileLoadAddress;
+        printf("BGT = %d \n", PC);
+        incrementPC = false;
       }
       break;
+
+    case BLT: // TEST
+      byteOffset = (int32_t)((
+          (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
+          (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
+      if (Z < 0) {
+        byteOffset = byteOffset - (process.fileFirstInstruction * 4);
+        byteOffset = byteOffset / 6;
+        byteOffset = byteOffset + process.fileFirstInstruction;
+        PC = byteOffset + process.fileLoadAddress;
+        printf("BNE = %d \n", PC);
+        incrementPC = false;
+      }
+      break;
+
+    case BEQ:
+      byteOffset = (int32_t)((
+          (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
+          (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
+      if (Z == 0) {
+        byteOffset = byteOffset - (process.fileFirstInstruction * 4);
+        byteOffset = byteOffset / 6;
+        byteOffset = byteOffset + process.fileFirstInstruction;
+        PC = byteOffset + process.fileLoadAddress;
+        printf("BEQ = %d \n", PC);
+        incrementPC = false;
+      }
+      break;
+    // LOGICAL //
+    case CMP: // CMP <Reg1> - <Reg2>
+      Z = Reg[ram.mem[PC][1]] - Reg[ram.mem[PC][2]];
+      break;
+
     case AND:
       break;
+
     case ORR:
       break;
+
     case EOR:
       break;
+
     case SWI: // SWI 10 = HALT
       swiOpCode = (int32_t)((
           (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
@@ -177,10 +221,10 @@ int VirtualMachine::runCpu(Pcb &process) {
       break;
     }
 
-    // Only increment PC if we didn't branch
     if (incrementPC) {
       PC++;
     }
+
     clock++;
   }
   process.kernelMode = 0;

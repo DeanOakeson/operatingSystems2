@@ -13,22 +13,12 @@ public:
 
   // CREATE VMEM //
   std::vector<Pcb> vMemory;
+  // std::unordered_map<Pcb, std::string> hashVMemory;
 
   int initializePcb(std::vector<int> asmHeader, std::string filePath) {
-    Pcb newPcb;
-    newPcb.fileLoadAddress = asmHeader[0];
-    newPcb.fileEndAddress = asmHeader[0] + (asmHeader[1]);
-    newPcb.fileSize = asmHeader[1];
-    newPcb.fileFirstInstruction = asmHeader[2];
-    newPcb.prcID = stoi(std::to_string(newPcb.fileLoadAddress) +
-                        std::to_string(newPcb.fileEndAddress));
-    newPcb.name = filePath;
-
-    printf("prcID = %d\n", newPcb.prcID);
+    Pcb newPcb(asmHeader, filePath);
     std::cout << newPcb.name << "\n";
-
     vMemory.push_back(newPcb);
-
     return 0;
   }
 };

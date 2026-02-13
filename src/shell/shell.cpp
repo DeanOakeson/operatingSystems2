@@ -4,13 +4,14 @@
 Shell::Shell(Kernel &kernel) : kernel(kernel) {}
 
 void Shell::initPath() {
-  functionMap["run"] = &Shell::shellRunProgram;
+  functionMap["run"] = &Shell::shellRun;
   functionMap["load"] = &Shell::shellLoadProgram;
   functionMap["exit"] = &Shell::shellExitShell;
   functionMap["help"] = &Shell::shellPrintHelp;
   functionMap["clear"] = &Shell::shellPrintClear;
   functionMap["coredump"] = &Shell::shellCoreDump;
   functionMap["errordump"] = &Shell::shellErrorDump;
+  functionMap["memdump"] = &Shell::shellMemDump;
 }
 
 //////////////////////////////////////
@@ -104,7 +105,8 @@ int Shell::shellLoadProgram(std::vector<std::string> argList) {
   // load -v "path/to/file"
   if (argList[1] == "-v" && argList.size() > 2) {
     returnCode = kernel.loader.loadProgram(argList[2]);
-    kernel.errorHandler.memDump();
+    // replace with memDump(argList[2]);
+    kernel.errorHandler.memDumpAll();
     return 0;
   }
 
@@ -133,11 +135,7 @@ int Shell::shellErrorDump(std::vector<std::string> argList) {
   return 0;
 }
 
-/////////////////////////////////////
-// VIRTUAL MACHINE CONTROL PROGRAMS//
-/////////////////////////////////////
-
-int Shell::shellRunProgram(std::vector<std::string> argList) {
+int Shell::shellRun(std::vector<std::string> argList) {
   int returnCode;
 
   // run
@@ -170,8 +168,14 @@ int Shell::shellRunProgram(std::vector<std::string> argList) {
   return 1;
 }
 
+int Shell::shellExecute(std::vector<std::string> arglist) {}
+
 int Shell::shellCoreDump(std::vector<std::string> argList) {
   kernel.errorHandler.coreDump();
-  kernel.errorHandler.memDump();
+  return 0;
+}
+
+int Shell::shellMemDump(std::vector<std::string> argList) {
+  kernel.errorHandler.memDumpAll();
   return 0;
 }

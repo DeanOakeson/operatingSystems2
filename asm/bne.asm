@@ -2,6 +2,11 @@
 ; Program to demonstrate conditional branching with BNE
 ; BNE branches if Z register is not equal to zero
 
+.WORD 55
+.WORD 10
+.WORD 40
+.WORD 50
+
 ; Load immediate value 100 into R1
 MVI R1 100
 

@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dean/test
+CMAKE_SOURCE_DIR = /home/dean/operatingSystems2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dean/test/build
+CMAKE_BINARY_DIR = /home/dean/operatingSystems2/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,14 +87,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/dean/test/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles /home/dean/test/build/src/kernel//CMakeFiles/progress.marks
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles 0
+	cd /home/dean/operatingSystems2/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles /home/dean/operatingSystems2/build/src/kernel//CMakeFiles/progress.marks
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/clean
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +103,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/preinstall
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/preinstall
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/dean/test/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/dean/operatingSystems2/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 src/kernel/CMakeFiles/kernel.dir/rule:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/CMakeFiles/kernel.dir/rule
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/CMakeFiles/kernel.dir/rule
 .PHONY : src/kernel/CMakeFiles/kernel.dir/rule
 
 # Convenience name for target.
@@ -127,7 +127,7 @@ kernel: src/kernel/CMakeFiles/kernel.dir/rule
 
 # fast build rule for target.
 kernel/fast:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/build
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/build
 .PHONY : kernel/fast
 
 errorhandler.o: errorhandler.cpp.o
@@ -135,7 +135,7 @@ errorhandler.o: errorhandler.cpp.o
 
 # target to build an object file
 errorhandler.cpp.o:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o
 .PHONY : errorhandler.cpp.o
 
 errorhandler.i: errorhandler.cpp.i
@@ -143,7 +143,7 @@ errorhandler.i: errorhandler.cpp.i
 
 # target to preprocess a source file
 errorhandler.cpp.i:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.i
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.i
 .PHONY : errorhandler.cpp.i
 
 errorhandler.s: errorhandler.cpp.s
@@ -151,7 +151,7 @@ errorhandler.s: errorhandler.cpp.s
 
 # target to generate assembly for a file
 errorhandler.cpp.s:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.s
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.s
 .PHONY : errorhandler.cpp.s
 
 kernel.o: kernel.cpp.o
@@ -159,7 +159,7 @@ kernel.o: kernel.cpp.o
 
 # target to build an object file
 kernel.cpp.o:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o
 .PHONY : kernel.cpp.o
 
 kernel.i: kernel.cpp.i
@@ -167,7 +167,7 @@ kernel.i: kernel.cpp.i
 
 # target to preprocess a source file
 kernel.cpp.i:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/kernel.cpp.i
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/kernel.cpp.i
 .PHONY : kernel.cpp.i
 
 kernel.s: kernel.cpp.s
@@ -175,7 +175,7 @@ kernel.s: kernel.cpp.s
 
 # target to generate assembly for a file
 kernel.cpp.s:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/kernel.cpp.s
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/kernel.cpp.s
 .PHONY : kernel.cpp.s
 
 loader.o: loader.cpp.o
@@ -183,7 +183,7 @@ loader.o: loader.cpp.o
 
 # target to build an object file
 loader.cpp.o:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/loader.cpp.o
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/loader.cpp.o
 .PHONY : loader.cpp.o
 
 loader.i: loader.cpp.i
@@ -191,7 +191,7 @@ loader.i: loader.cpp.i
 
 # target to preprocess a source file
 loader.cpp.i:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/loader.cpp.i
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/loader.cpp.i
 .PHONY : loader.cpp.i
 
 loader.s: loader.cpp.s
@@ -199,7 +199,7 @@ loader.s: loader.cpp.s
 
 # target to generate assembly for a file
 loader.cpp.s:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/loader.cpp.s
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/loader.cpp.s
 .PHONY : loader.cpp.s
 
 scheduler.o: scheduler.cpp.o
@@ -207,7 +207,7 @@ scheduler.o: scheduler.cpp.o
 
 # target to build an object file
 scheduler.cpp.o:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o
 .PHONY : scheduler.cpp.o
 
 scheduler.i: scheduler.cpp.i
@@ -215,7 +215,7 @@ scheduler.i: scheduler.cpp.i
 
 # target to preprocess a source file
 scheduler.cpp.i:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.i
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.i
 .PHONY : scheduler.cpp.i
 
 scheduler.s: scheduler.cpp.s
@@ -223,7 +223,7 @@ scheduler.s: scheduler.cpp.s
 
 # target to generate assembly for a file
 scheduler.cpp.s:
-	cd /home/dean/test/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.s
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.s
 .PHONY : scheduler.cpp.s
 
 # Help Target
@@ -258,6 +258,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/dean/test/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/dean/operatingSystems2/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

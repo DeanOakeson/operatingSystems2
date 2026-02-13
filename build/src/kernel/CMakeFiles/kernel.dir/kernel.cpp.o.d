@@ -1,9 +1,10 @@
 src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o: \
- /home/dean/test/src/kernel/kernel.cpp /usr/include/stdc-predef.h \
- /home/dean/test/src/kernel/kernel.h \
- /home/dean/test/src/kernel/../hardware/vm.h \
- /home/dean/test/src/kernel/../hardware/ram.h \
- /home/dean/test/src/kernel/../hardware/pcb.h \
+ /home/dean/operatingSystems2/src/kernel/kernel.cpp \
+ /usr/include/stdc-predef.h \
+ /home/dean/operatingSystems2/src/kernel/kernel.h \
+ /home/dean/operatingSystems2/src/kernel/../hardware/vm.h \
+ /home/dean/operatingSystems2/src/kernel/../hardware/ram.h \
+ /home/dean/operatingSystems2/src/kernel/../hardware/pcb.h \
  /usr/include/x86_64-linux-gnu/c++/15/bits/stdc++.h \
  /usr/include/c++/15/cassert \
  /usr/include/x86_64-linux-gnu/c++/15/bits/c++config.h \
@@ -366,6 +367,6 @@ src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o: \
  /usr/include/c++/15/latch /usr/include/c++/15/syncstream \
  /usr/include/c++/15/backward/hashtable.h \
  /usr/include/c++/15/backward/hash_fun.h /usr/include/c++/15/stdlib.h \
- /home/dean/test/src/kernel/errorhandler.h \
- /home/dean/test/src/kernel/loader.h \
- /home/dean/test/src/kernel/scheduler.h
+ /home/dean/operatingSystems2/src/kernel/errorhandler.h \
+ /home/dean/operatingSystems2/src/kernel/loader.h \
+ /home/dean/operatingSystems2/src/kernel/scheduler.h

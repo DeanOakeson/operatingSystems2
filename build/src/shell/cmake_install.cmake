@@ -1,4 +1,4 @@
-# Install script for directory: /home/dean/test/src/shell
+# Install script for directory: /home/dean/operatingSystems2/src/shell
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

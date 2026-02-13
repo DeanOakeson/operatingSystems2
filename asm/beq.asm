@@ -2,6 +2,11 @@
 ; Program to demonstrate conditional branching with BEQ
 ; BEQ branches if Z register is equal to zero
 
+.WORD 10
+.WORD 20
+.WORD 30
+.WORD 40
+.WORD 50
 ; Load immediate value 100 into R1
 MVI R1 100
 

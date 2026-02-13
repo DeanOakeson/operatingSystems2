@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dean/test
+CMAKE_SOURCE_DIR = /home/dean/operatingSystems2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dean/test/build
+CMAKE_BINARY_DIR = /home/dean/operatingSystems2/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -136,14 +136,14 @@ CMakeFiles/dos.dir/all: src/kernel/CMakeFiles/kernel.dir/all
 CMakeFiles/dos.dir/all: src/shell/CMakeFiles/shell.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/dos.dir/build.make CMakeFiles/dos.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/dos.dir/build.make CMakeFiles/dos.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dean/test/build/CMakeFiles --progress-num=1,2 "Built target dos"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=1,2 "Built target dos"
 .PHONY : CMakeFiles/dos.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/dos.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles 11
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles 11
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/dos.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles 0
 .PHONY : CMakeFiles/dos.dir/rule
 
 # Convenience name for target.
@@ -162,14 +162,14 @@ CMakeFiles/dos.dir/clean:
 src/hardware/CMakeFiles/hardware.dir/all:
 	$(MAKE) $(MAKESILENT) -f src/hardware/CMakeFiles/hardware.dir/build.make src/hardware/CMakeFiles/hardware.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/hardware/CMakeFiles/hardware.dir/build.make src/hardware/CMakeFiles/hardware.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dean/test/build/CMakeFiles --progress-num=3,4 "Built target hardware"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=3,4 "Built target hardware"
 .PHONY : src/hardware/CMakeFiles/hardware.dir/all
 
 # Build rule for subdir invocation for target.
 src/hardware/CMakeFiles/hardware.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/hardware/CMakeFiles/hardware.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles 0
 .PHONY : src/hardware/CMakeFiles/hardware.dir/rule
 
 # Convenience name for target.
@@ -188,14 +188,14 @@ src/hardware/CMakeFiles/hardware.dir/clean:
 src/kernel/CMakeFiles/kernel.dir/all: src/hardware/CMakeFiles/hardware.dir/all
 	$(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dean/test/build/CMakeFiles --progress-num=5,6,7,8,9 "Built target kernel"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=5,6,7,8,9 "Built target kernel"
 .PHONY : src/kernel/CMakeFiles/kernel.dir/all
 
 # Build rule for subdir invocation for target.
 src/kernel/CMakeFiles/kernel.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles 7
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/kernel/CMakeFiles/kernel.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles 0
 .PHONY : src/kernel/CMakeFiles/kernel.dir/rule
 
 # Convenience name for target.
@@ -215,14 +215,14 @@ src/shell/CMakeFiles/shell.dir/all: src/hardware/CMakeFiles/hardware.dir/all
 src/shell/CMakeFiles/shell.dir/all: src/kernel/CMakeFiles/kernel.dir/all
 	$(MAKE) $(MAKESILENT) -f src/shell/CMakeFiles/shell.dir/build.make src/shell/CMakeFiles/shell.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/shell/CMakeFiles/shell.dir/build.make src/shell/CMakeFiles/shell.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dean/test/build/CMakeFiles --progress-num=10,11 "Built target shell"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=10,11 "Built target shell"
 .PHONY : src/shell/CMakeFiles/shell.dir/all
 
 # Build rule for subdir invocation for target.
 src/shell/CMakeFiles/shell.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles 9
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles 9
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/shell/CMakeFiles/shell.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/test/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/dean/operatingSystems2/build/CMakeFiles 0
 .PHONY : src/shell/CMakeFiles/shell.dir/rule
 
 # Convenience name for target.

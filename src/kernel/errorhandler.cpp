@@ -33,7 +33,7 @@ void ErrorHandler::coreDump() {
 
   printf("\n[OS] --CORE_DUMP  \n================");
   for (u_int8_t i = 0; i < 6; i++) {
-    printf("\nREGISTER:: [ %d ] -- [ %d ]", regId, machine.reg[regId]);
+    printf("\nREGISTER:: [ %d ] -- [ %d ]", regId, machine.Reg[regId]);
     regId += 1;
   }
   printf("\nREGISTER:: [ PC ] -- [ %d ] \nREGISTER:: [ Z ] -- "
@@ -41,7 +41,7 @@ void ErrorHandler::coreDump() {
          machine.PC, machine.Z);
 }
 
-int ErrorHandler::memDump() {
+int ErrorHandler::memDumpAll() {
 
   // CHECK IF THERE ARE ANY PCBS LOADED IN VMEM
   if (machine.ram.vMemory.size() == 0) { // IF NO FILE HAS BEEN LOADED
@@ -56,7 +56,7 @@ int ErrorHandler::memDump() {
            machine.ram.vMemory[i].fileLoadAddress +
                machine.ram.vMemory[i].fileSize,
            filePath.c_str());
-    for (int j = machine.ram.vMemory[i].fileLoadAddress;
+    for (int j = machine.ram.vMemory[i].fileLoadAddress - 1;
          j <= machine.ram.vMemory[i].fileLoadAddress +
                   machine.ram.vMemory[i].fileSize;
          j++) {
@@ -67,5 +67,31 @@ int ErrorHandler::memDump() {
     }
     printf("\n\n");
   }
+  return 0;
+}
+
+// FIGURE OUT HOW TO ORGANIZE THE PCBS IN A WAY YOU CAN CALL THIS MANY TIMES.
+int ErrorHandler::memDump(std::string filePath) {
+
+  Pcb process; // figure out how to find a pcb from string.
+
+  // CHECK IF THERE ARE ANY PCBS LOADED IN VMEM
+  if (machine.ram.vMemory.size() == 0) { // IF NO FILE HAS BEEN LOADED
+    printf("[OS][301] --attempted memDump() with no loaded program\n");
+    return 301; // 1 memDump means no load
+  }
+
+  printf("\n[OS] --MEM_DUMP  \n===========\nADDRESSES::[ %d - "
+         "%d ]\nPROGRAM::[ %s ]\n",
+         process.fileLoadAddress, process.fileLoadAddress + process.fileSize,
+         filePath.c_str());
+  for (int j = process.fileLoadAddress - 1;
+       j <= process.fileLoadAddress + process.fileSize; j++) {
+    printf("\nADDRESS::[ %d ] -- ", j);
+    for (int k = 0; k <= 6; k++) {
+      printf("[ %d ]", machine.ram.mem[j][k]);
+    }
+  }
+  printf("\n\n");
   return 0;
 }

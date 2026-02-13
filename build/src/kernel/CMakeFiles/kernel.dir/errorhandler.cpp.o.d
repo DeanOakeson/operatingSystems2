@@ -1,9 +1,10 @@
 src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o: \
- /home/dean/test/src/kernel/errorhandler.cpp /usr/include/stdc-predef.h \
- /home/dean/test/src/kernel/errorhandler.h \
- /home/dean/test/src/kernel/../hardware/vm.h \
- /home/dean/test/src/kernel/../hardware/ram.h \
- /home/dean/test/src/kernel/../hardware/pcb.h \
+ /home/dean/operatingSystems2/src/kernel/errorhandler.cpp \
+ /usr/include/stdc-predef.h \
+ /home/dean/operatingSystems2/src/kernel/errorhandler.h \
+ /home/dean/operatingSystems2/src/kernel/../hardware/vm.h \
+ /home/dean/operatingSystems2/src/kernel/../hardware/ram.h \
+ /home/dean/operatingSystems2/src/kernel/../hardware/pcb.h \
  /usr/include/x86_64-linux-gnu/c++/15/bits/stdc++.h \
  /usr/include/c++/15/cassert \
  /usr/include/x86_64-linux-gnu/c++/15/bits/c++config.h \

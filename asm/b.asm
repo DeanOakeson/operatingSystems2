@@ -1,6 +1,7 @@
 ; b.asm
 ; Program to demonstrate unconditional branching with B
 ; This will jump over the instruction that loads 999 into R2
+RUN .WORD 50
 
 ; Load immediate value 100 into R1
 MVI R1 100

@@ -9,7 +9,7 @@
 
 class VirtualMachine {
 public:
-  int reg[6];
+  int Reg[6];
   int PC = 0;
   int SP = 0;
   int FP = 0;

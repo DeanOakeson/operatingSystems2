@@ -1,7 +1,9 @@
 src/hardware/CMakeFiles/hardware.dir/vm.cpp.o: \
- /home/dean/test/src/hardware/vm.cpp /usr/include/stdc-predef.h \
- /home/dean/test/src/hardware/vm.h /home/dean/test/src/hardware/ram.h \
- /home/dean/test/src/hardware/pcb.h \
+ /home/dean/operatingSystems2/src/hardware/vm.cpp \
+ /usr/include/stdc-predef.h \
+ /home/dean/operatingSystems2/src/hardware/vm.h \
+ /home/dean/operatingSystems2/src/hardware/ram.h \
+ /home/dean/operatingSystems2/src/hardware/pcb.h \
  /usr/include/x86_64-linux-gnu/c++/15/bits/stdc++.h \
  /usr/include/c++/15/cassert \
  /usr/include/x86_64-linux-gnu/c++/15/bits/c++config.h \

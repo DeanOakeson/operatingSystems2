@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/dean/test/src/shell -I/home/dean/test/src/kernel -I/home/dean/test/src/hardware
+CXX_INCLUDES = -I/home/dean/operatingSystems2/src/shell -I/home/dean/operatingSystems2/src/kernel -I/home/dean/operatingSystems2/src/hardware
 
 CXX_FLAGS = -Wall -Wextra -pedantic -std=gnu++20
 

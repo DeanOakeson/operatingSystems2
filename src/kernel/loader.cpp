@@ -30,11 +30,18 @@ int Loader::loadProgram(std::string filePath) {
   file.read(reinterpret_cast<char *>(&fileFirstInstruction), sizeof(int));
   file.read(reinterpret_cast<char *>(&fileLoadAddress), sizeof(int));
 
-  fileSize = fileSize / 6; // translated to memory space
-  printf("%d\n", fileSize);
-  printf("%d\n", fileFirstInstruction);
-  printf("%d\n", fileLoadAddress);
+  fileSize = fileSize - fileFirstInstruction;
+  // TRANSLATE TO MEMSPACE / 6 - FIRSTINSTRUCTION
+  fileSize = fileSize / 6;
+  // TRANSLATE TO MEMSPACE / 4
+  fileFirstInstruction = fileFirstInstruction / 4;
+  // ADDING THE NEW MEMSPACE FIRSINSTRUCTION BACK TO FILE SIZE
+  fileSize = fileSize + fileFirstInstruction;
+  // ADDING IT TO AN ASM HEADER
   asmHeader = {fileLoadAddress, fileSize, fileFirstInstruction};
+  printf("[OS] [LOADER] -- fileSize/6 = %d\n", asmHeader[1]);
+  printf("[OS] [LOADER] -- fileFirstInstruction = %d\n", asmHeader[2]);
+  printf("[OS] [LOADER] -- fileLoadAddress = %d\n", fileLoadAddress);
 
   //  MEMORY OVERFLOW
   if (fileLoadAddress + fileSize > MEM_SIZE_KB) {
@@ -52,8 +59,8 @@ int Loader::loadProgram(std::string filePath) {
 
   // WORD LOADER
   if (fileLoadAddress + fileFirstInstruction != fileLoadAddress) {
-    for (int i = fileLoadAddress;
-         i < fileFirstInstruction / 4 + fileLoadAddress; i++) {
+    for (int i = fileLoadAddress; i < fileFirstInstruction + fileLoadAddress;
+         i++) {
       for (int j = 0; j < 6; j++) {
         if (j < 4) {
           file.read(reinterpret_cast<char *>(&machine.ram.mem[i][j]),
@@ -66,7 +73,7 @@ int Loader::loadProgram(std::string filePath) {
   }
 
   // LOADER
-  for (int i = fileFirstInstruction / 4 + fileLoadAddress;
+  for (int i = fileFirstInstruction + fileLoadAddress;
        i <= fileSize + fileLoadAddress; i++) {
     for (int j = 0; j < 6; j++) {
       file.read(reinterpret_cast<char *>(&machine.ram.mem[i][j]),
@@ -84,7 +91,7 @@ int Loader::loadProgram(std::string filePath) {
 bool Loader::verifyMemoryIsUnoccupied(std::vector<int> asmHeader) {
   int fileLoadAddress = asmHeader[0];
   int fileSize = asmHeader[1];
-  int fileFirstInstruction[2];
+  int fileFirstInstruction = asmHeader[2];
 
   for (int i = fileLoadAddress; i <= fileLoadAddress + fileSize; i++) {
     if (machine.ram.mem[i][6] == 1) {
@@ -98,7 +105,7 @@ bool Loader::verifyMemoryIsUnoccupied(std::vector<int> asmHeader) {
 void Loader::updateMemoryIndicators(std::vector<int> asmHeader) {
   int fileLoadAddress = asmHeader[0];
   int fileSize = asmHeader[1];
-  int fileFirstInstruction[2];
+  int fileFirstInstruction = asmHeader[2];
 
   for (int i = fileLoadAddress; i <= fileLoadAddress + fileSize; i++) {
     if (machine.ram.mem[i][6] == 0)

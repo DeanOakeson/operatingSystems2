@@ -26,6 +26,7 @@ public:
   std::queue<Pcb> terminatedQueue;
 
   void updateState(Pcb &process, int state);
+  int contextSwitch(Pcb process);
   int firstComeFirstServe();
   int runProgram();
 };
