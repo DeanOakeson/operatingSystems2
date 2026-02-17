@@ -24,7 +24,7 @@ public:
 
   // CPU IMAGE FOR CONTEXT SWITCH
   // CONSTRUCTOR
-  int reg[6] = {0};
+  int reg[6] = {};
   int pc = 0;
   int z = 0;
 
@@ -36,7 +36,7 @@ public:
       : fileLoadAddress{asmHeader[0]},
         fileEndAddress{asmHeader[0] + (asmHeader[1])}, fileSize{asmHeader[1]},
         fileFirstInstruction{asmHeader[2]}, prcID{asmHeader[0]},
-        pc{(fileFirstInstruction / 4) + fileLoadAddress}, name{filePath} {}
+        pc{fileFirstInstruction + fileLoadAddress}, name{filePath} {}
   // COPY CONSTRUCTOR
   Pcb(const Pcb &pcb)
       : fileLoadAddress{pcb.fileLoadAddress},

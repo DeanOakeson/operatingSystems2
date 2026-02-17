@@ -8,7 +8,7 @@ int Scheduler::firstComeFirstServe() {}
 // PASS BY REFERENCE
 int Scheduler::contextSwitch(Pcb process) {
   machine.PC = process.pc;
-  printf("machine.PC = %d\n", machine.PC);
+  printf("[OS] [SCHEDULER] -- machine.PC = %d\n", machine.PC);
   machine.Z = process.z;
   for (int i = 0; i <= 6; i++) {
     machine.Reg[i] = process.reg[i];

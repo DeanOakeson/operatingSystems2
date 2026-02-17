@@ -44,6 +44,7 @@ static const u_int8_t SWI = 20;
 
 // 100 = CPU TERMINATION CODE
 int VirtualMachine::runCpu(Pcb &process) {
+  printf("[VM] PC -- %d\n", PC);
 
   // CPU PREPERATION//
   bool incrementPC = true;
@@ -55,32 +56,40 @@ int VirtualMachine::runCpu(Pcb &process) {
     switch (opcode) {
     // ARITHMATIC //
     case ADD: // ADDS Reg<1> <-- Reg<2> + Reg<3>
-      Reg[ram.mem[PC][1]] = Reg[ram.mem[PC][2]] + Reg[ram.mem[PC][3]];
+      printf("[VM] ADDING -- R[%d]\n", ram.mem[PC + 1][0]);
+      Reg[ram.mem[PC + 1][0]] =
+          Reg[ram.mem[PC + 2][0]] + Reg[ram.mem[PC + 3][0]];
       break;
     case SUB: // SUB Reg<1> <-- Reg<2> - Reg<3>
-      Reg[ram.mem[PC][1]] = Reg[ram.mem[PC][2]] - Reg[ram.mem[PC][3]];
+      printf("[VM] SUBTRACTING -- R[%d]\n", ram.mem[PC + 1][0]);
+      Reg[ram.mem[PC + 1][0]] =
+          Reg[ram.mem[PC + 2][0]] + Reg[ram.mem[PC + 3][0]];
       break;
-    case MUL: { // MUL Reg<1> <-- Reg<2> * Reg<3>
-      Reg[ram.mem[PC][1]] = Reg[ram.mem[PC][2]] * Reg[ram.mem[PC][3]];
+    case MUL: // MUL Reg<1> <-- Reg<2> * Reg<3>
+      printf("[VM] MULTIPLYING -- R[%d]\n", ram.mem[PC + 1][0]);
+      Reg[ram.mem[PC + 1][0]] =
+          Reg[ram.mem[PC + 2][0]] * Reg[ram.mem[PC + 3][0]];
       break;
-    }
     case DIV: // DIV Reg<1> <-- Reg<2> / Reg<3>
-      Reg[ram.mem[PC][1]] = Reg[ram.mem[PC][2]] / Reg[ram.mem[PC][3]];
+      printf("[VM] DIVIDING -- R[%d]\n", ram.mem[PC + 1][0]);
+      Reg[ram.mem[PC + 1][0]] =
+          Reg[ram.mem[PC + 2][0]] / Reg[ram.mem[PC + 3][0]];
       break;
     case MOV: // MOVE Reg<1> <-- Reg<2>
-      Reg[ram.mem[PC][1]] = Reg[ram.mem[PC][2]];
+      Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]];
       break;
     case MVI: // MOVE IMM Reg<1> <-- Reg<2> | Reg<3> |
-      Reg[ram.mem[PC][1]] =
-          (int32_t)((uint32_t)ram.mem[PC][5] << 24 |
-                    (uint32_t)ram.mem[PC][4] << 16 |
-                    (uint32_t)ram.mem[PC][3] << 8 | (uint32_t)ram.mem[PC][2]);
+      printf("[VM] MVI -- R[%d]\n", ram.mem[PC + 1][0]);
+      Reg[ram.mem[PC + 1][0]] = (int32_t)((uint32_t)ram.mem[PC + 5][0] << 24 |
+                                          (uint32_t)ram.mem[PC + 4][0] << 16 |
+                                          (uint32_t)ram.mem[PC + 3][0] << 8 |
+                                          (uint32_t)ram.mem[PC + 2][0]);
       break;
     case ADR:
-      Reg[ram.mem[PC][1]] = (uint32_t)ram.mem[wordOffset][4] << 24 |
-                            (uint32_t)ram.mem[wordOffset][3] << 16 |
-                            (uint32_t)ram.mem[wordOffset][2] << 8 |
-                            (uint32_t)ram.mem[wordOffset][1];
+      Reg[ram.mem[PC + 1][0]] = (uint32_t)ram.mem[wordOffset][4] << 24 |
+                                (uint32_t)ram.mem[wordOffset][3] << 16 |
+                                (uint32_t)ram.mem[wordOffset][2] << 8 |
+                                (uint32_t)ram.mem[wordOffset][1];
 
       break;
     case STR:
@@ -93,13 +102,11 @@ int VirtualMachine::runCpu(Pcb &process) {
       break;
     // BRANCH //
     case B:
-      byteOffset = (int32_t)((
-          (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
-          (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
-      // TRANSLATE INTO 6 BYTE ADDRESS SPACE
-      byteOffset = byteOffset - (process.fileFirstInstruction * 4);
-      byteOffset = byteOffset / 6;
-      byteOffset = byteOffset + process.fileFirstInstruction;
+      printf("B\n");
+      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                              (uint32_t)ram.mem[PC + 3][0] << 16 |
+                              (uint32_t)ram.mem[PC + 2][0] << 8 |
+                              (uint32_t)ram.mem[PC + 1][0]));
       PC = byteOffset + process.fileLoadAddress;
       incrementPC = false;
       break;
@@ -113,9 +120,6 @@ int VirtualMachine::runCpu(Pcb &process) {
           (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
           (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
       if (Z != 0) {
-        byteOffset = byteOffset - (process.fileFirstInstruction * 4);
-        byteOffset = byteOffset / 6;
-        byteOffset = byteOffset + process.fileFirstInstruction;
         PC = byteOffset + process.fileLoadAddress;
         printf("BNE = %d \n", PC);
         incrementPC = false;
@@ -127,9 +131,6 @@ int VirtualMachine::runCpu(Pcb &process) {
           (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
           (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
       if (Z > 0) {
-        byteOffset = byteOffset - (process.fileFirstInstruction * 4);
-        byteOffset = byteOffset / 6;
-        byteOffset = byteOffset + process.fileFirstInstruction;
         PC = byteOffset + process.fileLoadAddress;
         printf("BGT = %d \n", PC);
         incrementPC = false;
@@ -141,11 +142,8 @@ int VirtualMachine::runCpu(Pcb &process) {
           (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
           (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
       if (Z < 0) {
-        byteOffset = byteOffset - (process.fileFirstInstruction * 4);
-        byteOffset = byteOffset / 6;
-        byteOffset = byteOffset + process.fileFirstInstruction;
         PC = byteOffset + process.fileLoadAddress;
-        printf("BNE = %d \n", PC);
+        printf("BLT = %d \n", PC);
         incrementPC = false;
       }
       break;
@@ -155,9 +153,6 @@ int VirtualMachine::runCpu(Pcb &process) {
           (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
           (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
       if (Z == 0) {
-        byteOffset = byteOffset - (process.fileFirstInstruction * 4);
-        byteOffset = byteOffset / 6;
-        byteOffset = byteOffset + process.fileFirstInstruction;
         PC = byteOffset + process.fileLoadAddress;
         printf("BEQ = %d \n", PC);
         incrementPC = false;
@@ -165,7 +160,7 @@ int VirtualMachine::runCpu(Pcb &process) {
       break;
     // LOGICAL //
     case CMP: // CMP <Reg1> - <Reg2>
-      Z = Reg[ram.mem[PC][1]] - Reg[ram.mem[PC][2]];
+      Z = Reg[ram.mem[PC + 1][0]] - Reg[ram.mem[PC + 2][0]];
       break;
 
     case AND:
@@ -178,9 +173,10 @@ int VirtualMachine::runCpu(Pcb &process) {
       break;
 
     case SWI: // SWI 10 = HALT
-      swiOpCode = (int32_t)((
-          (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
-          (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
+      swiOpCode = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                             (uint32_t)ram.mem[PC + 3][0] << 16 |
+                             (uint32_t)ram.mem[PC + 2][0] << 8 |
+                             (uint32_t)ram.mem[PC + 1][0]));
 
       if (process.kernelMode == 0) {
         std::string userInput;
@@ -222,7 +218,8 @@ int VirtualMachine::runCpu(Pcb &process) {
     }
 
     if (incrementPC) {
-      PC++;
+      printf("%d\n", PC);
+      PC += 6;
     }
 
     clock++;

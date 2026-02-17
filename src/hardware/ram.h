@@ -9,7 +9,7 @@
 class Ram {
 public:
   // OBJECTS//
-  unsigned char mem[MEM_SIZE_KB][7];
+  unsigned char mem[MEM_SIZE_KB * 8][2];
 
   // CREATE VMEM //
   std::vector<Pcb> vMemory;
@@ -17,7 +17,7 @@ public:
 
   int initializePcb(std::vector<int> asmHeader, std::string filePath) {
     Pcb newPcb(asmHeader, filePath);
-    std::cout << newPcb.name << "\n";
+    std::cout << "[VM] [RAM]" << newPcb.name << "\n";
     vMemory.push_back(newPcb);
     return 0;
   }

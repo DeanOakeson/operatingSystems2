@@ -1,7 +1,7 @@
 ; CMP.asm
 ; Program to compare two values using CMP
 ; Result: Z = R1 - R2 = 100 - 50 = 50
-
+.WORD 11
 ; Load immediate value 100 into R1
 MVI R1 100
 
