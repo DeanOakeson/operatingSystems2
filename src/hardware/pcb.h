@@ -37,12 +37,17 @@ public:
         fileEndAddress{asmHeader[0] + (asmHeader[1])}, fileSize{asmHeader[1]},
         fileFirstInstruction{asmHeader[2]}, prcID{asmHeader[0]},
         pc{fileFirstInstruction + fileLoadAddress}, name{filePath} {}
+
   // COPY CONSTRUCTOR
   Pcb(const Pcb &pcb)
       : fileLoadAddress{pcb.fileLoadAddress},
         fileEndAddress{pcb.fileEndAddress}, fileSize{pcb.fileSize},
         fileFirstInstruction{pcb.fileFirstInstruction}, prcID{pcb.prcID},
         pc{pcb.pc}, name{pcb.name} {}
+
+  std::size_t operator()(const Pcb &pcb) const {
+    return std::hash<int>()(pcb.prcID);
+  }
 };
 
 #endif

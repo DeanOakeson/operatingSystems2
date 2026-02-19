@@ -5,10 +5,10 @@ Shell::Shell(Kernel &kernel) : kernel(kernel) {}
 
 void Shell::initPath() {
   functionMap["run"] = &Shell::shellRun;
-  functionMap["load"] = &Shell::shellLoadProgram;
-  functionMap["exit"] = &Shell::shellExitShell;
-  functionMap["help"] = &Shell::shellPrintHelp;
-  functionMap["clear"] = &Shell::shellPrintClear;
+  functionMap["load"] = &Shell::shellLoad;
+  functionMap["exit"] = &Shell::shellExit;
+  functionMap["help"] = &Shell::shellHelp;
+  functionMap["clear"] = &Shell::shellClear;
   functionMap["coredump"] = &Shell::shellCoreDump;
   functionMap["errordump"] = &Shell::shellErrorDump;
   functionMap["memdump"] = &Shell::shellMemDump;
@@ -50,6 +50,7 @@ int Shell::shellLoop() {
     }
 
     int returnCode = (this->*functionMap[commandArray[0]])(commandArray);
+    printf("\n");
     if (returnCode == 9) { // EXIT CODE
       return 0;
     }
@@ -60,12 +61,12 @@ int Shell::shellLoop() {
 // CONSOLE CONTROL PROGRAMS //
 //////////////////////////////
 
-int Shell::shellPrintClear(std::vector<std::string> argList) {
+int Shell::shellClear(std::vector<std::string> argList) {
   system("clear");
   return 0;
 }
 
-int Shell::shellPrintHelp(std::vector<std::string> argList) {
+int Shell::shellHelp(std::vector<std::string> argList) {
   std::cout
       << "\n[SHELL] --HELP  \n==============\n"
          "\nrun [-v] ------ runs a loaded specified program\n"
@@ -74,12 +75,12 @@ int Shell::shellPrintHelp(std::vector<std::string> argList) {
          "clear --------- clears the terminal screen\n"
          "coredump ------ lists the current values contained in REGISTERS\n"
          "errordump ----- prints logged errors\n"
-         "exit ---------- exits terminal\n\n";
+         "exit ---------- exits terminal\n";
   return 0;
 }
 
-int Shell::shellExitShell(std::vector<std::string> argList) {
-  std::cout << "exiting...\n";
+int Shell::shellExit(std::vector<std::string> argList) {
+  std::cout << "[SHELL] exiting...\n";
   return 9;
 }
 
@@ -87,95 +88,84 @@ int Shell::shellExitShell(std::vector<std::string> argList) {
 // MEMORY CONTROL PROGRAMS //
 /////////////////////////////
 
-int Shell::shellLoadProgram(std::vector<std::string> argList) {
-  int returnCode;
+int Shell::shellLoad(std::vector<std::string> argList) {
 
-  // load
-  if (argList.size() <= 1) {
-    std::cout << "[SHELL] --no file path provided--\n";
-    return 1;
-  }
-
-  // load -v
-  if (argList[1] == "-v" && argList.size() == 2) {
-    std::cout << "[SHELL] --no file path provided--\n";
-    return 1;
-  }
-
-  // load -v "path/to/file"
-  if (argList[1] == "-v" && argList.size() > 2) {
-    returnCode = kernel.loader.loadProgram(argList[2]);
-    // replace with memDump(argList[2]);
-    kernel.errorHandler.memDumpAll();
+  switch (argList.size()) {
+  case 1:
+    // error message
+  case 2:
+    // load ...
+    kernel.kernelLoadProgram(argList[1]);
+    return 0;
+  case 3:
+    // load -v ...
+    kernel.kernelLoadProgram(argList[2]);
+    kernel.kernelMemDump(argList[2]);
     return 0;
   }
-
-  // load "path/to/file"
-  returnCode = kernel.loader.loadProgram(argList[1]);
-
-  // loader found a memory overflow
-  if (returnCode == 201) {
-    std::cout << "[SHELL] -- error 201 returned by kernel\n";
-    kernel.errorHandler.errorList.push_back(returnCode);
-    return 1;
-  }
-
-  // loader found memory occupation
-  if (returnCode == 202) {
-    std::cout << "[SHELL] -- error [202] returned by kernel\n";
-    kernel.errorHandler.errorList.push_back(returnCode);
-    return 1;
-  }
-
-  return 0;
+  printf("[SHELL] -- too many arguments\n");
+  return 1;
 }
 
 int Shell::shellErrorDump(std::vector<std::string> argList) {
-  kernel.errorHandler.errorDump();
-  return 0;
+  switch (argList.size()) {
+  case 1:
+    kernel.kernelErrorDump();
+    return 0;
+  }
+  printf("[SHELL] -- too many arguments\n");
+  return 1;
 }
 
 int Shell::shellRun(std::vector<std::string> argList) {
-  int returnCode;
 
-  // run
-  if (argList.size() == 1) {
-    returnCode = kernel.scheduler.runProgram();
-
-    if (returnCode == 100) {
-      std::cout << "[SHELL] --error [100] returned by the kernel\n";
-      kernel.errorHandler.errorList.push_back(returnCode);
-      return 1;
+  switch (argList.size()) {
+  case 2:
+    if (argList[1] == "-v") {
+      kernel.kernelRunProgram(argList[1]);
+      kernel.kernelCoreDump();
+      return 0;
     }
+    printf("[SHELL] %s is not a valid argument\n", argList[1].c_str());
+
+    return 1;
+  case 3:
+    // run -v ../asm/file
+    kernel.kernelRunProgram(argList[2]);
+    kernel.kernelCoreDump();
     return 0;
   }
-
-  // run -v
-  if (argList.size() >= 2 && argList[1] == "-v") {
-
-    returnCode = kernel.scheduler.runProgram();
-
-    if (returnCode == 100) {
-      std::cout << "[SHELL] --error [100] returned by the kernel\n";
-      kernel.errorHandler.errorList.push_back(returnCode);
-      return 1;
-    }
-
-    kernel.errorHandler.coreDump();
-    return 0;
-  }
-
+  printf("[SHELL] -- too many arguments\n");
   return 1;
 }
 
 int Shell::shellExecute(std::vector<std::string> arglist) {}
 
+/////////////////////
+// ERROR MANAGMENT //
+/////////////////////
+
 int Shell::shellCoreDump(std::vector<std::string> argList) {
-  kernel.errorHandler.coreDump();
+  kernel.kernelCoreDump();
   return 0;
 }
 
 int Shell::shellMemDump(std::vector<std::string> argList) {
-  kernel.errorHandler.memDumpAll();
+
+  switch (argList.size()) {
+    // memdump //
+  case 1:
+    kernel.kernelMemDumpAll();
+    return 0;
+  case 2:
+    // memdump ../path/to/file //
+    kernel.kernelMemDump(argList[1]);
+    return 0;
+  }
+  // too many arguments //
+  if (argList.size() > 2) {
+    printf("[SHELL] too many arguments\n");
+    return 1;
+  }
   return 0;
 }

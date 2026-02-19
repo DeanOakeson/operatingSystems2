@@ -14,5 +14,12 @@ public:
   VirtualMachine &machine;
 
   Kernel(VirtualMachine &machine);
+
+  int kernelLoadProgram(std::string filePath);
+  int kernelRunProgram(std::string filePath);
+  int kernelMemDump(std::string filePath);
+  int kernelErrorDump();
+  int kernelMemDumpAll();
+  int kernelCoreDump();
 };
 #endif

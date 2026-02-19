@@ -44,13 +44,14 @@ static const u_int8_t SWI = 20;
 
 // 100 = CPU TERMINATION CODE
 int VirtualMachine::runCpu(Pcb &process) {
+  int opcode;
   printf("[VM] PC -- %d\n", PC);
 
   // CPU PREPERATION//
   bool incrementPC = true;
 
   while (PC <= process.fileSize + process.fileLoadAddress) {
-    uint8_t opcode = ram.mem[PC][0];
+    opcode = ram.mem[PC][0];
     incrementPC = true;
 
     switch (opcode) {
@@ -101,7 +102,7 @@ int VirtualMachine::runCpu(Pcb &process) {
     case LDRB:
       break;
     // BRANCH //
-    case B:
+    case B: // BRANCH
       printf("B\n");
       byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
                               (uint32_t)ram.mem[PC + 3][0] << 16 |
@@ -111,14 +112,20 @@ int VirtualMachine::runCpu(Pcb &process) {
       incrementPC = false;
       break;
 
-    case BL:
-      PC = Reg[ram.mem[PC][1]];
+    case BL: // TEST //WRONGG
+      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                              (uint32_t)ram.mem[PC + 3][0] << 16 |
+                              (uint32_t)ram.mem[PC + 2][0] << 8 |
+                              (uint32_t)ram.mem[PC + 1][0]));
+      PC = byteOffset + process.fileLoadAddress;
+      incrementPC = false;
       break;
 
-    case BNE:
-      byteOffset = (int32_t)((
-          (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
-          (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
+    case BNE: // BRANCH IF NOT EQUAL works
+      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                              (uint32_t)ram.mem[PC + 3][0] << 16 |
+                              (uint32_t)ram.mem[PC + 2][0] << 8 |
+                              (uint32_t)ram.mem[PC + 1][0]));
       if (Z != 0) {
         PC = byteOffset + process.fileLoadAddress;
         printf("BNE = %d \n", PC);
@@ -127,9 +134,10 @@ int VirtualMachine::runCpu(Pcb &process) {
       break;
 
     case BGT: // TEST
-      byteOffset = (int32_t)((
-          (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
-          (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
+      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                              (uint32_t)ram.mem[PC + 3][0] << 16 |
+                              (uint32_t)ram.mem[PC + 2][0] << 8 |
+                              (uint32_t)ram.mem[PC + 1][0]));
       if (Z > 0) {
         PC = byteOffset + process.fileLoadAddress;
         printf("BGT = %d \n", PC);
@@ -138,9 +146,11 @@ int VirtualMachine::runCpu(Pcb &process) {
       break;
 
     case BLT: // TEST
-      byteOffset = (int32_t)((
-          (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
-          (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
+      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                              (uint32_t)ram.mem[PC + 3][0] << 16 |
+                              (uint32_t)ram.mem[PC + 2][0] << 8 |
+                              (uint32_t)ram.mem[PC + 1][0]));
+
       if (Z < 0) {
         PC = byteOffset + process.fileLoadAddress;
         printf("BLT = %d \n", PC);
@@ -148,10 +158,11 @@ int VirtualMachine::runCpu(Pcb &process) {
       }
       break;
 
-    case BEQ:
-      byteOffset = (int32_t)((
-          (uint32_t)ram.mem[PC][4] << 24 | (uint32_t)ram.mem[PC][3] << 16 |
-          (uint32_t)ram.mem[PC][2] << 8 | (uint32_t)ram.mem[PC][1]));
+    case BEQ: // BRANCH if Z == 0 WORKS
+      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                              (uint32_t)ram.mem[PC + 3][0] << 16 |
+                              (uint32_t)ram.mem[PC + 2][0] << 8 |
+                              (uint32_t)ram.mem[PC + 1][0]));
       if (Z == 0) {
         PC = byteOffset + process.fileLoadAddress;
         printf("BEQ = %d \n", PC);

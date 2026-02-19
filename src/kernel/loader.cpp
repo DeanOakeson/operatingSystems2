@@ -1,8 +1,9 @@
 #include "loader.h"
 
-Loader::Loader(VirtualMachine &machine) : machine(machine) {}
+Loader::Loader(VirtualMachine &machine) : machine(machine) {};
 
-int Loader::loadProgram(std::string filePath) {
+std::tuple<int, std::vector<int>> Loader::loadProgram(std::string filePath) {
+  std::cout << filePath << "\n";
 
   int fileSize;
   int fileLoadAddress;
@@ -11,55 +12,46 @@ int Loader::loadProgram(std::string filePath) {
   std::ifstream file(filePath,
                      std::ios::binary); // FILESTREAM ERRORS NEED TO WORK
 
-  if (file.fail()) {
-    std::ios_base::iostate state = file.rdstate();
-
-    if (state & std::ios_base::eofbit) {
-      return MEM_FSTREAM_ERR_1; // END OF FILE REACHED FAIL
-    }
-    if (state & std::ios_base::failbit) {
-      return MEM_FSTREAM_ERR_2; // NON_FATAL I/O ERROR OCCURED
-    }
-    if (state & std::ios_base::failbit) {
-      return MEM_FSTREAM_ERR_3; // FATAL ERROR OCCURED
-    }
+  if (!file.is_open()) {
+    printf("[OS][LOADER][200] -- file not found\n");
+    return std::make_tuple(200, asmHeader);
+    ;
   }
-
   // FIRST READ THE FIRST 3 INTS FOR HEADER VARIABLES //
   file.read(reinterpret_cast<char *>(&fileSize), sizeof(int));
   file.read(reinterpret_cast<char *>(&fileFirstInstruction), sizeof(int));
   file.read(reinterpret_cast<char *>(&fileLoadAddress), sizeof(int));
 
   asmHeader = {fileLoadAddress, fileSize, fileFirstInstruction};
-  printf("[OS] [LOADER] -- fileSize = %d\n", asmHeader[1]);
-  printf("[OS] [LOADER] -- fileFirstInstruction = %d\n", asmHeader[2]);
-  printf("[OS] [LOADER] -- fileLoadAddress = %d\n", fileLoadAddress);
+  printf("[OS][LOADER] -- fileSize = %d\n", asmHeader[1]);
+  printf("[OS][LOADER] -- fileFirstInstruction = %d\n", asmHeader[2]);
+  printf("[OS][LOADER] -- fileLoadAddress = %d\n", fileLoadAddress);
 
   //  MEMORY OVERFLOW
   if (fileLoadAddress + fileSize > MEM_SIZE_KB) {
     printf("[OS][201] --memory overflow, load "
            "cancelled\n");
-    return MEM_OVERFLOW;
+    return std::make_tuple(201, asmHeader);
   }
 
   // MEMORY IS OCCUPIED
   if (verifyMemoryIsUnoccupied(asmHeader) != true) {
     printf("[OS][202] --attempted to overwrite existing memory, load "
            "cancelled\n");
-    return MEM_OVERWRITE;
+    return std::make_tuple(202, asmHeader);
+    ;
   }
 
   // LOADER
-  for (int i = fileFirstInstruction + fileLoadAddress;
-       i <= fileSize + fileLoadAddress; i++) {
+  for (int i = fileLoadAddress; i <= fileSize + fileLoadAddress; i++) {
     file.read(reinterpret_cast<char *>(&machine.ram.mem[i][0]),
               sizeof(unsigned char));
   }
 
   // PCB creation and memory indicator swap
   updateMemoryIndicators(asmHeader);
-  machine.ram.initializePcb(asmHeader, filePath);
-  return 0;
+  return std::make_tuple(0, asmHeader);
+  ;
 }
 
 bool Loader::verifyMemoryIsUnoccupied(std::vector<int> asmHeader) {

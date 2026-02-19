@@ -8,12 +8,11 @@
 #include <stdlib.h>
 
 static const u_int32_t CPU_EARLY_TERMINATION = 100;
+static const u_int32_t LOAD_FILE_NOT_FOUND = 200;
 static const u_int32_t MEM_OVERFLOW = 201;
 static const u_int32_t MEM_OVERWRITE = 202;
-static const u_int32_t MEM_FSTREAM_ERR_1 = 203;
-static const u_int32_t MEM_FSTREAM_ERR_2 = 204;
-static const u_int32_t MEM_FSTREAM_ERR_3 = 205;
 static const u_int32_t MEM_DUMP_NO_PROGRAM = 301;
+static const u_int32_t MEM_DUMP_FALSE_PROGRAM = 302;
 
 class ErrorHandler {
 public:

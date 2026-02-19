@@ -31,15 +31,15 @@ public:
   // CONSOLE CONTROL PROGRAMS //
   //////////////////////////////
 
-  int shellPrintClear(std::vector<std::string> argList);
+  int shellClear(std::vector<std::string> argList);
 
-  int shellPrintHelp(std::vector<std::string> argList);
+  int shellHelp(std::vector<std::string> argList);
 
   /////////////////////////////
   // MEMORY CONTROL PROGRAMS //
   /////////////////////////////
 
-  int shellLoadProgram(std::vector<std::string> argList);
+  int shellLoad(std::vector<std::string> argList);
 
   int shellErrorDump(std::vector<std::string> argList);
 
@@ -55,7 +55,7 @@ public:
 
   int shellCoreDump(std::vector<std::string> argList);
 
-  int shellExitShell(std::vector<std::string> argList);
+  int shellExit(std::vector<std::string> argList);
 };
 
 #endif

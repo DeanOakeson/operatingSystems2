@@ -14,18 +14,17 @@ void ErrorHandler::errorDump() {
     case MEM_OVERWRITE:
       printf("[OS][ERROR][202] --attempted memory overwrite--\n");
       break;
-    case MEM_FSTREAM_ERR_1:
-      break;
-    case MEM_FSTREAM_ERR_2:
-      break;
-    case MEM_FSTREAM_ERR_3:
+    case LOAD_FILE_NOT_FOUND:
+      printf("[OS][ERROR][200] --file not found--\n");
       break;
     case MEM_DUMP_NO_PROGRAM:
       printf("[OS][ERROR][301] --attempted memDump() no loaded program--\n");
       break;
+    case MEM_DUMP_FALSE_PROGRAM:
+      printf("[OS][ERROR][302] --attempted memDump() with false program--\n");
+      break;
     }
   }
-  printf("\n");
 }
 
 void ErrorHandler::coreDump() {
@@ -37,30 +36,31 @@ void ErrorHandler::coreDump() {
     regId += 1;
   }
   printf("\nREGISTER:: [ PC ] -- [ %d ] \nREGISTER:: [ Z ] -- "
-         "[ %d ]\n\n",
+         "[ %d ]\n",
          machine.PC, machine.Z);
 }
 
 int ErrorHandler::memDumpAll() {
 
-  // NEEDS TO BE COMPLETLEY IMPLPLEMENTED
-
   // CHECK IF THERE ARE ANY PCBS LOADED IN VMEM
-  if (machine.ram.vMemory.size() == 0) { // IF NO FILE HAS BEEN LOADED
+  // IF NO FILE HAS BEEN LOADED
+  if (machine.ram.vMemory.size() == 0) {
     printf("[OS][ERROR][301] --attempted memDump() with no loaded program\n");
     return 301; // 1 memDump means no load
   }
+  printf("\n[OS][ERROR] --MEM_DUMP  \n===========\n");
 
+  // this iterates over the actual vMemory not the hash
   for (int i = 0; i < machine.ram.vMemory.size(); i++) {
     int fileFirstInstruction = machine.ram.vMemory[i].fileFirstInstruction;
     int fileLoadAddress = machine.ram.vMemory[i].fileLoadAddress;
     int fileSize = machine.ram.vMemory[i].fileSize;
+    std::string fileName = machine.ram.vMemory[i].name;
 
     int fileEnd = fileLoadAddress + fileSize - 1;
 
-    printf("\n[OS][ERROR] --MEM_DUMP  \n===========\nADDRESSES::[ %d - "
-           "%d ]\nPROGRAM::[ %s ]\n",
-           fileLoadAddress, fileLoadAddress + fileSize, filePath.c_str());
+    printf("\nSPACE::[ %d - %d ]\nPROGRAM::[ %s ]\n", fileLoadAddress,
+           fileLoadAddress + fileSize, fileName.c_str());
 
     for (int j = 0; (j + fileLoadAddress + fileFirstInstruction) <= fileEnd;
          j++) {
@@ -71,32 +71,46 @@ int ErrorHandler::memDumpAll() {
       printf("[ %d ]",
              machine.ram.mem[j + fileLoadAddress + fileFirstInstruction][0]);
     }
-    printf("\n\n");
+    printf("\n");
   }
   return 0;
 }
-// FIGURE OUT HOW TO ORGANIZE THE PCBS IN A WAY YOU CAN CALL THIS MANY TIMES.
+
 int ErrorHandler::memDump(std::string filePath) {
 
-  Pcb process; // figure out how to find a pcb from string.
+  int index;
+
+  try {
+    index = machine.ram.vMemoryLookup.at(filePath);
+  } catch (std::out_of_range) {
+    printf(
+        "[OS][ERROR][302] --attempted vMemoryLookup.at() with false program\n");
+    return 302;
+  }
+
+  Pcb process = machine.ram.vMemory[index];
+  int fileEnd = process.fileLoadAddress + process.fileSize - 1;
 
   // CHECK IF THERE ARE ANY PCBS LOADED IN VMEM
-  if (machine.ram.vMemory.size() == 0) { // IF NO FILE HAS BEEN LOADED
+  if (machine.ram.vMemory.size() == 0) {
     printf("[OS][ERROR][301] --attempted memDump() with no loaded program\n");
     return 301; // 1 memDump means no load
   }
 
-  printf("\n[OS][ERROR] --MEM_DUMP  \n===========\nADDRESSES::[ %d - "
+  printf("\n[OS][ERROR] --MEM_DUMP  \n===========\nSPACE::[ %d - "
          "%d ]\nPROGRAM::[ %s ]\n",
          process.fileLoadAddress, process.fileLoadAddress + process.fileSize,
          filePath.c_str());
-  for (int j = process.fileLoadAddress - 1;
-       j <= process.fileLoadAddress + process.fileSize / 6; j++) {
+
+  for (int j = 0;
+       (j + process.fileLoadAddress + process.fileFirstInstruction) <= fileEnd;
+       j++) {
     if (j % 6 == 0) {
-      printf("\nADDRESS::[ %d ] -- ", j);
+      printf("\nADDRESS::[ %d - %d ] -- ", j + process.fileLoadAddress,
+             j + process.fileLoadAddress + 5);
     }
-    printf("[ %d ]", machine.ram.mem[j][0]);
+    printf("[ %d ]", machine.ram.mem[j + process.fileLoadAddress +
+                                     process.fileFirstInstruction][0]);
   }
-  printf("\n\n");
   return 0;
 }
