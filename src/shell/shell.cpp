@@ -120,9 +120,13 @@ int Shell::shellErrorDump(std::vector<std::string> argList) {
 int Shell::shellRun(std::vector<std::string> argList) {
 
   switch (argList.size()) {
+  case 1:
+    kernel.kernelRun();
+    return 0;
+
   case 2:
     if (argList[1] == "-v") {
-      kernel.kernelRunProgram(argList[1]);
+      kernel.kernelRun();
       kernel.kernelCoreDump();
       return 0;
     }
@@ -131,7 +135,7 @@ int Shell::shellRun(std::vector<std::string> argList) {
     return 1;
   case 3:
     // run -v ../asm/file
-    kernel.kernelRunProgram(argList[2]);
+    kernel.kernelRunSingleProgram(argList[2]);
     kernel.kernelCoreDump();
     return 0;
   }

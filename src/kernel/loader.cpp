@@ -1,6 +1,23 @@
 #include "loader.h"
 
+//------------
+// CONSTRUCTOR
+//------------
+
 Loader::Loader(VirtualMachine &machine) : machine(machine) {};
+
+//------
+// LOAD
+//------
+
+// loadProgram(filePath)
+// INPUT - takes a file path in a string format
+//
+// OUTPUT SUCCESS - returns a vector that contains 0 and a vector
+// containing the header information that was loaded from the asm file.
+//
+// OUTPUT FAIL - returns a return code that indicates the problem that occured
+// and an empty vector.
 
 std::tuple<int, std::vector<int>> Loader::loadProgram(std::string filePath) {
   std::cout << filePath << "\n";
@@ -23,9 +40,10 @@ std::tuple<int, std::vector<int>> Loader::loadProgram(std::string filePath) {
   file.read(reinterpret_cast<char *>(&fileLoadAddress), sizeof(int));
 
   asmHeader = {fileLoadAddress, fileSize, fileFirstInstruction};
-  printf("[OS][LOADER] -- fileSize = %d\n", asmHeader[1]);
-  printf("[OS][LOADER] -- fileFirstInstruction = %d\n", asmHeader[2]);
-  printf("[OS][LOADER] -- fileLoadAddress = %d\n", fileLoadAddress);
+
+  // printf("[OS][LOADER] -- fileSize = %d\n", asmHeader[1]);
+  // printf("[OS][LOADER] -- fileFirstInstruction = %d\n", asmHeader[2]);
+  // printf("[OS][LOADER] -- fileLoadAddress = %d\n", fileLoadAddress);
 
   //  MEMORY OVERFLOW
   if (fileLoadAddress + fileSize > MEM_SIZE_KB) {
@@ -48,11 +66,14 @@ std::tuple<int, std::vector<int>> Loader::loadProgram(std::string filePath) {
               sizeof(unsigned char));
   }
 
-  // PCB creation and memory indicator swap
   updateMemoryIndicators(asmHeader);
   return std::make_tuple(0, asmHeader);
   ;
 }
+
+//------------------
+// PRIVATE FUNCTIONS
+//------------------
 
 bool Loader::verifyMemoryIsUnoccupied(std::vector<int> asmHeader) {
   int fileLoadAddress = asmHeader[0];
@@ -67,8 +88,8 @@ bool Loader::verifyMemoryIsUnoccupied(std::vector<int> asmHeader) {
   return true;
 }
 
-// FLIPS THE MEMORY OCCUPATION BIT //
 void Loader::updateMemoryIndicators(std::vector<int> asmHeader) {
+  // FLIPS MEM OCCUPATION BIT AT EACH ADDRESS
   int fileLoadAddress = asmHeader[0];
   int fileSize = asmHeader[1];
   int fileFirstInstruction = asmHeader[2];

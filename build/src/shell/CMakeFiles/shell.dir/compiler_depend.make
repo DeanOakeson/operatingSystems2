@@ -5,6 +5,7 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
   /usr/include/stdc-predef.h \
   /home/dean/operatingSystems2/src/shell/shell.h \
   /home/dean/operatingSystems2/src/kernel/kernel.h \
+  /home/dean/operatingSystems2/src/kernel/errorhandler.h \
   /home/dean/operatingSystems2/src/hardware/vm.h \
   /home/dean/operatingSystems2/src/hardware/ram.h \
   /home/dean/operatingSystems2/src/hardware/pcb.h \
@@ -475,10 +476,6 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
   /usr/include/c++/15/barrier \
   /usr/include/c++/15/latch \
   /usr/include/c++/15/syncstream \
-  /usr/include/c++/15/backward/hashtable.h \
-  /usr/include/c++/15/backward/hash_fun.h \
-  /usr/include/c++/15/stdlib.h \
-  /home/dean/operatingSystems2/src/kernel/errorhandler.h \
   /home/dean/operatingSystems2/src/kernel/loader.h \
   /home/dean/operatingSystems2/src/kernel/scheduler.h
 
@@ -590,8 +587,6 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 /usr/include/c++/15/fenv.h:
 
 /home/dean/operatingSystems2/src/kernel/scheduler.h:
-
-/usr/include/c++/15/stdlib.h:
 
 /usr/include/c++/15/ctime:
 
@@ -751,8 +746,6 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 
 /usr/include/c++/15/bits/locale_facets.h:
 
-/usr/include/c++/15/bits/max_size_type.h:
-
 /usr/include/c++/15/bits/deque.tcc:
 
 /usr/include/c++/15/bits/stl_tempbuf.h:
@@ -792,8 +785,6 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 /usr/include/c++/15/clocale:
 
 /usr/include/c++/15/bits/range_access.h:
-
-/usr/include/c++/15/backward/hash_fun.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-least.h:
 
@@ -885,23 +876,19 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 
 /usr/include/c++/15/cstdio:
 
-/usr/include/x86_64-linux-gnu/bits/endianness.h:
+/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
 
-/usr/include/c++/15/bits/stl_iterator_base_types.h:
+/usr/include/x86_64-linux-gnu/c++/15/bits/opt_random.h:
 
-/usr/include/c++/15/iomanip:
+/usr/include/c++/15/set:
 
-/usr/include/c++/15/bits/ranges_base.h:
-
-/usr/include/x86_64-linux-gnu/sys/single_threaded.h:
+/usr/include/c++/15/bits/memory_resource.h:
 
 /usr/include/x86_64-linux-gnu/c++/15/bits/ctype_inline.h:
 
 /usr/include/c++/15/bits/move.h:
 
 /usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
-
-/usr/include/c++/15/backward/hashtable.h:
 
 /usr/include/x86_64-linux-gnu/bits/waitflags.h:
 
@@ -951,12 +938,6 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 
 /usr/include/c++/15/bits/std_function.h:
 
-/usr/include/c++/15/version:
-
-/home/dean/operatingSystems2/src/shell/shell.h:
-
-/usr/include/c++/15/pstl/pstl_config.h:
-
 /usr/include/c++/15/bits/list.tcc:
 
 /usr/include/c++/15/debug/debug.h:
@@ -995,6 +976,16 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 
 /usr/include/c++/15/system_error:
 
+/usr/include/c++/15/bits/stl_iterator_base_types.h:
+
+/usr/include/c++/15/iomanip:
+
+/usr/include/c++/15/bits/ranges_base.h:
+
+/usr/include/x86_64-linux-gnu/sys/single_threaded.h:
+
+/usr/include/x86_64-linux-gnu/bits/endianness.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h:
 
 /usr/include/c++/15/cfloat:
@@ -1022,6 +1013,22 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 /usr/include/c++/15/new:
 
 /usr/include/linux/errno.h:
+
+/usr/include/c++/15/version:
+
+/home/dean/operatingSystems2/src/shell/shell.h:
+
+/usr/include/c++/15/pstl/pstl_config.h:
+
+/usr/include/c++/15/climits:
+
+/usr/include/c++/15/type_traits:
+
+/usr/include/c++/15/valarray:
+
+/usr/include/c++/15/bits/refwrap.h:
+
+/usr/include/c++/15/cstdarg:
 
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
 
@@ -1113,24 +1120,6 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 
 /usr/include/stdc-predef.h:
 
-/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
-
-/usr/include/x86_64-linux-gnu/c++/15/bits/opt_random.h:
-
-/usr/include/c++/15/set:
-
-/usr/include/c++/15/bits/memory_resource.h:
-
-/usr/include/c++/15/climits:
-
-/usr/include/c++/15/type_traits:
-
-/usr/include/c++/15/valarray:
-
-/usr/include/c++/15/bits/refwrap.h:
-
-/usr/include/c++/15/cstdarg:
-
 /usr/include/c++/15/bits/semaphore_base.h:
 
 /usr/include/c++/15/bits/ranges_algobase.h:
@@ -1170,6 +1159,8 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 /usr/include/x86_64-linux-gnu/bits/types/FILE.h:
 
 /usr/include/pthread.h:
+
+/usr/include/c++/15/bits/max_size_type.h:
 
 /usr/include/x86_64-linux-gnu/bits/typesizes.h:
 
@@ -1373,9 +1364,9 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 
 /usr/include/linux/posix_types.h:
 
-/home/dean/operatingSystems2/src/kernel/errorhandler.h:
-
 /usr/include/wctype.h:
+
+/home/dean/operatingSystems2/src/kernel/errorhandler.h:
 
 /usr/include/sched.h:
 

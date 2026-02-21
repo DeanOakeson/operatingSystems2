@@ -2,10 +2,6 @@
 #define SHELL_H
 
 #include "../kernel/kernel.h"
-#include <cstdlib>
-#include <hashtable.h>
-#include <iostream>
-#include <string>
 
 class Shell {
 public:

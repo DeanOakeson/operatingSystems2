@@ -2,10 +2,6 @@
 #define ERROR_H
 
 #include "../hardware/vm.h"
-#include <bits/stdc++.h>
-#include <hashtable.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 static const u_int32_t CPU_EARLY_TERMINATION = 100;
 static const u_int32_t LOAD_FILE_NOT_FOUND = 200;

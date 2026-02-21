@@ -3,6 +3,7 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: \
  /usr/include/stdc-predef.h \
  /home/dean/operatingSystems2/src/shell/shell.h \
  /home/dean/operatingSystems2/src/shell/../kernel/kernel.h \
+ /home/dean/operatingSystems2/src/shell/../kernel/errorhandler.h \
  /home/dean/operatingSystems2/src/shell/../kernel/../hardware/vm.h \
  /home/dean/operatingSystems2/src/shell/../kernel/../hardware/ram.h \
  /home/dean/operatingSystems2/src/shell/../kernel/../hardware/pcb.h \
@@ -366,8 +367,5 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: \
  /usr/include/c++/15/bits/fs_dir.h /usr/include/c++/15/bits/fs_ops.h \
  /usr/include/c++/15/memory_resource /usr/include/c++/15/barrier \
  /usr/include/c++/15/latch /usr/include/c++/15/syncstream \
- /usr/include/c++/15/backward/hashtable.h \
- /usr/include/c++/15/backward/hash_fun.h /usr/include/c++/15/stdlib.h \
- /home/dean/operatingSystems2/src/shell/../kernel/errorhandler.h \
  /home/dean/operatingSystems2/src/shell/../kernel/loader.h \
  /home/dean/operatingSystems2/src/shell/../kernel/scheduler.h

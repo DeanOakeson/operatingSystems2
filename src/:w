@@ -1,0 +1,36 @@
+#ifndef ISR_H
+#define ISR_H
+
+#include "../hardware/vm.h"
+
+class InterruptServiceRoutine {
+public:
+  static const u_int8_t PRINT = 21;
+  static const u_int8_t HALT = 22;
+  static const u_int8_t FORK = 23;
+  static const u_int8_t WAIT = 24;
+  static const u_int8_t INPUT = 25;
+
+  void interruptServiceRoutine(Pcb &process, int returnCode) {
+    switch (returnCode) {
+    case PRINT:
+      isrPrint();
+    case HALT:
+      isrHalt();
+    case FORK:
+      isrFork();
+    case WAIT:
+      isrWait();
+    case INPUT:
+      isrInput();
+    }
+  };
+
+private:
+  int isrPrint();
+  int isrHalt();
+  int isrFork();
+  int isrWait();
+  int isrInput();
+};
+#endif

@@ -1,7 +1,4 @@
 #include "vm.h"
-#include <bits/stdc++.h>
-#include <hashtable.h>
-#include <stdlib.h>
 
 ///////////////////
 // STATIC CONSTS //
@@ -50,29 +47,29 @@ int VirtualMachine::runCpu(Pcb &process) {
   // CPU PREPERATION//
   bool incrementPC = true;
 
-  while (PC <= process.fileSize + process.fileLoadAddress) {
+  while (PC <= process.pSize + process.pLoadAddress) {
     opcode = ram.mem[PC][0];
     incrementPC = true;
 
     switch (opcode) {
     // ARITHMATIC //
     case ADD: // ADDS Reg<1> <-- Reg<2> + Reg<3>
-      printf("[VM] ADDING -- R[%d]\n", ram.mem[PC + 1][0]);
+      // printf("[VM] ADDING -- R[%d]\n", ram.mem[PC + 1][0]);
       Reg[ram.mem[PC + 1][0]] =
           Reg[ram.mem[PC + 2][0]] + Reg[ram.mem[PC + 3][0]];
       break;
     case SUB: // SUB Reg<1> <-- Reg<2> - Reg<3>
-      printf("[VM] SUBTRACTING -- R[%d]\n", ram.mem[PC + 1][0]);
+      // printf("[VM] SUBTRACTING -- R[%d]\n", ram.mem[PC + 1][0]);
       Reg[ram.mem[PC + 1][0]] =
           Reg[ram.mem[PC + 2][0]] + Reg[ram.mem[PC + 3][0]];
       break;
     case MUL: // MUL Reg<1> <-- Reg<2> * Reg<3>
-      printf("[VM] MULTIPLYING -- R[%d]\n", ram.mem[PC + 1][0]);
+      // printf("[VM] MULTIPLYING -- R[%d]\n", ram.mem[PC + 1][0]);
       Reg[ram.mem[PC + 1][0]] =
           Reg[ram.mem[PC + 2][0]] * Reg[ram.mem[PC + 3][0]];
       break;
     case DIV: // DIV Reg<1> <-- Reg<2> / Reg<3>
-      printf("[VM] DIVIDING -- R[%d]\n", ram.mem[PC + 1][0]);
+      // printf("[VM] DIVIDING -- R[%d]\n", ram.mem[PC + 1][0]);
       Reg[ram.mem[PC + 1][0]] =
           Reg[ram.mem[PC + 2][0]] / Reg[ram.mem[PC + 3][0]];
       break;
@@ -103,12 +100,12 @@ int VirtualMachine::runCpu(Pcb &process) {
       break;
     // BRANCH //
     case B: // BRANCH
-      printf("B\n");
+      // printf("B\n");
       byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
                               (uint32_t)ram.mem[PC + 3][0] << 16 |
                               (uint32_t)ram.mem[PC + 2][0] << 8 |
                               (uint32_t)ram.mem[PC + 1][0]));
-      PC = byteOffset + process.fileLoadAddress;
+      PC = byteOffset + process.pLoadAddress;
       incrementPC = false;
       break;
 
@@ -117,7 +114,7 @@ int VirtualMachine::runCpu(Pcb &process) {
                               (uint32_t)ram.mem[PC + 3][0] << 16 |
                               (uint32_t)ram.mem[PC + 2][0] << 8 |
                               (uint32_t)ram.mem[PC + 1][0]));
-      PC = byteOffset + process.fileLoadAddress;
+      PC = byteOffset + process.pLoadAddress;
       incrementPC = false;
       break;
 
@@ -127,8 +124,7 @@ int VirtualMachine::runCpu(Pcb &process) {
                               (uint32_t)ram.mem[PC + 2][0] << 8 |
                               (uint32_t)ram.mem[PC + 1][0]));
       if (Z != 0) {
-        PC = byteOffset + process.fileLoadAddress;
-        printf("BNE = %d \n", PC);
+        PC = byteOffset + process.pLoadAddress;
         incrementPC = false;
       }
       break;
@@ -139,8 +135,7 @@ int VirtualMachine::runCpu(Pcb &process) {
                               (uint32_t)ram.mem[PC + 2][0] << 8 |
                               (uint32_t)ram.mem[PC + 1][0]));
       if (Z > 0) {
-        PC = byteOffset + process.fileLoadAddress;
-        printf("BGT = %d \n", PC);
+        PC = byteOffset + process.pLoadAddress;
         incrementPC = false;
       }
       break;
@@ -152,8 +147,7 @@ int VirtualMachine::runCpu(Pcb &process) {
                               (uint32_t)ram.mem[PC + 1][0]));
 
       if (Z < 0) {
-        PC = byteOffset + process.fileLoadAddress;
-        printf("BLT = %d \n", PC);
+        PC = byteOffset + process.pLoadAddress;
         incrementPC = false;
       }
       break;
@@ -164,8 +158,7 @@ int VirtualMachine::runCpu(Pcb &process) {
                               (uint32_t)ram.mem[PC + 2][0] << 8 |
                               (uint32_t)ram.mem[PC + 1][0]));
       if (Z == 0) {
-        PC = byteOffset + process.fileLoadAddress;
-        printf("BEQ = %d \n", PC);
+        PC = byteOffset + process.pLoadAddress;
         incrementPC = false;
       }
       break;
@@ -188,53 +181,24 @@ int VirtualMachine::runCpu(Pcb &process) {
                              (uint32_t)ram.mem[PC + 3][0] << 16 |
                              (uint32_t)ram.mem[PC + 2][0] << 8 |
                              (uint32_t)ram.mem[PC + 1][0]));
-
-      if (process.kernelMode == 0) {
-        std::string userInput;
-
-        while (true) {
-          std::cin.clear();
-          std::cout << "[OS] -- allow kernel access?, press y/n \n";
-          std::cin >> userInput;
-          std::cin.ignore();
-
-          if (userInput == "n" | userInput == "N") {
-            std::cout << "[OS] -- program not permitted to enter kernel "
-                         "mode. program "
-                         "terminated.\n";
-            std::cin.clear();
-            return 100;
-          }
-          if (userInput == "y" | userInput == "Y") {
-            process.kernelMode = 1;
-            std::cin.clear();
-            std::cout << "[OS] -- kernel mode entered\n";
-            break;
-          }
-          std::cout << "[OS] -- invalid input\n";
-        }
-      }
-
       switch (swiOpCode) {
-      case 1:
-        std::cout << "[OS][SWI 1] -- not yet defined\n";
-        break;
-      case 2:
-        break;
-      case 10: // HALT SUCCESFULLY
-        std::cout << "[OS][SWI 10] -- halting program--\n";
+      case 1: // PRINT
+        printf("[VM] Returning 21\n");
+        return 21;
+      case 2: // INPUT
+        return 22;
+      case 10: // HALT
         return 0;
       }
       break;
     }
 
     if (incrementPC) {
-      printf("%d\n", PC);
       PC += 6;
     }
 
     clock++;
   }
-  process.kernelMode = 0;
+  process.pKernelMode = 0;
   return 0;
 }

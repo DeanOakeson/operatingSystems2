@@ -2,51 +2,56 @@
 #define PCB_H
 
 #include <bits/stdc++.h>
-#include <hashtable.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 class Pcb {
 
 public:
-  int prcID;
-  int state;
-  int arrivalTime;
-  int fileLoadAddress;
-  int fileFirstInstruction = 0;
-  int fileSize = 0;
-  int fileEndAddress = 0;
-  int kernelMode = 0;
-
   std::string name;
-
+  int pId;
+  int pState = 0;
+  int pArrivalTime;
+  int pLoadAddress;
+  int pFirstInstruction = 0;
+  int pSize = 0;
+  int pEndAddress = 0;
+  int pKernelMode = 0;
   int childID = 0;
 
-  // CPU IMAGE FOR CONTEXT SWITCH
-  // CONSTRUCTOR
+  // ---------
+  // CPU IMAGE
+  // ---------
+
   int reg[6] = {};
   int pc = 0;
   int z = 0;
 
+  // -----------
+  // CONSTRUCTOR
+  // -----------
+
   Pcb()
-      : fileLoadAddress{0}, fileEndAddress{0}, fileFirstInstruction{0},
-        prcID{0}, pc{0}, name{"default"} {}
+      : pLoadAddress{0}, pEndAddress{0}, pFirstInstruction{0}, pId{0}, pc{0},
+        name{"default"} {}
 
   Pcb(std::vector<int> asmHeader, std::string filePath)
-      : fileLoadAddress{asmHeader[0]},
-        fileEndAddress{asmHeader[0] + (asmHeader[1])}, fileSize{asmHeader[1]},
-        fileFirstInstruction{asmHeader[2]}, prcID{asmHeader[0]},
-        pc{fileFirstInstruction + fileLoadAddress}, name{filePath} {}
+      : pLoadAddress{asmHeader[0]}, pEndAddress{asmHeader[0] + (asmHeader[1])},
+        pSize{asmHeader[1]}, pFirstInstruction{asmHeader[2]}, pId{asmHeader[0]},
+        pc{pFirstInstruction + pLoadAddress}, name{filePath} {}
 
   // COPY CONSTRUCTOR
   Pcb(const Pcb &pcb)
-      : fileLoadAddress{pcb.fileLoadAddress},
-        fileEndAddress{pcb.fileEndAddress}, fileSize{pcb.fileSize},
-        fileFirstInstruction{pcb.fileFirstInstruction}, prcID{pcb.prcID},
-        pc{pcb.pc}, name{pcb.name} {}
+      : pLoadAddress{pcb.pLoadAddress}, pEndAddress{pcb.pEndAddress},
+        pSize{pcb.pSize}, pFirstInstruction{pcb.pFirstInstruction},
+        pId{pcb.pId}, pc{pcb.pc}, name{pcb.name} {}
 
   std::size_t operator()(const Pcb &pcb) const {
-    return std::hash<int>()(pcb.prcID);
+    return std::hash<int>()(pcb.pId);
+  }
+
+  void updateState(int newState) {
+    printf("[PCB] %d: %d --> ", pId, pState);
+    pState = newState;
+    printf("%d\n", pState);
   }
 };
 

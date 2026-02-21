@@ -52,24 +52,23 @@ int ErrorHandler::memDumpAll() {
 
   // this iterates over the actual vMemory not the hash
   for (int i = 0; i < machine.ram.vMemory.size(); i++) {
-    int fileFirstInstruction = machine.ram.vMemory[i].fileFirstInstruction;
-    int fileLoadAddress = machine.ram.vMemory[i].fileLoadAddress;
-    int fileSize = machine.ram.vMemory[i].fileSize;
+    int pFirstInstruction = machine.ram.vMemory[i].pFirstInstruction;
+    int pLoadAddress = machine.ram.vMemory[i].pLoadAddress;
+    int pSize = machine.ram.vMemory[i].pSize;
     std::string fileName = machine.ram.vMemory[i].name;
 
-    int fileEnd = fileLoadAddress + fileSize - 1;
+    int fileEnd = pLoadAddress + pSize - 1;
 
-    printf("\nSPACE::[ %d - %d ]\nPROGRAM::[ %s ]\n", fileLoadAddress,
-           fileLoadAddress + fileSize, fileName.c_str());
+    printf("\nSPACE::[ %d - %d ]\nPROGRAM::[ %s ]\n", pLoadAddress,
+           pLoadAddress + pSize, fileName.c_str());
 
-    for (int j = 0; (j + fileLoadAddress + fileFirstInstruction) <= fileEnd;
-         j++) {
+    for (int j = 0; (j + pLoadAddress + pFirstInstruction) <= fileEnd; j++) {
       if (j % 6 == 0) {
-        printf("\nADDRESS::[ %d - %d ] -- ", j + fileLoadAddress,
-               j + fileLoadAddress + 5);
+        printf("\nADDRESS::[ %d - %d ] -- ", j + pLoadAddress,
+               j + pLoadAddress + 5);
       }
       printf("[ %d ]",
-             machine.ram.mem[j + fileLoadAddress + fileFirstInstruction][0]);
+             machine.ram.mem[j + pLoadAddress + pFirstInstruction][0]);
     }
     printf("\n");
   }
@@ -89,7 +88,7 @@ int ErrorHandler::memDump(std::string filePath) {
   }
 
   Pcb process = machine.ram.vMemory[index];
-  int fileEnd = process.fileLoadAddress + process.fileSize - 1;
+  int fileEnd = process.pLoadAddress + process.pSize - 1;
 
   // CHECK IF THERE ARE ANY PCBS LOADED IN VMEM
   if (machine.ram.vMemory.size() == 0) {
@@ -99,18 +98,18 @@ int ErrorHandler::memDump(std::string filePath) {
 
   printf("\n[OS][ERROR] --MEM_DUMP  \n===========\nSPACE::[ %d - "
          "%d ]\nPROGRAM::[ %s ]\n",
-         process.fileLoadAddress, process.fileLoadAddress + process.fileSize,
+         process.pLoadAddress, process.pLoadAddress + process.pSize,
          filePath.c_str());
 
   for (int j = 0;
-       (j + process.fileLoadAddress + process.fileFirstInstruction) <= fileEnd;
-       j++) {
+       (j + process.pLoadAddress + process.pFirstInstruction) <= fileEnd; j++) {
     if (j % 6 == 0) {
-      printf("\nADDRESS::[ %d - %d ] -- ", j + process.fileLoadAddress,
-             j + process.fileLoadAddress + 5);
+      printf("\nADDRESS::[ %d - %d ] -- ", j + process.pLoadAddress,
+             j + process.pLoadAddress + 5);
     }
-    printf("[ %d ]", machine.ram.mem[j + process.fileLoadAddress +
-                                     process.fileFirstInstruction][0]);
+    printf("[ %d ]",
+           machine.ram
+               .mem[j + process.pLoadAddress + process.pFirstInstruction][0]);
   }
   return 0;
 }

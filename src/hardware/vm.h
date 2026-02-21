@@ -2,10 +2,6 @@
 #define VM_H
 
 #include "ram.h"
-#include <bits/stdc++.h>
-#include <hashtable.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 class VirtualMachine {
 public:

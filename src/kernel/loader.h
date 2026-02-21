@@ -2,10 +2,6 @@
 #define LOADER_H
 
 #include "../hardware/vm.h"
-#include <bits/stdc++.h>
-#include <hashtable.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 class Loader {
 public:

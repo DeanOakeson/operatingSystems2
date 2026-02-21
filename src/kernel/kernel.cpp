@@ -12,11 +12,10 @@ int Kernel::kernelLoadProgram(std::string filePath) {
   returnTuple = loader.loadProgram(filePath);
   returnCode = std::get<0>(returnTuple);
   asmHeader = std::get<1>(returnTuple);
-  printf("%d\n", returnCode);
 
   // IF LOAD SUCCEDED THEN CREATE A PCB AND LOAD IT INTO SCHEDULING QUEUES
   if (returnCode == 0) {
-    scheduler.initializePcb(asmHeader, filePath);
+    scheduler.createPcb(asmHeader, filePath);
     return 0;
   }
 
@@ -25,12 +24,26 @@ int Kernel::kernelLoadProgram(std::string filePath) {
   return 1;
 }
 
-int Kernel::kernelRunProgram(std::string filePath) {
-  Pcb pcb = scheduler.getPcb(filePath);
+int Kernel::kernelRunSingleProgram(std::string filePath) {
+  Pcb *pcb = scheduler.getPcb(filePath);
   int returnCode;
 
-  returnCode = scheduler.runProgram(pcb);
-  printf("returnCode = %d\n", returnCode);
+  returnCode = scheduler.runProgram(*pcb);
+
+  // IF RUN SUCCEEDS
+  if (returnCode == 0) {
+    return 0;
+  }
+
+  // IF RUN FAILED PUSH ERROR ONTO ERRORLIST
+  errorHandler.errorList.push_back(returnCode);
+  return 1;
+}
+
+int Kernel::kernelRun() {
+  int returnCode;
+
+  returnCode = scheduler.firstComeFirstServe();
 
   // IF RUN SUCCEEDS
   if (returnCode == 0) {
