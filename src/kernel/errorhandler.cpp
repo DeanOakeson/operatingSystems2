@@ -62,13 +62,12 @@ int ErrorHandler::memDumpAll() {
     printf("\nSPACE::[ %d - %d ]\nPROGRAM::[ %s ]\n", pLoadAddress,
            pLoadAddress + pSize, fileName.c_str());
 
-    for (int j = 0; (j + pLoadAddress + pFirstInstruction) <= fileEnd; j++) {
+    for (int j = 0; (j + pLoadAddress) <= fileEnd; j++) {
       if (j % 6 == 0) {
         printf("\nADDRESS::[ %d - %d ] -- ", j + pLoadAddress,
-               j + pLoadAddress + 5);
+               j + pLoadAddress + 6);
       }
-      printf("[ %d ]",
-             machine.ram.mem[j + pLoadAddress + pFirstInstruction][0]);
+      printf("[ %d ]", machine.ram.mem[j + pLoadAddress][0]);
     }
     printf("\n");
   }
@@ -101,15 +100,12 @@ int ErrorHandler::memDump(std::string filePath) {
          process.pLoadAddress, process.pLoadAddress + process.pSize,
          filePath.c_str());
 
-  for (int j = 0;
-       (j + process.pLoadAddress + process.pFirstInstruction) <= fileEnd; j++) {
+  for (int j = 0; (j + process.pLoadAddress) <= fileEnd; j++) {
     if (j % 6 == 0) {
       printf("\nADDRESS::[ %d - %d ] -- ", j + process.pLoadAddress,
-             j + process.pLoadAddress + 5);
+             j + process.pLoadAddress + 6);
     }
-    printf("[ %d ]",
-           machine.ram
-               .mem[j + process.pLoadAddress + process.pFirstInstruction][0]);
+    printf("[ %d ]", machine.ram.mem[j + process.pLoadAddress][0]);
   }
   return 0;
 }

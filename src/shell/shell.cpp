@@ -12,6 +12,7 @@ void Shell::initPath() {
   functionMap["coredump"] = &Shell::shellCoreDump;
   functionMap["errordump"] = &Shell::shellErrorDump;
   functionMap["memdump"] = &Shell::shellMemDump;
+  functionMap["execute"] = &Shell::shellExecute;
 }
 
 //////////////////////////////////////
@@ -143,7 +144,15 @@ int Shell::shellRun(std::vector<std::string> argList) {
   return 1;
 }
 
-int Shell::shellExecute(std::vector<std::string> arglist) {}
+int Shell::shellExecute(std::vector<std::string> argList) {
+
+  for (int i = 1; i < argList.size(); i += 2) {
+    kernel.kernelLoadProgram(argList[i], std::stoi(argList[i + 1]));
+  }
+
+  kernel.kernelRun();
+  return 0;
+}
 
 /////////////////////
 // ERROR MANAGMENT //

@@ -17,7 +17,7 @@ public:
   /////////////////////////
   // PROGRAM INTERACTION //
   /////////////////////////
-  int kernelLoadProgram(std::string filePath);
+  int kernelLoadProgram(std::string filePath, int arrivalTime = 0);
   int kernelRunSingleProgram(std::string filePath);
   int kernelRun();
 

@@ -36,7 +36,8 @@ public:
   Pcb(std::vector<int> asmHeader, std::string filePath)
       : pLoadAddress{asmHeader[0]}, pEndAddress{asmHeader[0] + (asmHeader[1])},
         pSize{asmHeader[1]}, pFirstInstruction{asmHeader[2]}, pId{asmHeader[0]},
-        pc{pFirstInstruction + pLoadAddress}, name{filePath} {}
+        pArrivalTime{asmHeader[3]}, pc{pFirstInstruction + pLoadAddress},
+        name{filePath} {}
 
   // COPY CONSTRUCTOR
   Pcb(const Pcb &pcb)

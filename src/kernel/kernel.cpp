@@ -4,7 +4,7 @@ Kernel::Kernel(VirtualMachine &machine)
     : machine(machine), errorHandler(machine), loader(machine),
       scheduler(machine) {}
 
-int Kernel::kernelLoadProgram(std::string filePath) {
+int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
   std::tuple<int, std::vector<int>> returnTuple;
   int returnCode;
   std::vector<int> asmHeader;
@@ -12,6 +12,8 @@ int Kernel::kernelLoadProgram(std::string filePath) {
   returnTuple = loader.loadProgram(filePath);
   returnCode = std::get<0>(returnTuple);
   asmHeader = std::get<1>(returnTuple);
+
+  asmHeader.push_back(arrivalTime);
 
   // IF LOAD SUCCEDED THEN CREATE A PCB AND LOAD IT INTO SCHEDULING QUEUES
   if (returnCode == 0) {

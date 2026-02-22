@@ -40,13 +40,15 @@ public:
 
 private:
   std::queue<Pcb *> newQueue;
-  std::queue<Pcb *> readyQueue;
+  std::deque<Pcb *> readyQueue;
   std::queue<Pcb *> runningQueue;
   std::queue<Pcb *> waitingQueue;
   std::queue<Pcb *> terminatedQueue;
 
+  void deallocateMemory(Pcb &process);
   int contextToCpu(Pcb &process);
   int contextToPcb(Pcb &process);
+  int setClock(Pcb &process);
   int clearCpu();
 
   //------------------------

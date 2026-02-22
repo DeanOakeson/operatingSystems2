@@ -77,7 +77,7 @@ int VirtualMachine::runCpu(Pcb &process) {
       Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]];
       break;
     case MVI: // MOVE IMM Reg<1> <-- Reg<2> | Reg<3> |
-      printf("[VM] MVI -- R[%d]\n", ram.mem[PC + 1][0]);
+      // printf("[VM] MVI -- R[%d]\n", ram.mem[PC + 1][0]);
       Reg[ram.mem[PC + 1][0]] = (int32_t)((uint32_t)ram.mem[PC + 5][0] << 24 |
                                           (uint32_t)ram.mem[PC + 4][0] << 16 |
                                           (uint32_t)ram.mem[PC + 3][0] << 8 |
