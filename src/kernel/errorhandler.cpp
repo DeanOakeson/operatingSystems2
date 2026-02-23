@@ -52,10 +52,10 @@ int ErrorHandler::memDumpAll() {
 
   // this iterates over the actual vMemory not the hash
   for (int i = 0; i < machine.ram.vMemory.size(); i++) {
-    int pFirstInstruction = machine.ram.vMemory[i].pFirstInstruction;
-    int pLoadAddress = machine.ram.vMemory[i].pLoadAddress;
-    int pSize = machine.ram.vMemory[i].pSize;
-    std::string fileName = machine.ram.vMemory[i].name;
+    int pFirstInstruction = machine.ram.vMemory[i]->pFirstInstruction;
+    int pLoadAddress = machine.ram.vMemory[i]->pLoadAddress;
+    int pSize = machine.ram.vMemory[i]->pSize;
+    std::string fileName = machine.ram.vMemory[i]->name;
 
     int fileEnd = pLoadAddress + pSize - 1;
 
@@ -86,8 +86,8 @@ int ErrorHandler::memDump(std::string filePath) {
     return 302;
   }
 
-  Pcb process = machine.ram.vMemory[index];
-  int fileEnd = process.pLoadAddress + process.pSize - 1;
+  Pcb *pPcb = machine.ram.vMemory[index];
+  int fileEnd = pPcb->pLoadAddress + pPcb->pSize - 1;
 
   // CHECK IF THERE ARE ANY PCBS LOADED IN VMEM
   if (machine.ram.vMemory.size() == 0) {
@@ -97,15 +97,15 @@ int ErrorHandler::memDump(std::string filePath) {
 
   printf("\n[OS][ERROR] --MEM_DUMP  \n===========\nSPACE::[ %d - "
          "%d ]\nPROGRAM::[ %s ]\n",
-         process.pLoadAddress, process.pLoadAddress + process.pSize,
+         pPcb->pLoadAddress, pPcb->pLoadAddress + pPcb->pSize,
          filePath.c_str());
 
-  for (int j = 0; (j + process.pLoadAddress) <= fileEnd; j++) {
+  for (int j = 0; (j + pPcb->pLoadAddress) <= fileEnd; j++) {
     if (j % 6 == 0) {
-      printf("\nADDRESS::[ %d - %d ] -- ", j + process.pLoadAddress,
-             j + process.pLoadAddress + 6);
+      printf("\nADDRESS::[ %d - %d ] -- ", j + pPcb->pLoadAddress,
+             j + pPcb->pLoadAddress + 6);
     }
-    printf("[ %d ]", machine.ram.mem[j + process.pLoadAddress][0]);
+    printf("[ %d ]", machine.ram.mem[j + pPcb->pLoadAddress][0]);
   }
   return 0;
 }

@@ -25,6 +25,5 @@ public:
 
 private:
   bool verifyMemoryIsUnoccupied(std::vector<int> asmHeader);
-  void updateMemoryIndicators(std::vector<int> asmHeader);
 };
 #endif

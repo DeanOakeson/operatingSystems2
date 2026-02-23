@@ -4,6 +4,26 @@ Kernel::Kernel(VirtualMachine &machine)
     : machine(machine), errorHandler(machine), loader(machine),
       scheduler(machine) {}
 
+int Kernel::kernelExecuteProgram(std::map<int, std::string> argMap) {
+  int returnCode = 0;
+  int currentClock = machine.clock;
+  // fix this
+  while (!argMap.empty() | !scheduler.empty()) {
+    auto nextProcess = argMap.begin();
+    // OFFSET BY LOAD TIME FROM CURRENT CLOCK ON EXECUTION FUNCTION
+    if (machine.clock == nextProcess->first + currentClock) {
+      returnCode = kernelLoadProgram(nextProcess->second, nextProcess->first);
+      if (returnCode == 1) {
+        printf("[OS] -- loader failed \n");
+      }
+      argMap.erase(nextProcess->first);
+    }
+
+    scheduler.firstComeFirstServe();
+  }
+  return 0;
+}
+
 int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
   std::tuple<int, std::vector<int>> returnTuple;
   int returnCode;
@@ -17,7 +37,7 @@ int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
 
   // IF LOAD SUCCEDED THEN CREATE A PCB AND LOAD IT INTO SCHEDULING QUEUES
   if (returnCode == 0) {
-    scheduler.createPcb(asmHeader, filePath);
+    scheduler.allocateMemory(asmHeader, filePath);
     return 0;
   }
 
@@ -27,14 +47,14 @@ int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
 }
 
 int Kernel::kernelRunSingleProgram(std::string filePath) {
-  Pcb *pcb = scheduler.getPcb(filePath);
-  int returnCode;
 
-  returnCode = scheduler.runProgram(*pcb);
+  int returnCode = 0;
+  Pcb *pPcb = scheduler.getPcb(filePath);
+  printf("pId = %d\n", pPcb->pId);
+  printf("pPcb state = %d\n", pPcb->pState);
 
-  // IF RUN SUCCEEDS
-  if (returnCode == 0) {
-    return 0;
+  while (returnCode != 10) {
+    returnCode = scheduler.singleProgram(pPcb);
   }
 
   // IF RUN FAILED PUSH ERROR ONTO ERRORLIST
@@ -43,18 +63,12 @@ int Kernel::kernelRunSingleProgram(std::string filePath) {
 }
 
 int Kernel::kernelRun() {
-  int returnCode;
 
-  returnCode = scheduler.firstComeFirstServe();
-
-  // IF RUN SUCCEEDS
-  if (returnCode == 0) {
-    return 0;
+  int returnCode = 0;
+  while (!scheduler.empty()) {
+    returnCode = scheduler.firstComeFirstServe();
   }
-
-  // IF RUN FAILED PUSH ERROR ONTO ERRORLIST
-  errorHandler.errorList.push_back(returnCode);
-  return 1;
+  return 0;
 }
 
 int Kernel::kernelMemDump(std::string filePath) {

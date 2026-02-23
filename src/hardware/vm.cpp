@@ -39,166 +39,172 @@ static const u_int8_t SWI = 20;
 // CPU OPERATIONS //
 ////////////////////
 
-// 100 = CPU TERMINATION CODE
-int VirtualMachine::runCpu(Pcb &process) {
+void VirtualMachine::idle() { clock++; }
+
+int VirtualMachine::fetchDecodeExecute(Pcb &process) {
   int opcode;
-  printf("[VM] PC -- %d\n", PC);
+  // printf("[VM] PC -- %d\n", PC);
 
   // CPU PREPERATION//
   bool incrementPC = true;
 
-  while (PC <= process.pSize + process.pLoadAddress) {
-    opcode = ram.mem[PC][0];
-    incrementPC = true;
+  opcode = ram.mem[PC][0];
+  incrementPC = true;
 
-    switch (opcode) {
-    // ARITHMATIC //
-    case ADD: // ADDS Reg<1> <-- Reg<2> + Reg<3>
-      // printf("[VM] ADDING -- R[%d]\n", ram.mem[PC + 1][0]);
-      Reg[ram.mem[PC + 1][0]] =
-          Reg[ram.mem[PC + 2][0]] + Reg[ram.mem[PC + 3][0]];
-      break;
-    case SUB: // SUB Reg<1> <-- Reg<2> - Reg<3>
-      // printf("[VM] SUBTRACTING -- R[%d]\n", ram.mem[PC + 1][0]);
-      Reg[ram.mem[PC + 1][0]] =
-          Reg[ram.mem[PC + 2][0]] + Reg[ram.mem[PC + 3][0]];
-      break;
-    case MUL: // MUL Reg<1> <-- Reg<2> * Reg<3>
-      // printf("[VM] MULTIPLYING -- R[%d]\n", ram.mem[PC + 1][0]);
-      Reg[ram.mem[PC + 1][0]] =
-          Reg[ram.mem[PC + 2][0]] * Reg[ram.mem[PC + 3][0]];
-      break;
-    case DIV: // DIV Reg<1> <-- Reg<2> / Reg<3>
-      // printf("[VM] DIVIDING -- R[%d]\n", ram.mem[PC + 1][0]);
-      Reg[ram.mem[PC + 1][0]] =
-          Reg[ram.mem[PC + 2][0]] / Reg[ram.mem[PC + 3][0]];
-      break;
-    case MOV: // MOVE Reg<1> <-- Reg<2>
-      Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]];
-      break;
-    case MVI: // MOVE IMM Reg<1> <-- Reg<2> | Reg<3> |
-      // printf("[VM] MVI -- R[%d]\n", ram.mem[PC + 1][0]);
-      Reg[ram.mem[PC + 1][0]] = (int32_t)((uint32_t)ram.mem[PC + 5][0] << 24 |
-                                          (uint32_t)ram.mem[PC + 4][0] << 16 |
-                                          (uint32_t)ram.mem[PC + 3][0] << 8 |
-                                          (uint32_t)ram.mem[PC + 2][0]);
-      break;
-    case ADR:
-      Reg[ram.mem[PC + 1][0]] = (uint32_t)ram.mem[wordOffset][4] << 24 |
-                                (uint32_t)ram.mem[wordOffset][3] << 16 |
-                                (uint32_t)ram.mem[wordOffset][2] << 8 |
-                                (uint32_t)ram.mem[wordOffset][1];
+  switch (opcode) {
+  // ARITHMATIC //
+  case ADD: // ADDS Reg<1> <-- Reg<2> + Reg<3>
+    // printf("[VM] ADDING -- R[%d]\n", ram.mem[PC + 1][0]);
+    Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]] + Reg[ram.mem[PC + 3][0]];
+    break;
+  case SUB: // SUB Reg<1> <-- Reg<2> - Reg<3>
+    // printf("[VM] SUBTRACTING -- R[%d]\n", ram.mem[PC + 1][0]);
+    Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]] + Reg[ram.mem[PC + 3][0]];
+    break;
+  case MUL: // MUL Reg<1> <-- Reg<2> * Reg<3>
+    // printf("[VM] MULTIPLYING -- R[%d]\n", ram.mem[PC + 1][0]);
+    Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]] * Reg[ram.mem[PC + 3][0]];
+    break;
+  case DIV: // DIV Reg<1> <-- Reg<2> / Reg<3>
+    // printf("[VM] DIVIDING -- R[%d]\n", ram.mem[PC + 1][0]);
+    Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]] / Reg[ram.mem[PC + 3][0]];
+    break;
+  case MOV: // MOVE Reg<1> <-- Reg<2>
+    Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]];
+    break;
+  case MVI: // MOVE IMM Reg<1> <-- Reg<2> | Reg<3> |
+    printf("[VM] MVI -- R[%d]\n", ram.mem[PC + 1][0]);
+    Reg[ram.mem[PC + 1][0]] = (int32_t)((uint32_t)ram.mem[PC + 5][0] << 24 |
+                                        (uint32_t)ram.mem[PC + 4][0] << 16 |
+                                        (uint32_t)ram.mem[PC + 3][0] << 8 |
+                                        (uint32_t)ram.mem[PC + 2][0]);
+    break;
+  case ADR:
+    Reg[ram.mem[PC + 1][0]] = (uint32_t)ram.mem[wordOffset][4] << 24 |
+                              (uint32_t)ram.mem[wordOffset][3] << 16 |
+                              (uint32_t)ram.mem[wordOffset][2] << 8 |
+                              (uint32_t)ram.mem[wordOffset][1];
 
-      break;
-    case STR:
-      break;
-    case STRB:
-      break;
-    case LDR:
-      break;
-    case LDRB:
-      break;
-    // BRANCH //
-    case B: // BRANCH
-      // printf("B\n");
-      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
-                              (uint32_t)ram.mem[PC + 3][0] << 16 |
-                              (uint32_t)ram.mem[PC + 2][0] << 8 |
-                              (uint32_t)ram.mem[PC + 1][0]));
+    break;
+  case STR:
+    break;
+  case STRB:
+    break;
+  case LDR:
+    break;
+  case LDRB:
+    break;
+  // BRANCH //
+  case B: // BRANCH
+    // printf("B\n");
+    byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                            (uint32_t)ram.mem[PC + 3][0] << 16 |
+                            (uint32_t)ram.mem[PC + 2][0] << 8 |
+                            (uint32_t)ram.mem[PC + 1][0]));
+    PC = byteOffset + process.pLoadAddress;
+    incrementPC = false;
+    break;
+
+  case BL: // TEST //WRONGG
+    byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                            (uint32_t)ram.mem[PC + 3][0] << 16 |
+                            (uint32_t)ram.mem[PC + 2][0] << 8 |
+                            (uint32_t)ram.mem[PC + 1][0]));
+    PC = byteOffset + process.pLoadAddress;
+    incrementPC = false;
+    break;
+
+  case BNE: // BRANCH IF NOT EQUAL works
+    byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                            (uint32_t)ram.mem[PC + 3][0] << 16 |
+                            (uint32_t)ram.mem[PC + 2][0] << 8 |
+                            (uint32_t)ram.mem[PC + 1][0]));
+    if (Z != 0) {
       PC = byteOffset + process.pLoadAddress;
       incrementPC = false;
-      break;
-
-    case BL: // TEST //WRONGG
-      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
-                              (uint32_t)ram.mem[PC + 3][0] << 16 |
-                              (uint32_t)ram.mem[PC + 2][0] << 8 |
-                              (uint32_t)ram.mem[PC + 1][0]));
-      PC = byteOffset + process.pLoadAddress;
-      incrementPC = false;
-      break;
-
-    case BNE: // BRANCH IF NOT EQUAL works
-      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
-                              (uint32_t)ram.mem[PC + 3][0] << 16 |
-                              (uint32_t)ram.mem[PC + 2][0] << 8 |
-                              (uint32_t)ram.mem[PC + 1][0]));
-      if (Z != 0) {
-        PC = byteOffset + process.pLoadAddress;
-        incrementPC = false;
-      }
-      break;
-
-    case BGT: // TEST
-      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
-                              (uint32_t)ram.mem[PC + 3][0] << 16 |
-                              (uint32_t)ram.mem[PC + 2][0] << 8 |
-                              (uint32_t)ram.mem[PC + 1][0]));
-      if (Z > 0) {
-        PC = byteOffset + process.pLoadAddress;
-        incrementPC = false;
-      }
-      break;
-
-    case BLT: // TEST
-      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
-                              (uint32_t)ram.mem[PC + 3][0] << 16 |
-                              (uint32_t)ram.mem[PC + 2][0] << 8 |
-                              (uint32_t)ram.mem[PC + 1][0]));
-
-      if (Z < 0) {
-        PC = byteOffset + process.pLoadAddress;
-        incrementPC = false;
-      }
-      break;
-
-    case BEQ: // BRANCH if Z == 0 WORKS
-      byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
-                              (uint32_t)ram.mem[PC + 3][0] << 16 |
-                              (uint32_t)ram.mem[PC + 2][0] << 8 |
-                              (uint32_t)ram.mem[PC + 1][0]));
-      if (Z == 0) {
-        PC = byteOffset + process.pLoadAddress;
-        incrementPC = false;
-      }
-      break;
-    // LOGICAL //
-    case CMP: // CMP <Reg1> - <Reg2>
-      Z = Reg[ram.mem[PC + 1][0]] - Reg[ram.mem[PC + 2][0]];
-      break;
-
-    case AND:
-      break;
-
-    case ORR:
-      break;
-
-    case EOR:
-      break;
-
-    case SWI: // SWI 10 = HALT
-      swiOpCode = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
-                             (uint32_t)ram.mem[PC + 3][0] << 16 |
-                             (uint32_t)ram.mem[PC + 2][0] << 8 |
-                             (uint32_t)ram.mem[PC + 1][0]));
-      switch (swiOpCode) {
-      case 1: // PRINT
-        printf("[VM] Returning 21\n");
-        return 21;
-      case 2: // INPUT
-        return 22;
-      case 10: // HALT
-        return 0;
-      }
-      break;
     }
+    break;
 
-    if (incrementPC) {
+  case BGT: // TEST
+    byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                            (uint32_t)ram.mem[PC + 3][0] << 16 |
+                            (uint32_t)ram.mem[PC + 2][0] << 8 |
+                            (uint32_t)ram.mem[PC + 1][0]));
+    if (Z > 0) {
+      PC = byteOffset + process.pLoadAddress;
+      incrementPC = false;
+    }
+    break;
+
+  case BLT: // TEST
+    byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                            (uint32_t)ram.mem[PC + 3][0] << 16 |
+                            (uint32_t)ram.mem[PC + 2][0] << 8 |
+                            (uint32_t)ram.mem[PC + 1][0]));
+
+    if (Z < 0) {
+      PC = byteOffset + process.pLoadAddress;
+      incrementPC = false;
+    }
+    break;
+
+  case BEQ: // BRANCH if Z == 0 WORKS
+    byteOffset = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                            (uint32_t)ram.mem[PC + 3][0] << 16 |
+                            (uint32_t)ram.mem[PC + 2][0] << 8 |
+                            (uint32_t)ram.mem[PC + 1][0]));
+    if (Z == 0) {
+      PC = byteOffset + process.pLoadAddress;
+      incrementPC = false;
+    }
+    break;
+  // LOGICAL //
+  case CMP: // CMP <Reg1> - <Reg2>
+    printf("B\n");
+    Z = Reg[ram.mem[PC + 1][0]] - Reg[ram.mem[PC + 2][0]];
+    break;
+
+  case AND:
+    break;
+
+  case ORR:
+    break;
+
+  case EOR:
+    break;
+
+  case SWI: // SWI 10 = HALT
+    swiOpCode = (int32_t)(((uint32_t)ram.mem[PC + 4][0] << 24 |
+                           (uint32_t)ram.mem[PC + 3][0] << 16 |
+                           (uint32_t)ram.mem[PC + 2][0] << 8 |
+                           (uint32_t)ram.mem[PC + 1][0]));
+    switch (swiOpCode) {
+    case 1: // PRINT
       PC += 6;
+      clock++;
+      printf("[VM] Returning 21\n");
+      return 21;
+    case 2: // INPUT
+      PC += 6;
+      clock++;
+      printf("[VM] Returning 22\n");
+      return 22;
+    case 10: // HALT
+      PC += 6;
+      clock++;
+      return 10;
     }
-
-    clock++;
   }
-  process.pKernelMode = 0;
+
+  clock++;
+
+  if (incrementPC) {
+    PC += 6;
+  }
+
+  if (PC >= process.pSize + process.pLoadAddress) {
+    return 10;
+  }
+
   return 0;
 }

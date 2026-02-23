@@ -20,7 +20,6 @@ Loader::Loader(VirtualMachine &machine) : machine(machine) {};
 // and an empty vector.
 
 std::tuple<int, std::vector<int>> Loader::loadProgram(std::string filePath) {
-  std::cout << filePath << "\n";
 
   int fileSize;
   int fileLoadAddress;
@@ -66,7 +65,6 @@ std::tuple<int, std::vector<int>> Loader::loadProgram(std::string filePath) {
               sizeof(unsigned char));
   }
 
-  updateMemoryIndicators(asmHeader);
   return std::make_tuple(0, asmHeader);
   ;
 }
@@ -86,18 +84,4 @@ bool Loader::verifyMemoryIsUnoccupied(std::vector<int> asmHeader) {
     }
   }
   return true;
-}
-
-void Loader::updateMemoryIndicators(std::vector<int> asmHeader) {
-  // FLIPS MEM OCCUPATION BIT AT EACH ADDRESS
-  int fileLoadAddress = asmHeader[0];
-  int fileSize = asmHeader[1];
-  int fileFirstInstruction = asmHeader[2];
-
-  for (int i = fileLoadAddress; i <= fileLoadAddress + fileSize; i++) {
-    if (machine.ram.mem[i][1] == 0)
-      machine.ram.mem[i][1] = 1;
-    else if (machine.ram.mem[i][1] == 1)
-      machine.ram.mem[i][1] = 0;
-  }
 }

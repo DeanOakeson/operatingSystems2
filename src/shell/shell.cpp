@@ -121,36 +121,40 @@ int Shell::shellErrorDump(std::vector<std::string> argList) {
 int Shell::shellRun(std::vector<std::string> argList) {
 
   switch (argList.size()) {
+    // run
   case 1:
     kernel.kernelRun();
     return 0;
 
   case 2:
+    // run ../asm/file
+    kernel.kernelRunSingleProgram(argList[1]);
+    return 0;
+
+  case 3:
+    // run -v ../asm/file
     if (argList[1] == "-v") {
-      kernel.kernelRun();
+      kernel.kernelRunSingleProgram(argList[2]);
       kernel.kernelCoreDump();
       return 0;
     }
     printf("[SHELL] %s is not a valid argument\n", argList[1].c_str());
 
     return 1;
-  case 3:
-    // run -v ../asm/file
-    kernel.kernelRunSingleProgram(argList[2]);
-    kernel.kernelCoreDump();
-    return 0;
   }
-  printf("[SHELL] -- too many arguments\n");
+  printf("[SHELL] -- not valid usage\n");
   return 1;
 }
 
 int Shell::shellExecute(std::vector<std::string> argList) {
 
+  std::map<int, std::string> argMap;
   for (int i = 1; i < argList.size(); i += 2) {
-    kernel.kernelLoadProgram(argList[i], std::stoi(argList[i + 1]));
+    argMap.insert({std::stoi(argList[i + 1]), argList[i]});
   }
 
-  kernel.kernelRun();
+  // organize the argVector
+  kernel.kernelExecuteProgram(argMap);
   return 0;
 }
 

@@ -19,6 +19,7 @@ public:
   /////////////////////////
   int kernelLoadProgram(std::string filePath, int arrivalTime = 0);
   int kernelRunSingleProgram(std::string filePath);
+  int kernelExecuteProgram(std::map<int, std::string> argMap);
   int kernelRun();
 
   ////////////////////////

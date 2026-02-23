@@ -29,10 +29,12 @@ public:
   // CONSTRUCTOR
   // -----------
 
+  // DEFAULT
   Pcb()
       : pLoadAddress{0}, pEndAddress{0}, pFirstInstruction{0}, pId{0}, pc{0},
         name{"default"} {}
 
+  // CONSTRUCTOR
   Pcb(std::vector<int> asmHeader, std::string filePath)
       : pLoadAddress{asmHeader[0]}, pEndAddress{asmHeader[0] + (asmHeader[1])},
         pSize{asmHeader[1]}, pFirstInstruction{asmHeader[2]}, pId{asmHeader[0]},

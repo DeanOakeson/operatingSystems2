@@ -10,79 +10,65 @@ Scheduler::Scheduler(VirtualMachine &machine) : machine(machine) {}
 // ----------------
 
 int Scheduler::firstComeFirstServe() {
-  Pcb *pPcb;
-  int returnCode;
-  int passNumber = 0;
-  while (!newQueue.empty() | !readyQueue.empty() | !waitingQueue.empty()) {
-    passNumber += 1;
+  int returnCode = 0;
 
-    // SEND ALL PCBS IN NEW TO READY
-    while (!newQueue.empty()) {
-      pPcb = static_cast<Pcb *>(newQueue.front());
-      pPcb->updateState(READY);
-      newQueue.pop();
-      if (!readyQueue.empty() &&
-          pPcb->pArrivalTime <
-              static_cast<Pcb *>(readyQueue.front())->pArrivalTime) {
-        readyQueue.push_front(pPcb);
-        break;
-      }
-      readyQueue.push_back(pPcb);
-    }
-
-    // WHILE READY QUEUE IS NOT EMPTY
-    while (!readyQueue.empty()) {
-      // PROCESS PREP
-      pPcb = static_cast<Pcb *>(readyQueue.front());
-      if (machine.clock < pPcb->pArrivalTime) {
-        setClock(*pPcb);
-      }
-      pPcb->updateState(RUNNING);
-      runningQueue.push(pPcb);
-      readyQueue.pop_front();
-
-      // PROCESS RUN
-      returnCode = runProgram(*pPcb);
-
-      // SWI RETURN
-      if (returnCode >= 20) {
-        pPcb->updateState(WAITING);
-        runningQueue.pop();
-        waitingQueue.push(pPcb);
-        contextToPcb(*pPcb);
-        clearCpu();
-        interruptServiceRoutine(*pPcb, returnCode);
-        printf("[OS][SCHEDULER] -- interrupt handeled\n");
-        pPcb->pc += 6;
-        waitingQueue.pop();
-        if (!readyQueue.empty() &&
-            pPcb->pArrivalTime <=
-                static_cast<Pcb *>(readyQueue.front())->pArrivalTime) {
-          readyQueue.push_front(pPcb);
-          pPcb->updateState(READY);
-
-          break;
-        }
-        readyQueue.push_back(pPcb);
-        pPcb->updateState(READY);
-        break;
-      }
-
-      // PROCESS TERMINATION
-      if (returnCode == 0) {
-        pPcb->updateState(TERMINATED);
-        runningQueue.pop();
-        terminatedQueue.push(pPcb);
-        deallocateMemory(*pPcb);
-        printf("[OS][SCHEDULER] prc %s is terminating\n\n", pPcb->name.c_str());
-
-        terminatedQueue.pop();
-        delete pPcb;
-        break;
-      }
-    }
-    printf("[OS][SCHEDULER] FCFS pass = %d\n", passNumber);
+  // IF ALL QUEUES ARE EMPTY IDLE THE CLOCK
+  if (newQueue.empty() && readyQueue.empty() && waitingQueue.empty() &&
+      runningQueue.empty()) {
+    machine.idle();
   }
+
+  // SEND ALL NEW PCBS TO READY
+  while (!newQueue.empty()) {
+    pPcb = static_cast<Pcb *>(newQueue.front());
+    pPcb->updateState(READY);
+    newQueue.pop();
+    readyQueue.push_back(pPcb);
+  }
+
+  // IF RUNNING QUEUE IS EMPTY PROCESS PREP
+  if (runningQueue.empty() && !readyQueue.empty()) {
+    pPcb = static_cast<Pcb *>(readyQueue.front());
+    pPcb->updateState(RUNNING);
+    clearCpu();
+    contextToCpu(*pPcb);
+    runningQueue.push(pPcb);
+    readyQueue.pop_front();
+  }
+
+  // PROCESS RUN
+  if (pPcb != NULL) {
+    returnCode = machine.fetchDecodeExecute(*pPcb);
+  }
+
+  // SWI RETURN
+  if (returnCode >= 20) {
+    pPcb->updateState(WAITING);
+    runningQueue.pop();
+    waitingQueue.push(pPcb);
+    contextToPcb(*pPcb);
+    clearCpu();
+    interruptServiceRoutine(*pPcb, returnCode);
+    printf("[OS][SCHEDULER] -- interrupt handeled\n");
+    waitingQueue.pop();
+    readyQueue.push_back(pPcb);
+    pPcb->updateState(READY);
+    return returnCode;
+  }
+
+  // PROCESS TERMINATION
+  if (returnCode == 10) {
+    pPcb->updateState(TERMINATED);
+    runningQueue.pop();
+    terminatedQueue.push(pPcb);
+    printf("[OS][SCHEDULER] prc %s is terminating\n", pPcb->name.c_str());
+    deallocateMemory(*pPcb);
+    terminatedQueue.pop();
+    pPcb = NULL;
+    return returnCode;
+  }
+
+  // printf("[OS][SCHEDULER] clock = %d\n", machine.clock);
   return 0;
 }
 
@@ -90,27 +76,83 @@ int Scheduler::firstComeFirstServe() {
 // Single Program Run
 // ------------------
 
-int Scheduler::runProgram(Pcb &process) {
+int Scheduler::singleProgram(Pcb *pcb) {
+  pPcb = pcb;
 
-  clearCpu();
-  contextToCpu(process);
-  int returnCode = machine.runCpu(process);
+  printf("pState %d\n", pPcb->pState);
+  printf("pId %d\n", pPcb->pId);
+
+  // READY CPU and add CONTEXT
+  if (pPcb->pState == NEW) {
+    pPcb->updateState(READY);
+    clearCpu();
+    newQueue.pop();
+    readyQueue.push_front(pPcb);
+    pPcb->updateState(RUNNING);
+    readyQueue.pop_front();
+    runningQueue.push(pPcb);
+    contextToCpu(*pPcb);
+  }
+
+  if (pPcb->pState == READY) {
+    pPcb->updateState(RUNNING);
+    readyQueue.pop_front();
+    runningQueue.push(pPcb);
+    contextToCpu(*pPcb);
+  }
+
+  int returnCode = machine.fetchDecodeExecute(*pPcb);
+
+  // RETURN CODE = SWI
+  if (returnCode >= 20) {
+    pPcb->updateState(WAITING);
+    runningQueue.pop();
+    waitingQueue.push(pPcb);
+    contextToPcb(*pPcb);
+    clearCpu();
+    interruptServiceRoutine(*pPcb, returnCode);
+    printf("[OS][SCHEDULER] -- interrupt handeled\n");
+    waitingQueue.pop();
+    readyQueue.push_front(pPcb);
+    pPcb->updateState(READY);
+    return returnCode;
+  }
+
+  if (returnCode == 10) {
+    pPcb->updateState(TERMINATED);
+    runningQueue.pop();
+    terminatedQueue.push(pPcb);
+    printf("[OS][SCHEDULER] prc %s is terminating\n", pPcb->name.c_str());
+    deallocateMemory(*pPcb);
+    terminatedQueue.pop();
+    pPcb = NULL;
+    return returnCode;
+  }
   return returnCode;
 }
 
 // --------------
-// PCB Managment
+// PCB and QUEUE Managment
 // -------------
 
-int Scheduler::createPcb(std::vector<int> asmHeader, std::string filePath) {
+int Scheduler::allocateMemory(std::vector<int> asmHeader,
+                              std::string filePath) {
 
   // PCB CREATION //
   Pcb *pPcb = new Pcb(asmHeader, filePath);
-  machine.ram.vMemory.push_back(*pPcb);
+  machine.ram.vMemory.push_back(pPcb);
   machine.ram.vMemoryLookup[pPcb->name] = machine.ram.vMemory.size() - 1;
+
+  // MEMORY ALLOCATION
+  for (int i = pPcb->pLoadAddress; i <= pPcb->pLoadAddress + pPcb->pSize; i++) {
+    machine.ram.mem[i][1] = 1;
+  }
 
   // PUSH PCB TO NEW //
   pPcb->updateState(NEW);
+  printf("[OS][SCHEDULER][ALLOCATE] Id = %d\n", pPcb->pId);
+
+  printf("[OS][SCHEDULER][ALLOCATE] state = %d\n", pPcb->pState);
   newQueue.push(pPcb);
 
   return 0;
@@ -126,7 +168,15 @@ Pcb *Scheduler::getPcb(std::string filePath) {
     return NULL;
   }
 
-  return &machine.ram.vMemory[index];
+  return machine.ram.vMemory[index];
+}
+
+bool Scheduler::empty() {
+  if (readyQueue.empty() && newQueue.empty() && runningQueue.empty() &&
+      waitingQueue.empty()) {
+    return true;
+  }
+  return false;
 }
 
 // ----------------
@@ -176,10 +226,15 @@ int Scheduler::setClock(Pcb &process) {
 
 void Scheduler::deallocateMemory(Pcb &process) {
   // FLIPS MEM OCCUPATION BIT AT EACH ADDRESS BACK TO ZERO
+  printf("[OS][SCHEDULER][DEALLOCATE][%s]\n\n", process.name.c_str());
+
   for (int i = process.pLoadAddress; i <= process.pLoadAddress + process.pSize;
        i++) {
     machine.ram.mem[i][1] = 0;
   }
+  machine.ram.vMemory.erase(machine.ram.vMemory.begin() +
+                            machine.ram.vMemoryLookup.at(process.name));
+  machine.ram.vMemoryLookup.erase(process.name);
 }
 
 // -------------------------
@@ -187,7 +242,7 @@ void Scheduler::deallocateMemory(Pcb &process) {
 // -------------------------
 
 void Scheduler::interruptServiceRoutine(Pcb &process, int returnCode) {
-  printf("[OS][SCHEDULER] -- irs started\n");
+  printf("[OS][SCHEDULER][IRS]\n");
   switch (returnCode) {
   case PRINT:
     printf("print\n");

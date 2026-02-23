@@ -18,7 +18,8 @@ public:
   int clock = 0;
   Ram ram;
 
-  int runCpu(Pcb &process);
+  void idle();
+  int fetchDecodeExecute(Pcb &process);
 };
 
 #endif
