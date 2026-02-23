@@ -49,6 +49,8 @@ private:
   Pcb *pPcb = NULL;
   int passNumber = 0;
 
+  std::string ganntChart;
+
   void deallocateMemory(Pcb &process);
   int contextToCpu(Pcb &process);
   int contextToPcb(Pcb &process);

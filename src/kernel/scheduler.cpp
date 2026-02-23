@@ -19,7 +19,7 @@ int Scheduler::firstComeFirstServe() {
   }
 
   // SEND ALL NEW PCBS TO READY
-  while (!newQueue.empty()) {
+  if (!newQueue.empty()) {
     pPcb = static_cast<Pcb *>(newQueue.front());
     pPcb->updateState(READY);
     newQueue.pop();
@@ -49,7 +49,7 @@ int Scheduler::firstComeFirstServe() {
     contextToPcb(*pPcb);
     clearCpu();
     interruptServiceRoutine(*pPcb, returnCode);
-    printf("[OS][SCHEDULER] -- interrupt handeled\n");
+    // printf("[OS][SCHEDULER] -- interrupt handeled\n");
     waitingQueue.pop();
     readyQueue.push_back(pPcb);
     pPcb->updateState(READY);
@@ -78,9 +78,6 @@ int Scheduler::firstComeFirstServe() {
 
 int Scheduler::singleProgram(Pcb *pcb) {
   pPcb = pcb;
-
-  printf("pState %d\n", pPcb->pState);
-  printf("pId %d\n", pPcb->pId);
 
   // READY CPU and add CONTEXT
   if (pPcb->pState == NEW) {
@@ -228,10 +225,13 @@ void Scheduler::deallocateMemory(Pcb &process) {
   // FLIPS MEM OCCUPATION BIT AT EACH ADDRESS BACK TO ZERO
   printf("[OS][SCHEDULER][DEALLOCATE][%s]\n\n", process.name.c_str());
 
+  // WORKS
   for (int i = process.pLoadAddress; i <= process.pLoadAddress + process.pSize;
        i++) {
     machine.ram.mem[i][1] = 0;
   }
+
+  // IFY
   machine.ram.vMemory.erase(machine.ram.vMemory.begin() +
                             machine.ram.vMemoryLookup.at(process.name));
   machine.ram.vMemoryLookup.erase(process.name);

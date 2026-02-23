@@ -33,5 +33,7 @@ public:
   // CPU INTERACTION //
   /////////////////////
   int kernelCoreDump();
+
+private:
 };
 #endif

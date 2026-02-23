@@ -4,6 +4,8 @@ Kernel::Kernel(VirtualMachine &machine)
     : machine(machine), errorHandler(machine), loader(machine),
       scheduler(machine) {}
 
+int Kernel::kernelGanntChart() {}
+
 int Kernel::kernelExecuteProgram(std::map<int, std::string> argMap) {
   int returnCode = 0;
   int currentClock = machine.clock;
@@ -18,7 +20,6 @@ int Kernel::kernelExecuteProgram(std::map<int, std::string> argMap) {
       }
       argMap.erase(nextProcess->first);
     }
-
     scheduler.firstComeFirstServe();
   }
   return 0;
@@ -50,8 +51,15 @@ int Kernel::kernelRunSingleProgram(std::string filePath) {
 
   int returnCode = 0;
   Pcb *pPcb = scheduler.getPcb(filePath);
-  printf("pId = %d\n", pPcb->pId);
-  printf("pPcb state = %d\n", pPcb->pState);
+
+  // IF getPcb fails
+  if (pPcb == NULL) {
+    errorHandler.errorList.push_back(302);
+    return 1;
+  }
+
+  // printf("pId = %d\n", pPcb->pId);
+  // printf("pPcb state = %d\n", pPcb->pState);
 
   while (returnCode != 10) {
     returnCode = scheduler.singleProgram(pPcb);

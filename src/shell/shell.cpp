@@ -127,6 +127,12 @@ int Shell::shellRun(std::vector<std::string> argList) {
     return 0;
 
   case 2:
+    // run -v
+    if (argList[1] == "-v") {
+      kernel.kernelRun();
+      kernel.kernelCoreDump();
+      return 0;
+    }
     // run ../asm/file
     kernel.kernelRunSingleProgram(argList[1]);
     return 0;
@@ -138,24 +144,54 @@ int Shell::shellRun(std::vector<std::string> argList) {
       kernel.kernelCoreDump();
       return 0;
     }
-    printf("[SHELL] %s is not a valid argument\n", argList[1].c_str());
 
+    printf("[SHELL][RUN] %s is not a valid argument\n", argList[1].c_str());
     return 1;
   }
-  printf("[SHELL] -- not valid usage\n");
+  printf("[SHELL][RUN] -- not valid usage\n");
   return 1;
 }
 
 int Shell::shellExecute(std::vector<std::string> argList) {
-
+  int firstArg = false;
   std::map<int, std::string> argMap;
-  for (int i = 1; i < argList.size(); i += 2) {
-    argMap.insert({std::stoi(argList[i + 1]), argList[i]});
-  }
 
-  // organize the argVector
-  kernel.kernelExecuteProgram(argMap);
-  return 0;
+  if (argList[1] == "-v")
+    firstArg = true;
+
+  switch (firstArg) {
+
+  case false:
+    // THERE MUST BE AN ODD NUMBER OF ARGUMENTS
+    if (argList.size() % 2 == 0) {
+      printf("[SHELL][EXECUTE] -- not valid usage.");
+      return 1;
+    }
+
+    // KEY IS ARRIVAL TIME SO THAT IT IS SORTED CHRONO
+    for (int i = 1; i < argList.size(); i += 2) {
+      argMap.insert({std::stoi(argList[i + 1]), argList[i]});
+    }
+
+    kernel.kernelExecuteProgram(argMap);
+    return 0;
+
+  case true:
+    // THERE MUST BE AN EVEN NUMBER OF ARGUMENTS
+    if (argList.size() % 2 != 0) {
+      printf("[SHELL][EXECUTE] -- not valid usage.");
+      return 1;
+    }
+
+    // KEY IS ARRIVAL TIME SO THAT IT IS SORTED CHRONO
+    for (int i = 1; i < argList.size(); i += 2) {
+      argMap.insert({std::stoi(argList[i + 1]), argList[i]});
+    }
+
+    kernel.kernelExecuteProgram(argMap);
+    kernel.kernelGanntChart();
+    return 0;
+  }
 }
 
 /////////////////////
