@@ -6,7 +6,7 @@
 
 class Ram {
 public:
-  unsigned char mem[MEM_SIZE_KB * 8][2];
+  std::array<unsigned char, 2> mem[MEM_SIZE_KB];
   // VMEM LOOKUP TABLE// name : index in vMemory
   std::unordered_map<std::string, int> vMemoryLookup;
   std::vector<Pcb *> vMemory;

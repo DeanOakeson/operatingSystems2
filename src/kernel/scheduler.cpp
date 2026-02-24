@@ -10,23 +10,21 @@ Scheduler::Scheduler(VirtualMachine &machine) : machine(machine) {}
 // ----------------
 
 int Scheduler::firstComeFirstServe() {
+  // FIRST COME FIRST SERVE //
+  // must be wrapped in a loop to run an entire program //
+  // each function call advances the clock one step //
+
   int returnCode = 0;
 
-  // IF ALL QUEUES ARE EMPTY IDLE THE CLOCK
-  if (newQueue.empty() && readyQueue.empty() && waitingQueue.empty() &&
-      runningQueue.empty()) {
-    machine.idle();
-  }
-
-  // SEND ALL NEW PCBS TO READY
-  if (!newQueue.empty()) {
+  // SEND A NEW PCB TO READY
+  while (!newQueue.empty()) {
     pPcb = static_cast<Pcb *>(newQueue.front());
     pPcb->updateState(READY);
     newQueue.pop();
     readyQueue.push_back(pPcb);
   }
 
-  // IF RUNNING QUEUE IS EMPTY PROCESS PREP
+  // if running queue is empty process prep
   if (runningQueue.empty() && !readyQueue.empty()) {
     pPcb = static_cast<Pcb *>(readyQueue.front());
     pPcb->updateState(RUNNING);
@@ -36,12 +34,15 @@ int Scheduler::firstComeFirstServe() {
     readyQueue.pop_front();
   }
 
-  // PROCESS RUN
+  // run process in running
   if (pPcb != NULL) {
+    pPcb = static_cast<Pcb *>(runningQueue.front());
     returnCode = machine.fetchDecodeExecute(*pPcb);
+  } else {
+    machine.idle();
   }
 
-  // SWI RETURN
+  // swi return
   if (returnCode >= 20) {
     pPcb->updateState(WAITING);
     runningQueue.pop();
@@ -56,106 +57,52 @@ int Scheduler::firstComeFirstServe() {
     return returnCode;
   }
 
-  // PROCESS TERMINATION
+  // process termination
   if (returnCode == 10) {
     pPcb->updateState(TERMINATED);
     runningQueue.pop();
     terminatedQueue.push(pPcb);
-    printf("[OS][SCHEDULER] prc %s is terminating\n", pPcb->name.c_str());
+    printf("[OS][SCHEDULER][FCFS] Prc %s is terminating\n", pPcb->name.c_str());
     deallocateMemory(*pPcb);
     terminatedQueue.pop();
     pPcb = NULL;
     return returnCode;
   }
 
-  // printf("[OS][SCHEDULER] clock = %d\n", machine.clock);
+  // DEBUG//
+  //  printf("[OS][SCHEDULER] clock = %d\n", machine.clock);
   return 0;
-}
-
-// ------------------
-// Single Program Run
-// ------------------
-
-int Scheduler::singleProgram(Pcb *pcb) {
-  pPcb = pcb;
-
-  // READY CPU and add CONTEXT
-  if (pPcb->pState == NEW) {
-    pPcb->updateState(READY);
-    clearCpu();
-    newQueue.pop();
-    readyQueue.push_front(pPcb);
-    pPcb->updateState(RUNNING);
-    readyQueue.pop_front();
-    runningQueue.push(pPcb);
-    contextToCpu(*pPcb);
-  }
-
-  if (pPcb->pState == READY) {
-    pPcb->updateState(RUNNING);
-    readyQueue.pop_front();
-    runningQueue.push(pPcb);
-    contextToCpu(*pPcb);
-  }
-
-  int returnCode = machine.fetchDecodeExecute(*pPcb);
-
-  // RETURN CODE = SWI
-  if (returnCode >= 20) {
-    pPcb->updateState(WAITING);
-    runningQueue.pop();
-    waitingQueue.push(pPcb);
-    contextToPcb(*pPcb);
-    clearCpu();
-    interruptServiceRoutine(*pPcb, returnCode);
-    printf("[OS][SCHEDULER] -- interrupt handeled\n");
-    waitingQueue.pop();
-    readyQueue.push_front(pPcb);
-    pPcb->updateState(READY);
-    return returnCode;
-  }
-
-  if (returnCode == 10) {
-    pPcb->updateState(TERMINATED);
-    runningQueue.pop();
-    terminatedQueue.push(pPcb);
-    printf("[OS][SCHEDULER] prc %s is terminating\n", pPcb->name.c_str());
-    deallocateMemory(*pPcb);
-    terminatedQueue.pop();
-    pPcb = NULL;
-    return returnCode;
-  }
-  return returnCode;
 }
 
 // --------------
 // PCB and QUEUE Managment
 // -------------
 
-int Scheduler::allocateMemory(std::vector<int> asmHeader,
-                              std::string filePath) {
+Pcb *Scheduler::allocateMemory(std::vector<int> asmHeader,
+                               std::string filePath) {
 
-  // PCB CREATION //
+  // creates pcb and flips the memory allocation bits to 1
+
+  // pcb creation //
   Pcb *pPcb = new Pcb(asmHeader, filePath);
+  pPcb->pId = currentIdCount;
   machine.ram.vMemory.push_back(pPcb);
   machine.ram.vMemoryLookup[pPcb->name] = machine.ram.vMemory.size() - 1;
 
-  // MEMORY ALLOCATION
+  // memory allocation //
   for (int i = pPcb->pLoadAddress; i <= pPcb->pLoadAddress + pPcb->pSize; i++) {
     machine.ram.mem[i][1] = 1;
   }
 
-  // PUSH PCB TO NEW //
-  pPcb->updateState(NEW);
-  printf("[OS][SCHEDULER][ALLOCATE] Id = %d\n", pPcb->pId);
+  // printf("[OS][SCHEDULER][ALLOCATE] Id = %d\n", pPcb->pId);
+  // printf("[OS][SCHEDULER][ALLOCATE] state = %d\n", pPcb->pState);
 
-  printf("[OS][SCHEDULER][ALLOCATE] state = %d\n", pPcb->pState);
-  newQueue.push(pPcb);
-
-  return 0;
+  currentIdCount += 1;
+  return pPcb;
 }
 
 Pcb *Scheduler::getPcb(std::string filePath) {
+  // find pcb using vmem lookup and return ptr to it //
   int index;
   try {
     index = machine.ram.vMemoryLookup.at(filePath);
@@ -168,7 +115,23 @@ Pcb *Scheduler::getPcb(std::string filePath) {
   return machine.ram.vMemory[index];
 }
 
+int Scheduler::getCurrentPcbId() {
+  // get active pcb id //
+  if (pPcb != NULL)
+    return pPcb->pId;
+
+  // if null send back error code //
+  return -1;
+}
+
+void Scheduler::queuePcb(Pcb &process) {
+  // place pcb into scheduling queues //
+  newQueue.push(&process);
+  process.updateState(NEW);
+}
+
 bool Scheduler::empty() {
+  // check if scheduler queues are empty //
   if (readyQueue.empty() && newQueue.empty() && runningQueue.empty() &&
       waitingQueue.empty()) {
     return true;
@@ -181,29 +144,27 @@ bool Scheduler::empty() {
 // ----------------
 
 int Scheduler::contextToCpu(Pcb &process) {
-  // LOAD CONTENTS FROM CPU TO PCB
-  // LOAD PCB CONTENTS INTO CPU
+  // load pcb contents into cpu //
   machine.PC = process.pc;
   machine.Z = process.z;
-  printf("[OS][SCHEDULER][CONTEXTTOCPU] -- %d\n", machine.PC);
 
   for (int i = 0; i <= 6; i++) {
     machine.Reg[i] = process.reg[i];
   }
 
+  // printf("[OS][SCHEDULER][CONTEXTTOCPU] -- %d\n", machine.PC);
   return 0;
 }
 
 int Scheduler::contextToPcb(Pcb &process) {
-  // LOAD CONTENTS FROM CPU TO PCB
-  // LOAD PCB CONTENTS INTO CPU
+  // load contents from cpu to pcb //
   process.pc = machine.PC;
-  printf("[OS][SCHEDULER][CONTEXTTOPCB] -- %d\n", process.pc);
   process.z = machine.Z;
   for (int i = 0; i <= 6; i++) {
     process.reg[i] = machine.Reg[i];
   }
 
+  // printf("[OS][SCHEDULER][CONTEXTTOPCB] -- %d\n", process.pc);
   return 0;
 }
 
@@ -222,19 +183,19 @@ int Scheduler::setClock(Pcb &process) {
 }
 
 void Scheduler::deallocateMemory(Pcb &process) {
-  // FLIPS MEM OCCUPATION BIT AT EACH ADDRESS BACK TO ZERO
-  printf("[OS][SCHEDULER][DEALLOCATE][%s]\n\n", process.name.c_str());
 
-  // WORKS
+  // allow addresses to be overwritten flips bit to zero //
   for (int i = process.pLoadAddress; i <= process.pLoadAddress + process.pSize;
        i++) {
     machine.ram.mem[i][1] = 0;
   }
 
-  // IFY
+  // deallocate from vmem and vmemlookup //
   machine.ram.vMemory.erase(machine.ram.vMemory.begin() +
                             machine.ram.vMemoryLookup.at(process.name));
   machine.ram.vMemoryLookup.erase(process.name);
+
+  printf("[OS][SCHEDULER][DEALLOCATE][%s]\n\n", process.name.c_str());
 }
 
 // -------------------------
@@ -242,7 +203,7 @@ void Scheduler::deallocateMemory(Pcb &process) {
 // -------------------------
 
 void Scheduler::interruptServiceRoutine(Pcb &process, int returnCode) {
-  printf("[OS][SCHEDULER][IRS]\n");
+  // printf("[OS][SCHEDULER][IRS]\n");
   switch (returnCode) {
   case PRINT:
     printf("print\n");
@@ -261,4 +222,13 @@ void Scheduler::interruptServiceRoutine(Pcb &process, int returnCode) {
     break;
   }
   return;
+}
+
+int Scheduler::fork(Pcb &process) {
+
+  // copy the pcb with context //
+  Pcb *cPcb = new Pcb(process);
+  // load child ptr into parent //
+  process.pChild = cPcb;
+  return 0;
 }

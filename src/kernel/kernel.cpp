@@ -4,23 +4,46 @@ Kernel::Kernel(VirtualMachine &machine)
     : machine(machine), errorHandler(machine), loader(machine),
       scheduler(machine) {}
 
-int Kernel::kernelGanntChart() {}
+int Kernel::kernelPrintGanntChart() {
+  // HANDLE ERROR LIKE NOT HAVING ANYTHING TO PRINT
+  printf("\n[OS][GANNT] \n===========\n\n");
+  for (int i = 0; i < ganntChart.size(); i++) {
+    if (std::get<1>(ganntChart[i]) != -1) {
+      printf("[TIME : PID]=[%d : %d]\n", std::get<0>(ganntChart[i]),
+             std::get<1>(ganntChart[i]));
+    }
+  }
+  return 0;
+}
 
-int Kernel::kernelExecuteProgram(std::map<int, std::string> argMap) {
+int Kernel::kernelExecuteProgram(std::multimap<int, std::string> argMap) {
   int returnCode = 0;
-  int currentClock = machine.clock;
-  // fix this
-  while (!argMap.empty() | !scheduler.empty()) {
-    auto nextProcess = argMap.begin();
-    // OFFSET BY LOAD TIME FROM CURRENT CLOCK ON EXECUTION FUNCTION
-    if (machine.clock == nextProcess->first + currentClock) {
-      returnCode = kernelLoadProgram(nextProcess->second, nextProcess->first);
-      if (returnCode == 1) {
-        printf("[OS] -- loader failed \n");
+  int clockImage = machine.clock;
+  ganntChart.clear();
+
+  // DEBUG //
+  // for (auto i : argMap)
+  //   std::cout << i.first << ": " << i.second << std::endl;
+
+  while (!argMap.empty() || !scheduler.empty()) {
+
+    if (!argMap.empty()) {
+      auto key = argMap.begin()->first;
+      // printf("[CLOCK] %d\n", machine.clock);
+
+      //  LOAD ALL ELEMENTS THAT ARRIVE AT A SPECIFIC TIME
+      if (argMap.begin()->first + clockImage == machine.clock) {
+        auto range = argMap.equal_range(key);
+        for (auto i = range.first; i != range.second; ++i) {
+          returnCode = kernelLoadProgram(i->second, i->first);
+        }
+
+        argMap.erase(key);
       }
-      argMap.erase(nextProcess->first);
     }
     scheduler.firstComeFirstServe();
+    ganntChart.push_back(
+        std::make_tuple(machine.clock, scheduler.getCurrentPcbId()));
   }
   return 0;
 }
@@ -38,34 +61,12 @@ int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
 
   // IF LOAD SUCCEDED THEN CREATE A PCB AND LOAD IT INTO SCHEDULING QUEUES
   if (returnCode == 0) {
-    scheduler.allocateMemory(asmHeader, filePath);
+    Pcb *pPcb = scheduler.allocateMemory(asmHeader, filePath);
+    scheduler.queuePcb(*pPcb);
     return 0;
   }
 
   // IF LOAD FAILED PUSH ERROR ONTO ERRORLIST
-  errorHandler.errorList.push_back(returnCode);
-  return 1;
-}
-
-int Kernel::kernelRunSingleProgram(std::string filePath) {
-
-  int returnCode = 0;
-  Pcb *pPcb = scheduler.getPcb(filePath);
-
-  // IF getPcb fails
-  if (pPcb == NULL) {
-    errorHandler.errorList.push_back(302);
-    return 1;
-  }
-
-  // printf("pId = %d\n", pPcb->pId);
-  // printf("pPcb state = %d\n", pPcb->pState);
-
-  while (returnCode != 10) {
-    returnCode = scheduler.singleProgram(pPcb);
-  }
-
-  // IF RUN FAILED PUSH ERROR ONTO ERRORLIST
   errorHandler.errorList.push_back(returnCode);
   return 1;
 }

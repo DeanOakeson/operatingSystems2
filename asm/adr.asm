@@ -3,8 +3,6 @@
 ; Result: R2 = address of VAL
 
 ; Data section - directives first
-ONE .WORD 10
-TEN .WORD 20
 VAL .WORD 42
 
 ; Code section - instructions second

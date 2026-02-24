@@ -15,7 +15,7 @@ public:
   int pSize = 0;
   int pEndAddress = 0;
   int pKernelMode = 0;
-  int childID = 0;
+  Pcb *pChild = NULL;
 
   // ---------
   // CPU IMAGE
@@ -37,11 +37,11 @@ public:
   // CONSTRUCTOR
   Pcb(std::vector<int> asmHeader, std::string filePath)
       : pLoadAddress{asmHeader[0]}, pEndAddress{asmHeader[0] + (asmHeader[1])},
-        pSize{asmHeader[1]}, pFirstInstruction{asmHeader[2]}, pId{asmHeader[0]},
+        pSize{asmHeader[1]}, pFirstInstruction{asmHeader[2]}, pId{0},
         pArrivalTime{asmHeader[3]}, pc{pFirstInstruction + pLoadAddress},
         name{filePath} {}
 
-  // COPY CONSTRUCTOR
+  // COPY CONSTRUCTOR FOR FORK
   Pcb(const Pcb &pcb)
       : pLoadAddress{pcb.pLoadAddress}, pEndAddress{pcb.pEndAddress},
         pSize{pcb.pSize}, pFirstInstruction{pcb.pFirstInstruction},

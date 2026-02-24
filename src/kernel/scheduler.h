@@ -30,14 +30,13 @@ public:
   Scheduler(VirtualMachine &machine);
 
 public:
-  int allocateMemory(std::vector<int> asmHeader, std::string filePath);
+  Pcb *allocateMemory(std::vector<int> asmHeader, std::string filePath);
   Pcb *getPcb(std::string filePath);
-  void updateState(Pcb &process, int state);
   void queuePcb(Pcb &process);
   bool empty();
 
-  int singleProgram(Pcb *pcb);
   int firstComeFirstServe();
+  int getCurrentPcbId();
 
 private:
   std::queue<Pcb *> newQueue;
@@ -47,9 +46,9 @@ private:
   std::queue<Pcb *> terminatedQueue;
 
   Pcb *pPcb = NULL;
-  int passNumber = 0;
+  std::vector<int> ganntChart;
 
-  std::string ganntChart;
+  int currentIdCount = 0;
 
   void deallocateMemory(Pcb &process);
   int contextToCpu(Pcb &process);
@@ -57,10 +56,13 @@ private:
   int setClock(Pcb &process);
   int clearCpu();
 
+  void updateState(Pcb &process, int state);
+
   //------------------------
   // InterruptServiceRoutine
   //-----------------------
 
   void interruptServiceRoutine(Pcb &process, int returnCode);
+  int fork(Pcb &process);
 };
 #endif

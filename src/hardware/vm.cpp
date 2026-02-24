@@ -43,6 +43,8 @@ void VirtualMachine::idle() { clock++; }
 
 int VirtualMachine::fetchDecodeExecute(Pcb &process) {
   int opcode;
+  int strValue;
+  int strAddress;
   // printf("[VM] PC -- %d\n", PC);
 
   // CPU PREPERATION//
@@ -73,20 +75,30 @@ int VirtualMachine::fetchDecodeExecute(Pcb &process) {
     Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]];
     break;
   case MVI: // MOVE IMM Reg<1> <-- Reg<2> | Reg<3> |
-    printf("[VM] MVI -- R[%d]\n", ram.mem[PC + 1][0]);
+    // printf("[VM] MVI -- R[%d]\n", ram.mem[PC + 1][0]);
     Reg[ram.mem[PC + 1][0]] = (int32_t)((uint32_t)ram.mem[PC + 5][0] << 24 |
                                         (uint32_t)ram.mem[PC + 4][0] << 16 |
                                         (uint32_t)ram.mem[PC + 3][0] << 8 |
                                         (uint32_t)ram.mem[PC + 2][0]);
     break;
   case ADR:
-    Reg[ram.mem[PC + 1][0]] = (uint32_t)ram.mem[wordOffset][4] << 24 |
-                              (uint32_t)ram.mem[wordOffset][3] << 16 |
-                              (uint32_t)ram.mem[wordOffset][2] << 8 |
-                              (uint32_t)ram.mem[wordOffset][1];
+    byteOffset = (int32_t)(uint32_t)ram.mem[PC + 5][0] << 24 |
+                 (uint32_t)ram.mem[PC + 4][0] << 16 |
+                 (uint32_t)ram.mem[PC + 3][0] << 8 |
+                 (uint32_t)ram.mem[PC + 2][0];
+
+    Reg[ram.mem[PC + 1][0]] = byteOffset + process.pLoadAddress;
+
+    printf("[ADR] [REG : %d] = %d\n", ram.mem[PC + 1][0],
+           byteOffset + process.pLoadAddress);
 
     break;
-  case STR:
+
+  case STR: // memory[<reg2>] <reg1>
+    strValue = Reg[ram.mem[PC + 1][0]];
+    strAddress = ram.mem[Reg[ram.mem[PC + 2][0]]][0];
+    ram.mem[strAddress][0] = strValue;
+    printf("ADDRESS:[%d] = %d\n", strAddress, strValue);
     break;
   case STRB:
     break;
@@ -160,7 +172,6 @@ int VirtualMachine::fetchDecodeExecute(Pcb &process) {
     break;
   // LOGICAL //
   case CMP: // CMP <Reg1> - <Reg2>
-    printf("B\n");
     Z = Reg[ram.mem[PC + 1][0]] - Reg[ram.mem[PC + 2][0]];
     break;
 
@@ -182,7 +193,7 @@ int VirtualMachine::fetchDecodeExecute(Pcb &process) {
     case 1: // PRINT
       PC += 6;
       clock++;
-      printf("[VM] Returning 21\n");
+      // printf("[VM] Returning 21\n");
       return 21;
     case 2: // INPUT
       PC += 6;

@@ -13,6 +13,7 @@ void Shell::initPath() {
   functionMap["errordump"] = &Shell::shellErrorDump;
   functionMap["memdump"] = &Shell::shellMemDump;
   functionMap["execute"] = &Shell::shellExecute;
+  functionMap["gannt"] = &Shell::shellGannt;
 }
 
 //////////////////////////////////////
@@ -133,18 +134,6 @@ int Shell::shellRun(std::vector<std::string> argList) {
       kernel.kernelCoreDump();
       return 0;
     }
-    // run ../asm/file
-    kernel.kernelRunSingleProgram(argList[1]);
-    return 0;
-
-  case 3:
-    // run -v ../asm/file
-    if (argList[1] == "-v") {
-      kernel.kernelRunSingleProgram(argList[2]);
-      kernel.kernelCoreDump();
-      return 0;
-    }
-
     printf("[SHELL][RUN] %s is not a valid argument\n", argList[1].c_str());
     return 1;
   }
@@ -153,13 +142,13 @@ int Shell::shellRun(std::vector<std::string> argList) {
 }
 
 int Shell::shellExecute(std::vector<std::string> argList) {
-  int firstArg = false;
-  std::map<int, std::string> argMap;
+  int verbose = false;
+  std::multimap<int, std::string> argMap;
 
   if (argList[1] == "-v")
-    firstArg = true;
+    verbose = true;
 
-  switch (firstArg) {
+  switch (verbose) {
 
   case false:
     // THERE MUST BE AN ODD NUMBER OF ARGUMENTS
@@ -184,14 +173,27 @@ int Shell::shellExecute(std::vector<std::string> argList) {
     }
 
     // KEY IS ARRIVAL TIME SO THAT IT IS SORTED CHRONO
-    for (int i = 1; i < argList.size(); i += 2) {
+    for (int i = 2; i < argList.size(); i += 2) {
       argMap.insert({std::stoi(argList[i + 1]), argList[i]});
     }
 
     kernel.kernelExecuteProgram(argMap);
-    kernel.kernelGanntChart();
+    kernel.kernelPrintGanntChart();
     return 0;
   }
+  return 0;
+}
+
+int Shell::shellGannt(std::vector<std::string> argList) {
+
+  switch (argList.size()) {
+
+  case 1:
+    kernel.kernelPrintGanntChart();
+    return 0;
+  }
+  printf("[SHELL][GANNT] -- not valid usage\n");
+  return 1;
 }
 
 /////////////////////

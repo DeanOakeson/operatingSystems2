@@ -49,6 +49,8 @@ public:
 
   int shellExecute(std::vector<std::string> argList);
 
+  int shellGannt(std::vector<std::string> argList);
+
   int shellCoreDump(std::vector<std::string> argList);
 
   int shellExit(std::vector<std::string> argList);

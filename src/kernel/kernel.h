@@ -18,8 +18,7 @@ public:
   // PROGRAM INTERACTION //
   /////////////////////////
   int kernelLoadProgram(std::string filePath, int arrivalTime = 0);
-  int kernelRunSingleProgram(std::string filePath);
-  int kernelExecuteProgram(std::map<int, std::string> argMap);
+  int kernelExecuteProgram(std::multimap<int, std::string> argMap);
   int kernelRun();
 
   ////////////////////////
@@ -34,6 +33,12 @@ public:
   /////////////////////
   int kernelCoreDump();
 
+  //////////////
+  /// LOGGING //
+  //////////////
+  int kernelPrintGanntChart();
+
 private:
+  std::vector<std::tuple<int, int>> ganntChart;
 };
 #endif

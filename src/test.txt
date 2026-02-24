@@ -1,0 +1,3 @@
+execute ../asm/int.osx 2 ../asm/str.osx 2 ../asm/bne.osx 3 ../asm/add.osx 5 ../asm/beq.osx 20 ../asm/bne.osx 100 ../asm/int.osx 300
+
+

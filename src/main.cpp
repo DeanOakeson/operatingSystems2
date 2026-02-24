@@ -2,6 +2,8 @@
 #include "./kernel/kernel.h"
 #include "./shell/shell.h"
 
+// TEST HANDLES TIES, RELOADS, AND OVERLAPS
+
 int main() {
 
   VirtualMachine machine;

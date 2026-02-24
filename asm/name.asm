@@ -1,7 +1,8 @@
-name .BYTE 'D'
-.BYTE 'E'
-.BYTE 'A'
-.BYTE 'N'
+NAME.BYTE 'D'
+    .BYTE 'E'
+    .BYTE 'A'
+    .BYTE 'N'
+    .WORD 0
 
 
-SWI 11
+SWI 1
