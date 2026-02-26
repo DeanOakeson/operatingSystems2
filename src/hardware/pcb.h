@@ -52,7 +52,7 @@ public:
   }
 
   void updateState(int newState) {
-    printf("[PCB] %d: %d --> ", pId, pState);
+    printf("[PCB][PRC %d]: %d --> ", pId, pState);
     pState = newState;
     printf("%d\n", pState);
   }

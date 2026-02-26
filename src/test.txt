@@ -1,3 +1,7 @@
 execute ../asm/int.osx 2 ../asm/str.osx 2 ../asm/bne.osx 3 ../asm/add.osx 5 ../asm/beq.osx 20 ../asm/bne.osx 100 ../asm/int.osx 300
 
+execute ../asm/int.osx 1 ../asm/int.osx 10
 
+execute -v ../asm/str.osx 2 ../asm/bne.osx 2
+
+execute -v ../asm/str.osx 1

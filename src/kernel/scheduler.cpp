@@ -62,7 +62,7 @@ int Scheduler::firstComeFirstServe() {
     pPcb->updateState(TERMINATED);
     runningQueue.pop();
     terminatedQueue.push(pPcb);
-    printf("[OS][SCHEDULER][FCFS] Prc %s is terminating\n", pPcb->name.c_str());
+    printf("[SCH][FCFS] -- Prc %s is terminating\n", pPcb->name.c_str());
     deallocateMemory(*pPcb);
     terminatedQueue.pop();
     pPcb = NULL;
@@ -107,8 +107,8 @@ Pcb *Scheduler::getPcb(std::string filePath) {
   try {
     index = machine.ram.vMemoryLookup.at(filePath);
   } catch (std::out_of_range) {
-    printf(
-        "[OS][ERROR][302] --attempted vMemoryLookup.at() with false program\n");
+    printf("[SCH][ERROR][302] --attempted vMemoryLookup.at() with false "
+           "program\n");
     return NULL;
   }
 
@@ -152,7 +152,7 @@ int Scheduler::contextToCpu(Pcb &process) {
     machine.Reg[i] = process.reg[i];
   }
 
-  // printf("[OS][SCHEDULER][CONTEXTTOCPU] -- %d\n", machine.PC);
+  printf("[SCH][PRC %d] context to cpu -- pc = %d\n", process.pId, machine.PC);
   return 0;
 }
 
@@ -163,8 +163,8 @@ int Scheduler::contextToPcb(Pcb &process) {
   for (int i = 0; i <= 6; i++) {
     process.reg[i] = machine.Reg[i];
   }
+  printf("[SCH][PRC %d] context to pcb -- pc = %d\n", process.pId, machine.PC);
 
-  // printf("[OS][SCHEDULER][CONTEXTTOPCB] -- %d\n", process.pc);
   return 0;
 }
 
@@ -195,7 +195,7 @@ void Scheduler::deallocateMemory(Pcb &process) {
                             machine.ram.vMemoryLookup.at(process.name));
   machine.ram.vMemoryLookup.erase(process.name);
 
-  printf("[OS][SCHEDULER][DEALLOCATE][%s]\n\n", process.name.c_str());
+  printf("[SCH][DEALLOC][%s]\n\n", process.name.c_str());
 }
 
 // -------------------------
@@ -203,10 +203,10 @@ void Scheduler::deallocateMemory(Pcb &process) {
 // -------------------------
 
 void Scheduler::interruptServiceRoutine(Pcb &process, int returnCode) {
-  // printf("[OS][SCHEDULER][IRS]\n");
+  printf("[SCH][IRS] -- interrupt service routine started\n");
   switch (returnCode) {
   case PRINT:
-    printf("print\n");
+    printf("\nprint interrupt\n\n");
     break;
   case HALT:
     printf("halt\n");

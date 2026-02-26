@@ -6,10 +6,10 @@ Kernel::Kernel(VirtualMachine &machine)
 
 int Kernel::kernelPrintGanntChart() {
   // HANDLE ERROR LIKE NOT HAVING ANYTHING TO PRINT
-  printf("\n[OS][GANNT] \n===========\n\n");
+  printf("\n[OS][GANNT] \n===========\n");
   for (int i = 0; i < ganntChart.size(); i++) {
     if (std::get<1>(ganntChart[i]) != -1) {
-      printf("[TIME : PID]=[%d : %d]\n", std::get<0>(ganntChart[i]),
+      printf("TIME::[%d] -- PID::[%d]\n", std::get<0>(ganntChart[i]),
              std::get<1>(ganntChart[i]));
     }
   }
