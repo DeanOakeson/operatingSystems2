@@ -202,6 +202,30 @@ loader.cpp.s:
 	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/loader.cpp.s
 .PHONY : loader.cpp.s
 
+processLogger.o: processLogger.cpp.o
+.PHONY : processLogger.o
+
+# target to build an object file
+processLogger.cpp.o:
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o
+.PHONY : processLogger.cpp.o
+
+processLogger.i: processLogger.cpp.i
+.PHONY : processLogger.i
+
+# target to preprocess a source file
+processLogger.cpp.i:
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.i
+.PHONY : processLogger.cpp.i
+
+processLogger.s: processLogger.cpp.s
+.PHONY : processLogger.s
+
+# target to generate assembly for a file
+processLogger.cpp.s:
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.s
+.PHONY : processLogger.cpp.s
+
 scheduler.o: scheduler.cpp.o
 .PHONY : scheduler.o
 
@@ -244,6 +268,9 @@ help:
 	@echo "... loader.o"
 	@echo "... loader.i"
 	@echo "... loader.s"
+	@echo "... processLogger.o"
+	@echo "... processLogger.i"
+	@echo "... processLogger.s"
 	@echo "... scheduler.o"
 	@echo "... scheduler.i"
 	@echo "... scheduler.s"

@@ -1,6 +1,4 @@
 #include "pcb.h"
-#include <string.h>
-#include <unordered_map>
 
 #define MEM_SIZE_KB 12 * 1024 // 12 KB
 
@@ -10,4 +8,9 @@ public:
   // VMEM LOOKUP TABLE// name : index in vMemory
   std::unordered_map<std::string, int> vMemoryLookup;
   std::vector<Pcb *> vMemory;
+
+  Pcb *pcbLookup(std::string name) {
+    Pcb *pPcb = vMemory[vMemoryLookup.at(name)];
+    return pPcb;
+  }
 };

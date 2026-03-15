@@ -12,8 +12,9 @@ void Shell::initPath() {
   functionMap["coredump"] = &Shell::shellCoreDump;
   functionMap["errordump"] = &Shell::shellErrorDump;
   functionMap["memdump"] = &Shell::shellMemDump;
-  functionMap["execute"] = &Shell::shellExecute;
+  functionMap["exec"] = &Shell::shellExecute;
   functionMap["gannt"] = &Shell::shellGannt;
+  functionMap["-v"] = &Shell::shellVerbose;
 }
 
 //////////////////////////////////////
@@ -38,7 +39,7 @@ Shell::commandStringToArrayOfStrings(std::string commandString) {
 int Shell::shellLoop() {
 
   while (true) {
-    std::cout << "[SHELL]-->> ";
+    std::cout << "shell --> ";
     std::string command;
     std::getline(std::cin, command);
 
@@ -52,7 +53,6 @@ int Shell::shellLoop() {
     }
 
     int returnCode = (this->*functionMap[commandArray[0]])(commandArray);
-    printf("\n");
     if (returnCode == 9) { // EXIT CODE
       return 0;
     }
@@ -70,19 +70,21 @@ int Shell::shellClear(std::vector<std::string> argList) {
 
 int Shell::shellHelp(std::vector<std::string> argList) {
   std::cout
-      << "\n[SHELL] --HELP  \n==============\n"
-         "\nrun [-v] ------ runs a loaded specified program\n"
+      << "[SH]::help\n"
+         "=================================================================\n"
+         "run [-v] ------ runs a loaded specified program\n"
          "load [-v]------ loads a binary file from an input file path\n"
          "clear --------- clears the terminal screen\n"
          "clear --------- clears the terminal screen\n"
          "coredump ------ lists the current values contained in REGISTERS\n"
          "errordump ----- prints logged errors\n"
-         "exit ---------- exits terminal\n";
+         "exit ---------- exits terminal\n"
+         "=================================================================\n";
   return 0;
 }
 
 int Shell::shellExit(std::vector<std::string> argList) {
-  std::cout << "[SHELL] exiting...\n";
+  std::cout << "[SH]::exit\n";
   return 9;
 }
 
@@ -105,7 +107,7 @@ int Shell::shellLoad(std::vector<std::string> argList) {
     kernel.kernelMemDump(argList[2]);
     return 0;
   }
-  printf("[SHELL] -- too many arguments\n");
+  printf("[SH]::load -- too many arguments\n");
   return 1;
 }
 
@@ -115,7 +117,7 @@ int Shell::shellErrorDump(std::vector<std::string> argList) {
     kernel.kernelErrorDump();
     return 0;
   }
-  printf("[SHELL] -- too many arguments\n");
+  printf("[SH]::load -- too many arguments\n");
   return 1;
 }
 
@@ -134,53 +136,40 @@ int Shell::shellRun(std::vector<std::string> argList) {
       kernel.kernelCoreDump();
       return 0;
     }
-    printf("[SHELL][RUN] %s is not a valid argument\n", argList[1].c_str());
+    printf("[SH]::run %s is not a valid argument\n", argList[1].c_str());
     return 1;
   }
-  printf("[SHELL][RUN] -- not valid usage\n");
+  printf("[SH]::run -- not valid usage\n");
   return 1;
 }
 
 int Shell::shellExecute(std::vector<std::string> argList) {
-  int verbose = false;
   std::multimap<int, std::string> argMap;
 
-  if (argList[1] == "-v")
-    verbose = true;
-
-  switch (verbose) {
-
-  case false:
-    // THERE MUST BE AN ODD NUMBER OF ARGUMENTS
-    if (argList.size() % 2 == 0) {
-      printf("[SHELL][EXECUTE] -- not valid usage.");
-      return 1;
+  // FIX THIS
+  //  KEY IS ARRIVAL TIME SO THAT IT IS SORTED CHRONO
+  int i = 1;
+  int arrivalTime;
+  while (i < argList.size()) {
+    printf("%s", argList[i].c_str());
+    try {
+      arrivalTime = stoi(argList.at(i + 1));
+    } catch (const std::invalid_argument) {
+      printf("%s\n", argList[i].c_str());
+      argMap.insert({0, argList[i]});
+      i++;
+      continue;
+    } catch (const std::out_of_range) {
+      argMap.insert({0, argList[i]});
+      i++;
+      continue;
     }
-
-    // KEY IS ARRIVAL TIME SO THAT IT IS SORTED CHRONO
-    for (int i = 1; i < argList.size(); i += 2) {
-      argMap.insert({std::stoi(argList[i + 1]), argList[i]});
-    }
-
-    kernel.kernelExecuteProgram(argMap);
-    return 0;
-
-  case true:
-    // THERE MUST BE AN EVEN NUMBER OF ARGUMENTS
-    if (argList.size() % 2 != 0) {
-      printf("[SHELL][EXECUTE] -- not valid usage.");
-      return 1;
-    }
-
-    // KEY IS ARRIVAL TIME SO THAT IT IS SORTED CHRONO
-    for (int i = 2; i < argList.size(); i += 2) {
-      argMap.insert({std::stoi(argList[i + 1]), argList[i]});
-    }
-
-    kernel.kernelExecuteProgram(argMap);
-    kernel.kernelPrintGanntChart();
-    return 0;
+    argMap.insert({arrivalTime, argList[i]});
+    i += 2;
+    continue;
   }
+
+  kernel.kernelExecuteProgram(argMap);
   return 0;
 }
 
@@ -192,8 +181,13 @@ int Shell::shellGannt(std::vector<std::string> argList) {
     kernel.kernelPrintGanntChart();
     return 0;
   }
-  printf("[SHELL][GANNT] -- not valid usage\n");
+  printf("[SH]::gant -- not valid usage\n");
   return 1;
+}
+
+int Shell::shellVerbose(std::vector<std::string> argList) {
+  kernel.setVerbosityFlag();
+  return 0;
 }
 
 /////////////////////
@@ -219,7 +213,7 @@ int Shell::shellMemDump(std::vector<std::string> argList) {
   }
   // too many arguments //
   if (argList.size() > 2) {
-    printf("[SHELL] too many arguments\n");
+    printf("[SH]::mudmp too many arguments\n");
     return 1;
   }
   return 0;

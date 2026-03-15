@@ -27,42 +27,50 @@ public:
   static const u_int8_t WAIT = 24;
   static const u_int8_t INPUT = 25;
 
-  Scheduler(VirtualMachine &machine);
-
 public:
-  Pcb *allocateMemory(std::vector<int> asmHeader, std::string filePath);
+  std::queue<Pcb *> terminatedQueue;
+
+  Scheduler(VirtualMachine &machine);
+  void setVerbosityFlag();
+
+  int allocateMemory(Pcb &process);
+  Pcb *createPcb(std::vector<int> asmHeader, std::string filePath);
   Pcb *getPcb(std::string filePath);
-  void queuePcb(Pcb &process);
+
+  void queuePcb(Pcb &process, int queue);
+  Pcb *popQueue(int queue);
   bool empty();
 
   int firstComeFirstServe();
-  int getCurrentPcbId();
+  int roundRobin();
+  int multiLevelFeedbackQueue();
 
 private:
   std::queue<Pcb *> newQueue;
   std::deque<Pcb *> readyQueue;
   std::queue<Pcb *> runningQueue;
   std::queue<Pcb *> waitingQueue;
-  std::queue<Pcb *> terminatedQueue;
 
-  Pcb *pPcb = NULL;
-  std::vector<int> ganntChart;
+  bool verbosityFlag = false;
 
+  Pcb *pRunningPcb = NULL;
   int currentIdCount = 0;
 
   void deallocateMemory(Pcb &process);
   int contextToCpu(Pcb &process);
   int contextToPcb(Pcb &process);
+  void updateState(Pcb &process, int state);
   int setClock(Pcb &process);
   int clearCpu();
-
-  void updateState(Pcb &process, int state);
 
   //------------------------
   // InterruptServiceRoutine
   //-----------------------
 
   void interruptServiceRoutine(Pcb &process, int returnCode);
-  int fork(Pcb &process);
+  int irsVFork(Pcb &process);
+  int irsWait(Pcb &process);
+  int irsPrintString(Pcb &process);
+  int irsPrintChar(Pcb &process);
 };
 #endif

@@ -6,6 +6,15 @@
 
 Loader::Loader(VirtualMachine &machine) : machine(machine) {};
 
+void Loader::setVerbosityFlag() {
+  if (verbosityFlag == true) {
+    verbosityFlag = false;
+    return;
+  }
+  verbosityFlag = true;
+  return;
+}
+
 //------
 // LOAD
 //------
@@ -29,7 +38,7 @@ std::tuple<int, std::vector<int>> Loader::loadProgram(std::string filePath) {
                      std::ios::binary); // FILESTREAM ERRORS NEED TO WORK
 
   if (!file.is_open()) {
-    printf("[OS][LOADER][200] -- file not found\n");
+    printf("[LD]::ldpr - ERROR/200 - file not found\n");
     return std::make_tuple(200, asmHeader);
     ;
   }
@@ -40,21 +49,23 @@ std::tuple<int, std::vector<int>> Loader::loadProgram(std::string filePath) {
 
   asmHeader = {fileLoadAddress, fileSize, fileFirstInstruction};
 
-  // printf("[OS][LOADER] -- fileSize = %d\n", asmHeader[1]);
-  // printf("[OS][LOADER] -- fileFirstInstruction = %d\n", asmHeader[2]);
-  // printf("[OS][LOADER] -- fileLoadAddress = %d\n", fileLoadAddress);
-
+  if (verbosityFlag == true) {
+    printf("[LD]::ldpr - fileSize = %d\n", asmHeader[1]);
+    printf("[LD]::ldpr - fileFirstInstruction = %d\n", asmHeader[2]);
+    printf("[LD]::ldpr - fileLoadAddress = %d\n", fileLoadAddress);
+  }
   //  MEMORY OVERFLOW
   if (fileLoadAddress + fileSize > MEM_SIZE_KB) {
-    printf("[OS][201] --memory overflow, load "
+    printf("[LD]::ldpr - 201 - memory overflow, load "
            "cancelled\n");
     return std::make_tuple(201, asmHeader);
   }
 
   // MEMORY IS OCCUPIED
   if (verifyMemoryIsUnoccupied(asmHeader) != true) {
-    printf("[OS][202] --attempted to overwrite existing memory, load "
-           "cancelled\n");
+    printf(
+        "[LD]::ldpr - ERROR/202 - attempted to overwrite existing memory, load "
+        "cancelled\n");
     return std::make_tuple(202, asmHeader);
     ;
   }

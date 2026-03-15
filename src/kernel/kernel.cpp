@@ -6,45 +6,64 @@ Kernel::Kernel(VirtualMachine &machine)
 
 int Kernel::kernelPrintGanntChart() {
   // HANDLE ERROR LIKE NOT HAVING ANYTHING TO PRINT
+
   printf("\n[OS][GANNT] \n===========\n");
-  for (int i = 0; i < ganntChart.size(); i++) {
-    if (std::get<1>(ganntChart[i]) != -1) {
-      printf("TIME::[%d] -- PID::[%d]\n", std::get<0>(ganntChart[i]),
-             std::get<1>(ganntChart[i]));
-    }
-  }
+  processLogger.printGannt();
   return 0;
 }
 
-int Kernel::kernelExecuteProgram(std::multimap<int, std::string> argMap) {
-  int returnCode = 0;
-  int clockImage = machine.clock;
-  ganntChart.clear();
+void Kernel::setVerbosityFlag() {
+  if (verbosityFlag == true) {
+    verbosityFlag = false;
+    scheduler.setVerbosityFlag();
+    processLogger.setVerbosityFlag();
+    loader.setVerbosityFlag();
+    return;
+  }
 
-  // DEBUG //
-  // for (auto i : argMap)
-  //   std::cout << i.first << ": " << i.second << std::endl;
+  verbosityFlag = true;
+  scheduler.setVerbosityFlag();
+  processLogger.setVerbosityFlag();
+  loader.setVerbosityFlag();
+}
+
+int Kernel::kernelExecuteProgram(std::multimap<int, std::string> argMap) {
+  auto start = std::chrono::high_resolution_clock::now();
+  int returnCode;
+  int clockImage = machine.clock;
 
   while (!argMap.empty() || !scheduler.empty()) {
 
     if (!argMap.empty()) {
       auto key = argMap.begin()->first;
-      // printf("[CLOCK] %d\n", machine.clock);
-
       //  LOAD ALL ELEMENTS THAT ARRIVE AT A SPECIFIC TIME
       if (argMap.begin()->first + clockImage == machine.clock) {
         auto range = argMap.equal_range(key);
         for (auto i = range.first; i != range.second; ++i) {
           returnCode = kernelLoadProgram(i->second, i->first);
         }
-
         argMap.erase(key);
       }
     }
     scheduler.firstComeFirstServe();
-    ganntChart.push_back(
-        std::make_tuple(machine.clock, scheduler.getCurrentPcbId()));
   }
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+          .count();
+
+  if (verbosityFlag == true) {
+    std::cout << "[OS]::exec --cpu runtime = ";
+    std::cout << duration;
+    std::cout << " m/s \n";
+  }
+
+  while (!scheduler.terminatedQueue.empty()) {
+    processLogger.logProcess(*scheduler.popQueue(TERMINATED));
+  }
+
+  // gannt = scheduler.ganntDataDump();
+  // error = scheduler.errorDataDump();
   return 0;
 }
 
@@ -59,10 +78,12 @@ int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
 
   asmHeader.push_back(arrivalTime);
 
-  // IF LOAD SUCCEDED THEN CREATE A PCB AND LOAD IT INTO SCHEDULING QUEUES
+  // IF LOAD SUCCEDED THEN CREATE A PCB ALLOCATE MEMORY AND LOAD IT INTO
+  // SCHEDULING QUEUES
   if (returnCode == 0) {
-    Pcb *pPcb = scheduler.allocateMemory(asmHeader, filePath);
-    scheduler.queuePcb(*pPcb);
+    Pcb *pPcb = scheduler.createPcb(asmHeader, filePath);
+    scheduler.allocateMemory(*pPcb);
+    scheduler.queuePcb(*pPcb, 1);
     return 0;
   }
 
@@ -72,10 +93,12 @@ int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
 }
 
 int Kernel::kernelRun() {
-
-  int returnCode = 0;
+  int returnCode;
   while (!scheduler.empty()) {
     returnCode = scheduler.firstComeFirstServe();
+  }
+  while (!scheduler.terminatedQueue.empty()) {
+    processLogger.logProcess(*scheduler.popQueue(TERMINATED));
   }
   return 0;
 }

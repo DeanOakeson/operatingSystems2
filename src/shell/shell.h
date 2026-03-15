@@ -53,6 +53,8 @@ public:
 
   int shellCoreDump(std::vector<std::string> argList);
 
+  int shellVerbose(std::vector<std::string> argList);
+
   int shellExit(std::vector<std::string> argList);
 };
 

@@ -477,6 +477,7 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
   /usr/include/c++/15/latch \
   /usr/include/c++/15/syncstream \
   /home/dean/operatingSystems2/src/kernel/loader.h \
+  /home/dean/operatingSystems2/src/kernel/processLogger.h \
   /home/dean/operatingSystems2/src/kernel/scheduler.h
 
 
@@ -1323,6 +1324,8 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: /home/dean/operatingSystems2/src/she
 /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
 
 /usr/include/asm-generic/types.h:
+
+/home/dean/operatingSystems2/src/kernel/processLogger.h:
 
 /usr/include/c++/15/bits/functexcept.h:
 

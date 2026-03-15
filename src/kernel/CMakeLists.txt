@@ -11,6 +11,7 @@ add_library(kernel STATIC
     loader.cpp
     errorhandler.cpp
     scheduler.cpp
+    processLogger.cpp
 )
 
 target_include_directories(kernel PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

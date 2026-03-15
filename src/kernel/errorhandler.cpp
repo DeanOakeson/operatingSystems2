@@ -2,42 +2,50 @@
 ErrorHandler::ErrorHandler(VirtualMachine &machine) : machine(machine) {}
 
 void ErrorHandler::errorDump() {
-  printf("\n[OS] --ERROR_DUMP  \n=================\n");
+  std::cout << "[OS]::errh/errorDump\n"
+               "==============================================================="
+               "==\n";
   for (const int &i : errorList) {
     switch (i) {
     case CPU_EARLY_TERMINATION:
-      printf("[OS][ERROR][100] --cpu early termination\n");
+      printf("[OS]::errh -100 --cpu early termination\n");
       break;
     case MEM_OVERFLOW:
-      printf("[OS][ERROR][201] --memory overflow--\n");
+      printf("[OS]::errh -201 --memory overflow--\n");
       break;
     case MEM_OVERWRITE:
-      printf("[OS][ERROR][202] --attempted memory overwrite--\n");
+      printf("[OS]::errh -202 --attempted memory overwrite--\n");
       break;
     case LOAD_FILE_NOT_FOUND:
-      printf("[OS][ERROR][200] --file not found--\n");
+      printf("[OS]::errh -200 --file not found--\n");
       break;
     case MEM_DUMP_NO_PROGRAM:
-      printf("[OS][ERROR][301] --attempted memDump() no loaded program--\n");
+      printf("[OS]::errh -301 --attempted memDump() no loaded program--\n");
       break;
     case MEM_DUMP_FALSE_PROGRAM:
-      printf("[OS][ERROR][302] --attempted memDump() with false program--\n");
+      printf("[OS]::errh -302 --attempted memDump() with false program--\n");
       break;
     }
   }
+  std::cout
+      << "=================================================================\n";
 }
 
 void ErrorHandler::coreDump() {
   u_int8_t regId = 0;
 
-  printf("\n[OS][ERROR] --CORE_DUMP  \n================");
+  std::cout << "[OS]::errh/coredump\n"
+               "========================\n";
+
   for (u_int8_t i = 0; i < 6; i++) {
-    printf("\nREGISTER:: [ %d ] -- [ %d ]", regId, machine.Reg[regId]);
+    printf("REGISTER:: [ %d ] -- [ %d ]\n", regId, machine.Reg[regId]);
     regId += 1;
   }
-  printf("\nREGISTER:: [ PC ] -- [ %d ] \nREGISTER:: [ Z ] -- "
+  printf("REGISTER:: [ PC ] - [ %d ] \nREGISTER:: [ Z ] -- "
          "[ %d ]\n",
          machine.PC, machine.Z);
+
+  std::cout << "=========================\n";
 }
 
 int ErrorHandler::memDumpAll() {
@@ -45,10 +53,10 @@ int ErrorHandler::memDumpAll() {
   // CHECK IF THERE ARE ANY PCBS LOADED IN VMEM
   // IF NO FILE HAS BEEN LOADED
   if (machine.ram.vMemory.size() == 0) {
-    printf("[OS][ERROR][301] --attempted memDump() with no loaded program\n");
+    printf("[OS]errh/mdmp -301 --attempted memDump() with no loaded program\n");
     return 301; // 1 memDump means no load
   }
-  printf("\n[OS][ERROR] --MEM_DUMP  \n===========\n");
+  printf("\n[OS]errh/memDumpAll \n===========\n");
 
   // this iterates over the actual vMemory not the hash
   for (int i = 0; i < machine.ram.vMemory.size(); i++) {

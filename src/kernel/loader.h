@@ -22,8 +22,10 @@ public:
   std::vector<int> asmHeader;
   std::tuple<int, std::vector<int>> returnVector;
   std::tuple<int, std::vector<int>> loadProgram(std::string FilePath);
+  void setVerbosityFlag();
 
 private:
   bool verifyMemoryIsUnoccupied(std::vector<int> asmHeader);
+  bool verbosityFlag = false;
 };
 #endif

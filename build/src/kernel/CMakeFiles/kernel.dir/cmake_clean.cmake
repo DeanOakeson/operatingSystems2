@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/kernel.dir/kernel.cpp.o.d"
   "CMakeFiles/kernel.dir/loader.cpp.o"
   "CMakeFiles/kernel.dir/loader.cpp.o.d"
+  "CMakeFiles/kernel.dir/processLogger.cpp.o"
+  "CMakeFiles/kernel.dir/processLogger.cpp.o.d"
   "CMakeFiles/kernel.dir/scheduler.cpp.o"
   "CMakeFiles/kernel.dir/scheduler.cpp.o.d"
   "libkernel.a"

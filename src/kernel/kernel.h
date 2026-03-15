@@ -3,13 +3,22 @@
 
 #include "errorhandler.h"
 #include "loader.h"
+#include "processLogger.h"
 #include "scheduler.h"
+#include <chrono>
 
 class Kernel {
 public:
+  static const u_int8_t NEW = 1;
+  static const u_int8_t READY = 2;
+  static const u_int8_t RUNNING = 3;
+  static const u_int8_t WAITING = 4;
+  static const u_int8_t TERMINATED = 5;
+
   ErrorHandler errorHandler;
   Loader loader;
   Scheduler scheduler;
+  ProcessLogger processLogger;
   VirtualMachine &machine;
 
   Kernel(VirtualMachine &machine);
@@ -37,8 +46,9 @@ public:
   /// LOGGING //
   //////////////
   int kernelPrintGanntChart();
+  void setVerbosityFlag();
 
 private:
-  std::vector<std::tuple<int, int>> ganntChart;
+  bool verbosityFlag = false;
 };
 #endif

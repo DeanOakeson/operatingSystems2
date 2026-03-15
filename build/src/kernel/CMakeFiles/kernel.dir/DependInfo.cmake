@@ -11,6 +11,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/dean/operatingSystems2/src/kernel/errorhandler.cpp" "src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o" "gcc" "src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o.d"
   "/home/dean/operatingSystems2/src/kernel/kernel.cpp" "src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o" "gcc" "src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o.d"
   "/home/dean/operatingSystems2/src/kernel/loader.cpp" "src/kernel/CMakeFiles/kernel.dir/loader.cpp.o" "gcc" "src/kernel/CMakeFiles/kernel.dir/loader.cpp.o.d"
+  "/home/dean/operatingSystems2/src/kernel/processLogger.cpp" "src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o" "gcc" "src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o.d"
   "/home/dean/operatingSystems2/src/kernel/scheduler.cpp" "src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o" "gcc" "src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o.d"
   )
 

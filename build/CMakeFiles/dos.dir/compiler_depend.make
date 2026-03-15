@@ -477,6 +477,7 @@ CMakeFiles/dos.dir/src/main.cpp.o: /home/dean/operatingSystems2/src/main.cpp \
   /home/dean/operatingSystems2/src/kernel/errorhandler.h \
   /home/dean/operatingSystems2/src/hardware/vm.h \
   /home/dean/operatingSystems2/src/kernel/loader.h \
+  /home/dean/operatingSystems2/src/kernel/processLogger.h \
   /home/dean/operatingSystems2/src/kernel/scheduler.h \
   /home/dean/operatingSystems2/src/shell/shell.h \
   /home/dean/operatingSystems2/src/kernel/kernel.h
@@ -1325,6 +1326,8 @@ CMakeFiles/dos.dir/src/main.cpp.o: /home/dean/operatingSystems2/src/main.cpp \
 /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
 
 /usr/include/asm-generic/types.h:
+
+/home/dean/operatingSystems2/src/kernel/processLogger.h:
 
 /usr/include/c++/15/bits/functexcept.h:
 

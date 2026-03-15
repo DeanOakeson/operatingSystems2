@@ -15,11 +15,13 @@ public:
   VirtualMachine &machine;
   std::string filePath = "";
   std::vector<int> errorList = {};
+  std::vector<std::vector<int>> processLogs;
 
   ErrorHandler(VirtualMachine &machine);
   void errorDump();
   void coreDump();
   int memDumpAll();
   int memDump(std::string filePath);
+  std::vector<int> infoExtraction(Pcb &terminatedPcb);
 };
 #endif

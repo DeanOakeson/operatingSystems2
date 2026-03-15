@@ -5,6 +5,15 @@
 
 Scheduler::Scheduler(VirtualMachine &machine) : machine(machine) {}
 
+void Scheduler::setVerbosityFlag() {
+  if (verbosityFlag == true) {
+    verbosityFlag = false;
+    return;
+  }
+
+  verbosityFlag = true;
+  return;
+}
 // ----------------
 // Scheduling algos
 // ----------------
@@ -18,85 +27,74 @@ int Scheduler::firstComeFirstServe() {
 
   // SEND A NEW PCB TO READY
   while (!newQueue.empty()) {
-    pPcb = static_cast<Pcb *>(newQueue.front());
-    pPcb->updateState(READY);
-    newQueue.pop();
-    readyQueue.push_back(pPcb);
+    queuePcb(*popQueue(NEW), READY);
   }
 
   // if running queue is empty process prep
   if (runningQueue.empty() && !readyQueue.empty()) {
-    pPcb = static_cast<Pcb *>(readyQueue.front());
-    pPcb->updateState(RUNNING);
+    pRunningPcb = popQueue(READY);
+    queuePcb(*pRunningPcb, RUNNING);
     clearCpu();
-    contextToCpu(*pPcb);
-    runningQueue.push(pPcb);
-    readyQueue.pop_front();
+    contextToCpu(*pRunningPcb);
   }
 
   // run process in running
-  if (pPcb != NULL) {
-    pPcb = static_cast<Pcb *>(runningQueue.front());
-    returnCode = machine.fetchDecodeExecute(*pPcb);
+  if (pRunningPcb != NULL) {
+    returnCode = machine.fetchDecodeExecute(*pRunningPcb);
+    pRunningPcb->cpuTimeSlices.push_back(machine.clock);
   } else {
     machine.idle();
+    return 0;
   }
 
   // swi return
   if (returnCode >= 20) {
-    pPcb->updateState(WAITING);
-    runningQueue.pop();
-    waitingQueue.push(pPcb);
-    contextToPcb(*pPcb);
+    popQueue(RUNNING);
+    queuePcb(*pRunningPcb, WAITING);
+    contextToPcb(*pRunningPcb);
     clearCpu();
-    interruptServiceRoutine(*pPcb, returnCode);
-    // printf("[OS][SCHEDULER] -- interrupt handeled\n");
+    interruptServiceRoutine(*pRunningPcb, returnCode);
+    if (verbosityFlag == true) {
+      printf("[SC]::fcfs -- interrupt handeled\n");
+    }
     waitingQueue.pop();
-    readyQueue.push_back(pPcb);
-    pPcb->updateState(READY);
+    queuePcb(*pRunningPcb, READY);
     return returnCode;
   }
 
   // process termination
   if (returnCode == 10) {
-    pPcb->updateState(TERMINATED);
-    runningQueue.pop();
-    terminatedQueue.push(pPcb);
-    printf("[SCH][FCFS] -- Prc %s is terminating\n", pPcb->name.c_str());
-    deallocateMemory(*pPcb);
-    terminatedQueue.pop();
-    pPcb = NULL;
+    popQueue(RUNNING);
+    contextToPcb(*pRunningPcb);
+    queuePcb(*pRunningPcb, TERMINATED);
+    if (verbosityFlag == true) {
+      printf("[SC]::fcfs - %s is terminating\n", pRunningPcb->name.c_str());
+    }
+    deallocateMemory(*pRunningPcb);
+    pRunningPcb = NULL;
     return returnCode;
   }
 
   // DEBUG//
-  //  printf("[OS][SCHEDULER] clock = %d\n", machine.clock);
+  if (verbosityFlag == true) {
+    printf("[SC]::fcfs clock = %d\n", machine.clock);
+  }
   return 0;
 }
+
+int Scheduler::roundRobin() {}
 
 // --------------
 // PCB and QUEUE Managment
 // -------------
 
-Pcb *Scheduler::allocateMemory(std::vector<int> asmHeader,
-                               std::string filePath) {
-
-  // creates pcb and flips the memory allocation bits to 1
-
-  // pcb creation //
+Pcb *Scheduler::createPcb(std::vector<int> asmHeader, std::string filePath) {
   Pcb *pPcb = new Pcb(asmHeader, filePath);
   pPcb->pId = currentIdCount;
+
+  // PUSH ONTO vMEMORY and vMEMORY LOOKUP
   machine.ram.vMemory.push_back(pPcb);
   machine.ram.vMemoryLookup[pPcb->name] = machine.ram.vMemory.size() - 1;
-
-  // memory allocation //
-  for (int i = pPcb->pLoadAddress; i <= pPcb->pLoadAddress + pPcb->pSize; i++) {
-    machine.ram.mem[i][1] = 1;
-  }
-
-  // printf("[OS][SCHEDULER][ALLOCATE] Id = %d\n", pPcb->pId);
-  // printf("[OS][SCHEDULER][ALLOCATE] state = %d\n", pPcb->pState);
-
   currentIdCount += 1;
   return pPcb;
 }
@@ -107,7 +105,7 @@ Pcb *Scheduler::getPcb(std::string filePath) {
   try {
     index = machine.ram.vMemoryLookup.at(filePath);
   } catch (std::out_of_range) {
-    printf("[SCH][ERROR][302] --attempted vMemoryLookup.at() with false "
+    printf("[SC]::gPcb - ERROR/302 - attempted vMemoryLookup.at() with false "
            "program\n");
     return NULL;
   }
@@ -115,19 +113,54 @@ Pcb *Scheduler::getPcb(std::string filePath) {
   return machine.ram.vMemory[index];
 }
 
-int Scheduler::getCurrentPcbId() {
-  // get active pcb id //
-  if (pPcb != NULL)
-    return pPcb->pId;
-
-  // if null send back error code //
-  return -1;
+void Scheduler::queuePcb(Pcb &process, int queue) {
+  // place pcb into scheduling queues //
+  switch (queue) {
+  case (NEW):
+    newQueue.push(&process);
+    break;
+  case (READY):
+    readyQueue.push_back(&process);
+    break;
+  case (WAITING):
+    waitingQueue.push(&process);
+    break;
+  case (RUNNING):
+    runningQueue.push(&process);
+    break;
+  case (TERMINATED):
+    terminatedQueue.push(&process);
+    break;
+  }
+  process.updateState(queue);
 }
 
-void Scheduler::queuePcb(Pcb &process) {
-  // place pcb into scheduling queues //
-  newQueue.push(&process);
-  process.updateState(NEW);
+Pcb *Scheduler::popQueue(int queue) {
+
+  Pcb *pPcb;
+  switch (queue) {
+  case (NEW):
+    pPcb = newQueue.front();
+    newQueue.pop();
+    return pPcb;
+  case (READY):
+    pPcb = readyQueue.front();
+    readyQueue.pop_front();
+    return pPcb;
+  case (WAITING):
+    pPcb = waitingQueue.front();
+    waitingQueue.pop();
+    return pPcb;
+  case (RUNNING):
+    pPcb = runningQueue.front();
+    runningQueue.pop();
+    return pPcb;
+  case (TERMINATED):
+    pPcb = terminatedQueue.front();
+    terminatedQueue.pop();
+    return pPcb;
+  }
+  return NULL;
 }
 
 bool Scheduler::empty() {
@@ -139,31 +172,72 @@ bool Scheduler::empty() {
   return false;
 }
 
+//------------------
+// MEMORY MANAGMENT
+//-----------------
+
+void Scheduler::deallocateMemory(Pcb &process) {
+
+  // allow addresses to be overwritten flips bit to zero //
+  for (int i = process.pLoadAddress; i <= process.pLoadAddress + process.pSize;
+       i++) {
+    machine.ram.mem[i][1] = 0;
+  }
+
+  // deallocate from vmem and vmemlookup //
+  machine.ram.vMemory.erase(machine.ram.vMemory.begin() +
+                            machine.ram.vMemoryLookup.at(process.name));
+  machine.ram.vMemoryLookup.erase(process.name);
+  if (verbosityFlag == true) {
+
+    printf("[SC]::dalo - %s\n", process.name.c_str());
+  }
+}
+
+int Scheduler::allocateMemory(Pcb &process) {
+
+  // creates pcb and flips the memory allocation bits to 1
+
+  // memory allocation //
+  for (int i = process.pLoadAddress; i <= process.pLoadAddress + process.pSize;
+       i++) {
+    machine.ram.mem[i][1] = 1;
+  }
+  if (verbosityFlag == true) {
+    printf("[SC]::allo - pId = %d\n", process.pId);
+    printf("[SC]::allo - pState = %d\n", process.pState);
+  }
+
+  return 0;
+}
+
 // ----------------
 // CONTEXT FUNCTIONS
 // ----------------
 
 int Scheduler::contextToCpu(Pcb &process) {
   // load pcb contents into cpu //
-  machine.PC = process.pc;
-  machine.Z = process.z;
+  machine.PC = process.PC;
+  machine.Z = process.Z;
 
   for (int i = 0; i <= 6; i++) {
-    machine.Reg[i] = process.reg[i];
+    machine.Reg[i] = process.Reg[i];
   }
 
-  printf("[SCH][PRC %d] context to cpu -- pc = %d\n", process.pId, machine.PC);
+  // printf("[OS][SCH][PRC %d] context to cpu - pc = %d\n", process.pId,
+  // machine.PC);
   return 0;
 }
 
 int Scheduler::contextToPcb(Pcb &process) {
   // load contents from cpu to pcb //
-  process.pc = machine.PC;
-  process.z = machine.Z;
+  process.PC = machine.PC;
+  process.Z = machine.Z;
   for (int i = 0; i <= 6; i++) {
-    process.reg[i] = machine.Reg[i];
+    process.Reg[i] = machine.Reg[i];
   }
-  printf("[SCH][PRC %d] context to pcb -- pc = %d\n", process.pId, machine.PC);
+  // printf("[OS][SCH][PRC %d] context to pcb - pc = %d\n", process.pId,
+  // machine.PC);
 
   return 0;
 }
@@ -182,53 +256,102 @@ int Scheduler::setClock(Pcb &process) {
   return 0;
 }
 
-void Scheduler::deallocateMemory(Pcb &process) {
-
-  // allow addresses to be overwritten flips bit to zero //
-  for (int i = process.pLoadAddress; i <= process.pLoadAddress + process.pSize;
-       i++) {
-    machine.ram.mem[i][1] = 0;
-  }
-
-  // deallocate from vmem and vmemlookup //
-  machine.ram.vMemory.erase(machine.ram.vMemory.begin() +
-                            machine.ram.vMemoryLookup.at(process.name));
-  machine.ram.vMemoryLookup.erase(process.name);
-
-  printf("[SCH][DEALLOC][%s]\n\n", process.name.c_str());
-}
-
 // -------------------------
 // Interrupt Service Routine
 // -------------------------
 
 void Scheduler::interruptServiceRoutine(Pcb &process, int returnCode) {
-  printf("[SCH][IRS] -- interrupt service routine started\n");
+  // printf("[SCH][IRS] -- interrupt service routine started\n");
   switch (returnCode) {
   case PRINT:
-    printf("\nprint interrupt\n\n");
+    switch (machine.ram.mem[process.Reg[0]][0]) {
+      //'"' STRING PRINT
+    case 34:
+      irsPrintString(process);
+      break;
+      // CHAR PRINT
+    default:
+      irsPrintChar(process);
+      break;
+    }
     break;
   case HALT:
     printf("halt\n");
     break;
-  case FORK:
-    printf("halt\n");
+  case FORK: {
+    if (verbosityFlag == true) {
+      printf("[SC]::irs --fork\n");
+    }
+    irsVFork(process);
     break;
+  }
   case WAIT:
-    printf("wait\n");
+    if (verbosityFlag == true) {
+      printf("[SC]::irs --wait\n");
+    }
     break;
   case INPUT:
-    printf("input\n");
+    if (verbosityFlag == true) {
+      printf("[SC]::irs --input\n");
+    }
     break;
   }
   return;
 }
 
-int Scheduler::fork(Pcb &process) {
+int Scheduler::irsVFork(Pcb &process) {
 
   // copy the pcb with context //
-  Pcb *cPcb = new Pcb(process);
+  Pcb *child = new Pcb(process);
   // load child ptr into parent //
-  process.pChild = cPcb;
+  process.pChild = child;
+  machine.ram.vMemory.push_back(child);
+  machine.ram.vMemoryLookup[child->name] = machine.ram.vMemory.size() - 1;
+  readyQueue.push_back(child);
+  process.updateState(READY);
+  currentIdCount += 1;
+  // sets z to 1 to indicate that it is the child program
+  child->Z = 1;
+  return 0;
+}
+
+int Scheduler::irsWait(Pcb &process) {}
+
+int Scheduler::irsPrintString(Pcb &process) {
+  // STRING PRINT
+  process.Reg[0] += 1;
+  while (machine.ram.mem[process.Reg[0]][0] != 34) {
+    switch (machine.ram.mem[process.Reg[0]][0]) {
+    case 92: //'\' = newline char
+      printf("\n");
+      process.Reg[0] += 1;
+      break;
+    case 36: //'$' = space char
+      printf(" ");
+      process.Reg[0] += 1;
+      break;
+    default:
+      printf("%c", machine.ram.mem[process.Reg[0]][0]);
+      process.Reg[0] += 1;
+      break;
+    }
+  }
+  return 0;
+}
+
+int Scheduler::irsPrintChar(Pcb &process) {
+
+  switch (machine.ram.mem[process.Reg[0]][0]) {
+  case 92: //'\' = newline char
+    printf("\n");
+    break;
+  case 36: //'$' = space char
+    printf(" ");
+    break;
+  default:
+    printf("%c", machine.ram.mem[process.Reg[0]][0]);
+    break;
+  }
+
   return 0;
 }

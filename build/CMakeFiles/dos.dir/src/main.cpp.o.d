@@ -367,6 +367,7 @@ CMakeFiles/dos.dir/src/main.cpp.o: \
  /home/dean/operatingSystems2/src/./kernel/errorhandler.h \
  /home/dean/operatingSystems2/src/./kernel/../hardware/vm.h \
  /home/dean/operatingSystems2/src/./kernel/loader.h \
+ /home/dean/operatingSystems2/src/./kernel/processLogger.h \
  /home/dean/operatingSystems2/src/./kernel/scheduler.h \
  /home/dean/operatingSystems2/src/./shell/shell.h \
  /home/dean/operatingSystems2/src/./shell/../kernel/kernel.h
