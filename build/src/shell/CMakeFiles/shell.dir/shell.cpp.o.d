@@ -367,6 +367,6 @@ src/shell/CMakeFiles/shell.dir/shell.cpp.o: \
  /usr/include/c++/15/bits/fs_dir.h /usr/include/c++/15/bits/fs_ops.h \
  /usr/include/c++/15/memory_resource /usr/include/c++/15/barrier \
  /usr/include/c++/15/latch /usr/include/c++/15/syncstream \
+ /home/dean/operatingSystems2/src/shell/../kernel/processlog.h \
  /home/dean/operatingSystems2/src/shell/../kernel/loader.h \
- /home/dean/operatingSystems2/src/shell/../kernel/processLogger.h \
  /home/dean/operatingSystems2/src/shell/../kernel/scheduler.h

@@ -7,6 +7,7 @@ class Shell {
 public:
   Shell(Kernel &kernel);
   Kernel &kernel;
+  bool verbosityFlag = false;
 
   std::unordered_map<std::string, int (Shell::*)(std::vector<std::string>)>
       functionMap;
@@ -31,6 +32,8 @@ public:
 
   int shellHelp(std::vector<std::string> argList);
 
+  int shellVerbose(std::vector<std::string> argList);
+
   /////////////////////////////
   // MEMORY CONTROL PROGRAMS //
   /////////////////////////////
@@ -52,8 +55,6 @@ public:
   int shellGannt(std::vector<std::string> argList);
 
   int shellCoreDump(std::vector<std::string> argList);
-
-  int shellVerbose(std::vector<std::string> argList);
 
   int shellExit(std::vector<std::string> argList);
 };

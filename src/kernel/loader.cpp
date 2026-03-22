@@ -38,7 +38,9 @@ std::tuple<int, std::vector<int>> Loader::loadProgram(std::string filePath) {
                      std::ios::binary); // FILESTREAM ERRORS NEED TO WORK
 
   if (!file.is_open()) {
-    printf("[LD]::ldpr - ERROR/200 - file not found\n");
+    if (verbosityFlag == true) {
+      printf("[LD]::ldpr - ERROR/200 - file not found\n");
+    }
     return std::make_tuple(200, asmHeader);
     ;
   }
@@ -56,16 +58,20 @@ std::tuple<int, std::vector<int>> Loader::loadProgram(std::string filePath) {
   }
   //  MEMORY OVERFLOW
   if (fileLoadAddress + fileSize > MEM_SIZE_KB) {
-    printf("[LD]::ldpr - 201 - memory overflow, load "
-           "cancelled\n");
+    if (verbosityFlag == true) {
+      printf("[LD]::ldpr - 201 - memory overflow, load "
+             "cancelled\n");
+    }
     return std::make_tuple(201, asmHeader);
   }
 
   // MEMORY IS OCCUPIED
   if (verifyMemoryIsUnoccupied(asmHeader) != true) {
-    printf(
-        "[LD]::ldpr - ERROR/202 - attempted to overwrite existing memory, load "
-        "cancelled\n");
+    if (verbosityFlag == true) {
+      printf("[LD]::ldpr - ERROR/202 - attempted to overwrite existing memory, "
+             "load "
+             "cancelled\n");
+    }
     return std::make_tuple(202, asmHeader);
     ;
   }

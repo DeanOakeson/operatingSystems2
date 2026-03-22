@@ -57,6 +57,7 @@ int VirtualMachine::fetchDecodeExecute(Pcb &process) {
 
   opcode = ram.mem[PC][0];
   incrementPC = true;
+  clock++;
 
   switch (opcode) {
   // ARITHMATIC //
@@ -227,8 +228,6 @@ int VirtualMachine::fetchDecodeExecute(Pcb &process) {
       return 10;
     }
   }
-
-  clock++;
 
   if (incrementPC) {
     PC += 6;

@@ -8,7 +8,7 @@ int Kernel::kernelPrintGanntChart() {
   // HANDLE ERROR LIKE NOT HAVING ANYTHING TO PRINT
 
   printf("\n[OS][GANNT] \n===========\n");
-  processLogger.printGannt();
+  // processLogger.printGannt();
   return 0;
 }
 
@@ -16,55 +16,51 @@ void Kernel::setVerbosityFlag() {
   if (verbosityFlag == true) {
     verbosityFlag = false;
     scheduler.setVerbosityFlag();
-    processLogger.setVerbosityFlag();
+    errorHandler.setVerbosityFlag();
     loader.setVerbosityFlag();
     return;
   }
 
   verbosityFlag = true;
   scheduler.setVerbosityFlag();
-  processLogger.setVerbosityFlag();
+  errorHandler.setVerbosityFlag();
   loader.setVerbosityFlag();
 }
 
-int Kernel::kernelExecuteProgram(std::multimap<int, std::string> argMap) {
+std::multimap<int, std::string>
+Kernel::kernelExecuteProgram(std::multimap<int, std::string> argMap) {
+  std::multimap<int, std::string> returnMap;
   auto start = std::chrono::high_resolution_clock::now();
   int returnCode;
   int clockImage = machine.clock;
 
   while (!argMap.empty() || !scheduler.empty()) {
-
-    if (!argMap.empty()) {
-      auto key = argMap.begin()->first;
-      //  LOAD ALL ELEMENTS THAT ARRIVE AT A SPECIFIC TIME
-      if (argMap.begin()->first + clockImage == machine.clock) {
-        auto range = argMap.equal_range(key);
-        for (auto i = range.first; i != range.second; ++i) {
-          returnCode = kernelLoadProgram(i->second, i->first);
-        }
-        argMap.erase(key);
+    // Drain all programs whose arrival time has been reached
+    while (!argMap.empty() &&
+           argMap.begin()->first + clockImage <= machine.clock) {
+      auto arrival = argMap.begin()->first;
+      auto range = argMap.equal_range(arrival);
+      for (auto i = range.first; i != range.second; ++i) {
+        returnCode = kernelLoadProgram(i->second, i->first);
+        returnMap.insert({returnCode, i->second});
       }
+      argMap.erase(arrival);
     }
-    scheduler.firstComeFirstServe();
+
+    scheduler.roundRobin(3);
   }
   auto end = std::chrono::high_resolution_clock::now();
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
           .count();
-
   if (verbosityFlag == true) {
-    std::cout << "[OS]::exec --cpu runtime = ";
-    std::cout << duration;
-    std::cout << " m/s \n";
+    std::cout << "[OS]::exec - cpu runtime = " << duration << "m/s \n";
   }
-
-  while (!scheduler.terminatedQueue.empty()) {
-    processLogger.logProcess(*scheduler.popQueue(TERMINATED));
+  if (!scheduler.terminatedQueue.empty()) {
+    // push completion time onto process log
+    errorHandler.logTerminatedProcesses(scheduler.terminatedQueue);
   }
-
-  // gannt = scheduler.ganntDataDump();
-  // error = scheduler.errorDataDump();
-  return 0;
+  return returnMap;
 }
 
 int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
@@ -75,8 +71,7 @@ int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
   returnTuple = loader.loadProgram(filePath);
   returnCode = std::get<0>(returnTuple);
   asmHeader = std::get<1>(returnTuple);
-
-  asmHeader.push_back(arrivalTime);
+  asmHeader.push_back(machine.clock);
 
   // IF LOAD SUCCEDED THEN CREATE A PCB ALLOCATE MEMORY AND LOAD IT INTO
   // SCHEDULING QUEUES
@@ -95,10 +90,10 @@ int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
 int Kernel::kernelRun() {
   int returnCode;
   while (!scheduler.empty()) {
-    returnCode = scheduler.firstComeFirstServe();
+    returnCode = scheduler.roundRobin(3);
   }
-  while (!scheduler.terminatedQueue.empty()) {
-    processLogger.logProcess(*scheduler.popQueue(TERMINATED));
+  if (!scheduler.terminatedQueue.empty()) {
+    errorHandler.logTerminatedProcesses(scheduler.terminatedQueue);
   }
   return 0;
 }
@@ -129,12 +124,17 @@ int Kernel::kernelMemDumpAll() {
   return 1;
 }
 
-int Kernel::kernelCoreDump() {
-  errorHandler.coreDump();
-  return 0;
+int Kernel::kernelCoreDump(int index) {
+  ProcessLog *pPrcLog = errorHandler.getCpuLog(index);
+  if (pPrcLog != NULL) {
+    errorHandler.coreDump(*pPrcLog);
+    return 0;
+  }
+  errorHandler.errorList.push_back(303);
+  return 1;
 }
 
 int Kernel::kernelErrorDump() {
-  errorHandler.errorDump();
-  return 0;
+  int returnCode = errorHandler.errorDump();
+  return returnCode;
 }

@@ -3,6 +3,17 @@
 
 Shell::Shell(Kernel &kernel) : kernel(kernel) {}
 
+int Shell::shellVerbose(std::vector<std::string> argList) {
+  kernel.setVerbosityFlag();
+  if (verbosityFlag == true) {
+    verbosityFlag = false;
+    return 0;
+  }
+  verbosityFlag = true;
+
+  return 0;
+}
+
 void Shell::initPath() {
   functionMap["run"] = &Shell::shellRun;
   functionMap["load"] = &Shell::shellLoad;
@@ -84,7 +95,9 @@ int Shell::shellHelp(std::vector<std::string> argList) {
 }
 
 int Shell::shellExit(std::vector<std::string> argList) {
-  std::cout << "[SH]::exit\n";
+  if (verbosityFlag == true) {
+    printf("[SH]::exit\n");
+  }
   return 9;
 }
 
@@ -94,16 +107,25 @@ int Shell::shellExit(std::vector<std::string> argList) {
 
 int Shell::shellLoad(std::vector<std::string> argList) {
 
+  int returnCode;
+
   switch (argList.size()) {
   case 1:
-    // error message
+    printf("[SH]::load -- no file provided\n");
+    return 1;
   case 2:
     // load ...
-    kernel.kernelLoadProgram(argList[1]);
+    returnCode = kernel.kernelLoadProgram(argList[1]);
+    if (returnCode == 1) {
+      printf("[SH]::load -- attemted load failed\n");
+    }
     return 0;
   case 3:
     // load -v ...
-    kernel.kernelLoadProgram(argList[2]);
+    returnCode = kernel.kernelLoadProgram(argList[2]);
+    if (returnCode == 1) {
+      printf("[SH]::load -- attemted load failed\n");
+    }
     kernel.kernelMemDump(argList[2]);
     return 0;
   }
@@ -112,9 +134,13 @@ int Shell::shellLoad(std::vector<std::string> argList) {
 }
 
 int Shell::shellErrorDump(std::vector<std::string> argList) {
+  int returnCode;
   switch (argList.size()) {
   case 1:
-    kernel.kernelErrorDump();
+    returnCode = kernel.kernelErrorDump();
+    if (returnCode == 1) {
+      printf("[SH]::edmp -- no logged errors\n");
+    }
     return 0;
   }
   printf("[SH]::load -- too many arguments\n");
@@ -145,31 +171,49 @@ int Shell::shellRun(std::vector<std::string> argList) {
 
 int Shell::shellExecute(std::vector<std::string> argList) {
   std::multimap<int, std::string> argMap;
+  std::multimap<int, std::string> returnMap;
 
-  // FIX THIS
-  //  KEY IS ARRIVAL TIME SO THAT IT IS SORTED CHRONO
-  int i = 1;
-  int arrivalTime;
-  while (i < argList.size()) {
-    printf("%s", argList[i].c_str());
-    try {
-      arrivalTime = stoi(argList.at(i + 1));
-    } catch (const std::invalid_argument) {
-      printf("%s\n", argList[i].c_str());
-      argMap.insert({0, argList[i]});
-      i++;
-      continue;
-    } catch (const std::out_of_range) {
-      argMap.insert({0, argList[i]});
-      i++;
-      continue;
-    }
-    argMap.insert({arrivalTime, argList[i]});
-    i += 2;
-    continue;
+  // argList[0] is the command name ("exec"), so start at index 1
+  // Format: <program> [arrivalTime] <program> [arrivalTime] ...
+  // If no arrival time follows a program, default to 0
+
+  if (argList.size() == 1) {
+    printf("[SH]::exec -- no file provided\n");
   }
 
-  kernel.kernelExecuteProgram(argMap);
+  int i = 1; // skip the command name
+  while (i < argList.size()) {
+    std::string program = argList[i];
+    i++;
+
+    // Check if the next argument is an arrival time (a number)
+    int arrivalTime = 0;
+    if (i < argList.size()) {
+      try {
+        arrivalTime = stoi(argList[i]);
+        i++; // consume the number
+      } catch (std::invalid_argument &) {
+        arrivalTime = 0; // next arg is another program, not a time
+      }
+    }
+
+    argMap.insert({arrivalTime, program});
+  }
+
+  if (verbosityFlag == true) {
+    for (auto &[time, prog] : argMap) {
+      printf("[SH]::exec - time = %d", time);
+      printf(", prog = %s\n", prog.c_str());
+    }
+  }
+
+  returnMap = kernel.kernelExecuteProgram(argMap);
+
+  for (auto it = returnMap.begin(); it != returnMap.end(); ++it) {
+    if (it->first == 1)
+      printf("[SH]::exec - failed to load '%s'\n", it->second.c_str());
+  }
+
   return 0;
 }
 
@@ -181,13 +225,8 @@ int Shell::shellGannt(std::vector<std::string> argList) {
     kernel.kernelPrintGanntChart();
     return 0;
   }
-  printf("[SH]::gant -- not valid usage\n");
+  printf("[SH]::gant - not valid usage\n");
   return 1;
-}
-
-int Shell::shellVerbose(std::vector<std::string> argList) {
-  kernel.setVerbosityFlag();
-  return 0;
 }
 
 /////////////////////
@@ -195,7 +234,11 @@ int Shell::shellVerbose(std::vector<std::string> argList) {
 /////////////////////
 
 int Shell::shellCoreDump(std::vector<std::string> argList) {
-  kernel.kernelCoreDump();
+  int returnCode;
+  returnCode = kernel.kernelCoreDump();
+  if (returnCode == 1) {
+    printf("[SH]::cdmp - kernelCoreDump() failed\n");
+  }
   return 0;
 }
 
@@ -213,7 +256,7 @@ int Shell::shellMemDump(std::vector<std::string> argList) {
   }
   // too many arguments //
   if (argList.size() > 2) {
-    printf("[SH]::mudmp too many arguments\n");
+    printf("[SH]::mdmp - too many arguments\n");
     return 1;
   }
   return 0;

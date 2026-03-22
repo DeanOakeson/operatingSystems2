@@ -125,19 +125,19 @@ src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kernel.dir/scheduler.cpp.s"
 	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/operatingSystems2/src/kernel/scheduler.cpp -o CMakeFiles/kernel.dir/scheduler.cpp.s
 
-src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o: src/kernel/CMakeFiles/kernel.dir/flags.make
-src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o: /home/dean/operatingSystems2/src/kernel/processLogger.cpp
-src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o: src/kernel/CMakeFiles/kernel.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o"
-	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o -MF CMakeFiles/kernel.dir/processLogger.cpp.o.d -o CMakeFiles/kernel.dir/processLogger.cpp.o -c /home/dean/operatingSystems2/src/kernel/processLogger.cpp
+src/kernel/CMakeFiles/kernel.dir/processlog.cpp.o: src/kernel/CMakeFiles/kernel.dir/flags.make
+src/kernel/CMakeFiles/kernel.dir/processlog.cpp.o: /home/dean/operatingSystems2/src/kernel/processlog.cpp
+src/kernel/CMakeFiles/kernel.dir/processlog.cpp.o: src/kernel/CMakeFiles/kernel.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object src/kernel/CMakeFiles/kernel.dir/processlog.cpp.o"
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT src/kernel/CMakeFiles/kernel.dir/processlog.cpp.o -MF CMakeFiles/kernel.dir/processlog.cpp.o.d -o CMakeFiles/kernel.dir/processlog.cpp.o -c /home/dean/operatingSystems2/src/kernel/processlog.cpp
 
-src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kernel.dir/processLogger.cpp.i"
-	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dean/operatingSystems2/src/kernel/processLogger.cpp > CMakeFiles/kernel.dir/processLogger.cpp.i
+src/kernel/CMakeFiles/kernel.dir/processlog.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/kernel.dir/processlog.cpp.i"
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/dean/operatingSystems2/src/kernel/processlog.cpp > CMakeFiles/kernel.dir/processlog.cpp.i
 
-src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kernel.dir/processLogger.cpp.s"
-	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/operatingSystems2/src/kernel/processLogger.cpp -o CMakeFiles/kernel.dir/processLogger.cpp.s
+src/kernel/CMakeFiles/kernel.dir/processlog.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/kernel.dir/processlog.cpp.s"
+	cd /home/dean/operatingSystems2/build/src/kernel && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/dean/operatingSystems2/src/kernel/processlog.cpp -o CMakeFiles/kernel.dir/processlog.cpp.s
 
 # Object files for target kernel
 kernel_OBJECTS = \
@@ -145,7 +145,7 @@ kernel_OBJECTS = \
 "CMakeFiles/kernel.dir/loader.cpp.o" \
 "CMakeFiles/kernel.dir/errorhandler.cpp.o" \
 "CMakeFiles/kernel.dir/scheduler.cpp.o" \
-"CMakeFiles/kernel.dir/processLogger.cpp.o"
+"CMakeFiles/kernel.dir/processlog.cpp.o"
 
 # External object files for target kernel
 kernel_EXTERNAL_OBJECTS =
@@ -154,7 +154,7 @@ src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o
 src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/loader.cpp.o
 src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o
 src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o
-src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o
+src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/processlog.cpp.o
 src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/build.make
 src/kernel/libkernel.a: src/kernel/CMakeFiles/kernel.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/dean/operatingSystems2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library libkernel.a"

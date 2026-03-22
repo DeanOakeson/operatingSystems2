@@ -3,7 +3,6 @@
 
 #include "errorhandler.h"
 #include "loader.h"
-#include "processLogger.h"
 #include "scheduler.h"
 #include <chrono>
 
@@ -18,7 +17,6 @@ public:
   ErrorHandler errorHandler;
   Loader loader;
   Scheduler scheduler;
-  ProcessLogger processLogger;
   VirtualMachine &machine;
 
   Kernel(VirtualMachine &machine);
@@ -27,7 +25,8 @@ public:
   // PROGRAM INTERACTION //
   /////////////////////////
   int kernelLoadProgram(std::string filePath, int arrivalTime = 0);
-  int kernelExecuteProgram(std::multimap<int, std::string> argMap);
+  std::multimap<int, std::string>
+  kernelExecuteProgram(std::multimap<int, std::string> argMap);
   int kernelRun();
 
   ////////////////////////
@@ -40,7 +39,7 @@ public:
   /////////////////////
   // CPU INTERACTION //
   /////////////////////
-  int kernelCoreDump();
+  int kernelCoreDump(int index = -1);
 
   //////////////
   /// LOGGING //

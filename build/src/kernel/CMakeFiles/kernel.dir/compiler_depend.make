@@ -473,7 +473,8 @@ src/kernel/CMakeFiles/kernel.dir/errorhandler.cpp.o: /home/dean/operatingSystems
   /usr/include/c++/15/memory_resource \
   /usr/include/c++/15/barrier \
   /usr/include/c++/15/latch \
-  /usr/include/c++/15/syncstream
+  /usr/include/c++/15/syncstream \
+  /home/dean/operatingSystems2/src/kernel/processlog.h
 
 src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o: /home/dean/operatingSystems2/src/kernel/kernel.cpp \
   /usr/include/stdc-predef.h \
@@ -949,8 +950,8 @@ src/kernel/CMakeFiles/kernel.dir/kernel.cpp.o: /home/dean/operatingSystems2/src/
   /usr/include/c++/15/barrier \
   /usr/include/c++/15/latch \
   /usr/include/c++/15/syncstream \
+  /home/dean/operatingSystems2/src/kernel/processlog.h \
   /home/dean/operatingSystems2/src/kernel/loader.h \
-  /home/dean/operatingSystems2/src/kernel/processLogger.h \
   /home/dean/operatingSystems2/src/kernel/scheduler.h
 
 src/kernel/CMakeFiles/kernel.dir/loader.cpp.o: /home/dean/operatingSystems2/src/kernel/loader.cpp \
@@ -1427,9 +1428,9 @@ src/kernel/CMakeFiles/kernel.dir/loader.cpp.o: /home/dean/operatingSystems2/src/
   /usr/include/c++/15/latch \
   /usr/include/c++/15/syncstream
 
-src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o: /home/dean/operatingSystems2/src/kernel/processLogger.cpp \
+src/kernel/CMakeFiles/kernel.dir/processlog.cpp.o: /home/dean/operatingSystems2/src/kernel/processlog.cpp \
   /usr/include/stdc-predef.h \
-  /home/dean/operatingSystems2/src/kernel/processLogger.h \
+  /home/dean/operatingSystems2/src/kernel/processlog.h \
   /home/dean/operatingSystems2/src/hardware/vm.h \
   /home/dean/operatingSystems2/src/hardware/ram.h \
   /home/dean/operatingSystems2/src/hardware/pcb.h \
@@ -2534,6 +2535,8 @@ src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o: /home/dean/operatingSystems2/s
 
 /usr/include/c++/15/tr1/modified_bessel_func.tcc:
 
+/home/dean/operatingSystems2/src/kernel/processlog.cpp:
+
 /usr/include/c++/15/tr1/hypergeometric.tcc:
 
 /usr/include/c++/15/tr1/exp_integral.tcc:
@@ -2954,8 +2957,6 @@ src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o: /home/dean/operatingSystems2/s
 
 /usr/include/assert.h:
 
-/home/dean/operatingSystems2/src/kernel/processLogger.cpp:
-
 /usr/lib/gcc/x86_64-linux-gnu/15/include/float.h:
 
 /usr/include/c++/15/condition_variable:
@@ -3144,6 +3145,8 @@ src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o: /home/dean/operatingSystems2/s
 
 /usr/include/x86_64-linux-gnu/c++/15/bits/gthr.h:
 
+/home/dean/operatingSystems2/src/kernel/processlog.h:
+
 /usr/include/c++/15/bits/localefwd.h:
 
 /usr/include/c++/15/pstl/glue_memory_defs.h:
@@ -3225,8 +3228,6 @@ src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o: /home/dean/operatingSystems2/s
 /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
 
 /usr/include/asm-generic/types.h:
-
-/home/dean/operatingSystems2/src/kernel/processLogger.h:
 
 /usr/include/c++/15/bits/functexcept.h:
 

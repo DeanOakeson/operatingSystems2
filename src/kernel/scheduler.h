@@ -42,24 +42,24 @@ public:
   bool empty();
 
   int firstComeFirstServe();
-  int roundRobin();
+  int roundRobin(int quantum);
   int multiLevelFeedbackQueue();
 
 private:
+  std::queue<Pcb *> priorityQueue1;
   std::queue<Pcb *> newQueue;
   std::deque<Pcb *> readyQueue;
-  std::queue<Pcb *> runningQueue;
   std::queue<Pcb *> waitingQueue;
 
   bool verbosityFlag = false;
 
   Pcb *pRunningPcb = NULL;
   int currentIdCount = 0;
+  int quantumClock = 0;
 
   void deallocateMemory(Pcb &process);
   int contextToCpu(Pcb &process);
   int contextToPcb(Pcb &process);
-  void updateState(Pcb &process, int state);
   int setClock(Pcb &process);
   int clearCpu();
 
@@ -68,9 +68,11 @@ private:
   //-----------------------
 
   void interruptServiceRoutine(Pcb &process, int returnCode);
-  int irsVFork(Pcb &process);
-  int irsWait(Pcb &process);
-  int irsPrintString(Pcb &process);
-  int irsPrintChar(Pcb &process);
+  int isrVFork(Pcb &process);
+  int isrWait(Pcb &process);
+  int isrRandomNumberGen();
+  int isrInputChar();
+  int isrPrintString(Pcb &process);
+  int isrPrintChar(Pcb &process);
 };
 #endif

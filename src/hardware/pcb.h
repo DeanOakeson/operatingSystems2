@@ -7,18 +7,23 @@ class Pcb {
 
 public:
   std::string name;
+  std::vector<int> cpuTimeSlices = {};
 
   int pId = -1;
   int pState = 0;
-  int pArrivalTime;
   int pLoadAddress;
+  int pEndAddress = 0;
   int pFirstInstruction = 0;
   int pSize = 0;
-  int pEndAddress = 0;
   int pKernelMode = 0;
-  Pcb *pChild = NULL;
+  int pArrivalTime = 0;
+  int pTerminationTime = 0;
 
-  std::vector<int> cpuTimeSlices;
+  int wait = 0;
+  int response = 0;
+  int turnAround = 0;
+
+  Pcb *pChild = NULL;
 
   // ---------
   // CPU IMAGE
@@ -48,7 +53,8 @@ public:
   Pcb(const Pcb &pcb)
       : pLoadAddress{pcb.pLoadAddress}, pEndAddress{pcb.pEndAddress},
         pSize{pcb.pSize}, pFirstInstruction{pcb.pFirstInstruction},
-        pId{pcb.pId + 1}, PC{pcb.PC}, name{pcb.name + ".child"} {}
+        pId{pcb.pId + 1}, PC{pcb.PC}, name{pcb.name + ".child"}, wait{0},
+        response{0}, turnAround{0} {}
 
   std::size_t operator()(const Pcb &pcb) const {
     return std::hash<int>()(pcb.pId);
@@ -59,7 +65,28 @@ public:
     pState = newState;
     // printf("%d\n", pState);
   }
-  void captureTimeSlice(int clockImage) { cpuTimeSlices.push_back(clockImage); }
+  void captureTimeSlice(int clockImage) {
+    calculateWait(clockImage);
+    cpuTimeSlices.push_back(clockImage);
+  }
+
+  void calculateWait(int clockImage) {
+    int lastTimeSlice;
+    if (cpuTimeSlices.empty()) {
+      lastTimeSlice = pArrivalTime;
+    } else {
+      lastTimeSlice = cpuTimeSlices.back();
+    }
+
+    int gap =
+        clockImage - lastTimeSlice - 1; // subtract 1, consecutive = 0 wait
+    if (gap > 0) {
+      wait += gap;
+    }
+  }
+
+  void calculateResponse() { response = cpuTimeSlices[0] - pArrivalTime; }
+  void calculateTurnAround() { turnAround = pTerminationTime - pArrivalTime; }
 };
 
 #endif

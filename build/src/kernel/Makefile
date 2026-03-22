@@ -202,29 +202,29 @@ loader.cpp.s:
 	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/loader.cpp.s
 .PHONY : loader.cpp.s
 
-processLogger.o: processLogger.cpp.o
-.PHONY : processLogger.o
+processlog.o: processlog.cpp.o
+.PHONY : processlog.o
 
 # target to build an object file
-processLogger.cpp.o:
-	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.o
-.PHONY : processLogger.cpp.o
+processlog.cpp.o:
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/processlog.cpp.o
+.PHONY : processlog.cpp.o
 
-processLogger.i: processLogger.cpp.i
-.PHONY : processLogger.i
+processlog.i: processlog.cpp.i
+.PHONY : processlog.i
 
 # target to preprocess a source file
-processLogger.cpp.i:
-	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.i
-.PHONY : processLogger.cpp.i
+processlog.cpp.i:
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/processlog.cpp.i
+.PHONY : processlog.cpp.i
 
-processLogger.s: processLogger.cpp.s
-.PHONY : processLogger.s
+processlog.s: processlog.cpp.s
+.PHONY : processlog.s
 
 # target to generate assembly for a file
-processLogger.cpp.s:
-	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/processLogger.cpp.s
-.PHONY : processLogger.cpp.s
+processlog.cpp.s:
+	cd /home/dean/operatingSystems2/build && $(MAKE) $(MAKESILENT) -f src/kernel/CMakeFiles/kernel.dir/build.make src/kernel/CMakeFiles/kernel.dir/processlog.cpp.s
+.PHONY : processlog.cpp.s
 
 scheduler.o: scheduler.cpp.o
 .PHONY : scheduler.o
@@ -268,9 +268,9 @@ help:
 	@echo "... loader.o"
 	@echo "... loader.i"
 	@echo "... loader.s"
-	@echo "... processLogger.o"
-	@echo "... processLogger.i"
-	@echo "... processLogger.s"
+	@echo "... processlog.o"
+	@echo "... processlog.i"
+	@echo "... processlog.s"
 	@echo "... scheduler.o"
 	@echo "... scheduler.i"
 	@echo "... scheduler.s"
