@@ -18,9 +18,6 @@ void Scheduler::setVerbosityFlag() {
 // Scheduling algos
 // ----------------
 int Scheduler::firstComeFirstServe() {
-  printf("[fcfs] tick %d | running: %s | ready: %zu | waiting: %zu\n",
-         machine.clock, pRunningPcb ? pRunningPcb->name.c_str() : "NULL",
-         readyQueue.size(), waitingQueue.size());
   // FIRST COME FIRST SERVE //
   // must be wrapped in a loop to run an entire program //
   // each function call advances the clock one step //
@@ -33,7 +30,7 @@ int Scheduler::firstComeFirstServe() {
   }
 
   // if running queue is empty process prep
-  if (pRunningPcb == NULL && !readyQueue.empty()) {
+  if (pRunningPcb == NULL && !readyQueue0.empty()) {
     pRunningPcb = popQueue(READY);
     pRunningPcb->updateState(RUNNING);
     clearCpu();
@@ -92,14 +89,14 @@ int Scheduler::roundRobin(int quantum) {
   }
 
   // if running queue is empty process prep
-  if (pRunningPcb == NULL && !readyQueue.empty()) {
+  if (pRunningPcb == NULL && !readyQueue0.empty()) {
     pRunningPcb = popQueue(READY);
     clearCpu();
     contextToCpu(*pRunningPcb);
   }
 
   // if quantum is up context swap
-  if (quantumClock % quantum == 0 && !readyQueue.empty()) {
+  if (quantumClock % quantum == 0 && !readyQueue0.empty()) {
     contextToPcb(*pRunningPcb);
     queuePcb(*pRunningPcb, READY);
     pRunningPcb = popQueue(READY);
@@ -149,7 +146,124 @@ int Scheduler::roundRobin(int quantum) {
   return 0;
 }
 
-int Scheduler::multiLevelFeedbackQueue() {}
+int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
+
+  int returnCode = 0;
+  int quantum0 = quantum;
+  int quantum1 = 6;
+  int quantum2 = quantum * 1000;
+  int quantumSet;
+
+  // SEND A NEW PCB TO READY
+  while (!newQueue.empty()) {
+    printf("pushing new\n");
+    queuePcb(*popQueue(NEW), READY);
+  }
+
+  ////////////////////////
+  // PREPERATION PHASE //
+  //////////////////////
+
+  // if running queue is empty process prep
+  // BAD LOGIC HERE
+  if (pRunningPcb == NULL && !readyQueue0.empty()) {
+    printf("popping from ready 0\n");
+    pRunningPcb = popQueue(READY0);
+    clearCpu();
+    contextToCpu(*pRunningPcb);
+  }
+
+  // take something from queue 1 if 0 is empty
+  else if (pRunningPcb == NULL && readyQueue0.empty() && !readyQueue1.empty()) {
+    printf("popping from ready 1\n");
+    pRunningPcb = popQueue(READY1);
+    clearCpu();
+    contextToCpu(*pRunningPcb);
+  }
+
+  // take process from queue 2 if 1 and 0 are empty
+  else if (pRunningPcb == NULL && readyQueue0.empty() && readyQueue1.empty() &&
+           !readyQueue2.empty()) {
+    printf("popping from ready 2\n");
+    pRunningPcb = popQueue(READY2);
+    clearCpu();
+    contextToCpu(*pRunningPcb);
+  }
+
+  // IMPLEMENT A VARIABALE QUANTUM
+  //  if quantum is up context swap
+
+  if (pRunningPcb != NULL) {
+    switch (pRunningPcb->pPriority) {
+    case 0:
+      quantumSet = quantum0;
+      break;
+    case 1:
+      quantumSet = quantum1;
+      break;
+    case 2:
+      quantumSet = quantum2;
+      break;
+    }
+  }
+  if (quantumClock % quantumSet == 0 && !readyQueue0.empty()) {
+    printf("quantum set to %d\n", quantumSet);
+    pRunningPcb->incrementQuatumCount();
+    contextToPcb(*pRunningPcb);
+    queuePcb(*pRunningPcb, READY);
+    pRunningPcb = popQueue(READY); // fix this logic here
+    pRunningPcb->updateState(RUNNING);
+    contextToCpu(*pRunningPcb);
+  }
+
+  // run process marked as running
+  if (pRunningPcb != NULL) {
+    returnCode = machine.fetchDecodeExecute(*pRunningPcb);
+    pRunningPcb->captureTimeSlice(machine.clock);
+    quantumClock += 1;
+    if (pRunningPcb->pQuantumCount >= 5) {
+      pRunningPcb->promotePriority();
+      pRunningPcb->pQuantumCount = 0;
+    }
+
+    if (verbosityFlag == true) {
+    }
+  } else {
+    machine.idle();
+    return 0;
+  }
+
+  // BE SURE THAT EVERTHING GETS BACK TO THE RIGHT READY QUEUE AFTER INTERUPT
+  //  swi return
+  if (returnCode >= 20) {
+    contextToPcb(*pRunningPcb);
+    queuePcb(*pRunningPcb, WAITING);
+    clearCpu();
+    interruptServiceRoutine(*pRunningPcb, returnCode);
+    pRunningPcb->decrementQuantumCount();
+    if (pRunningPcb->pQuantumCount < 0) {
+      pRunningPcb->demotePriority();
+    }
+    pRunningPcb = NULL;
+    return returnCode;
+  }
+
+  // process termination
+  if (returnCode == 10) {
+    contextToPcb(*pRunningPcb);
+    queuePcb(*pRunningPcb, TERMINATED);
+    deallocateMemory(*pRunningPcb);
+    pRunningPcb->calculateResponse();
+    pRunningPcb->calculateTurnAround();
+    if (verbosityFlag == true) {
+      printf("[SC]::mlfq - %s is terminating\n", pRunningPcb->name.c_str());
+    }
+    pRunningPcb = NULL;
+    return returnCode;
+  }
+
+  return 0;
+}
 
 // --------------
 // PCB and QUEUE Managment
@@ -187,8 +301,18 @@ void Scheduler::queuePcb(Pcb &process, int queue) {
     newQueue.push(&process);
     break;
   case (READY):
-    readyQueue.push_back(&process);
-    break;
+    if (process.pPriority == 0) {
+      readyQueue0.push_back(&process);
+      break;
+    }
+    if (process.pPriority == 1) {
+      readyQueue1.push_back(&process);
+      break;
+    }
+    if (process.pPriority == 2) {
+      readyQueue0.push_back(&process);
+      break;
+    }
   case (WAITING):
     waitingQueue.push(&process);
     break;
@@ -208,8 +332,20 @@ Pcb *Scheduler::popQueue(int queue) {
     newQueue.pop();
     return pPcb;
   case (READY):
-    pPcb = readyQueue.front();
-    readyQueue.pop_front();
+    pPcb = readyQueue0.front();
+    readyQueue0.pop_front();
+    return pPcb;
+  case (READY0):
+    pPcb = readyQueue0.front();
+    readyQueue0.pop_front();
+    return pPcb;
+  case (READY1):
+    pPcb = readyQueue1.front();
+    readyQueue1.pop_front();
+    return pPcb;
+  case (READY2):
+    pPcb = readyQueue2.front();
+    readyQueue2.pop_front();
     return pPcb;
   case (WAITING):
     pPcb = waitingQueue.front();
@@ -225,8 +361,8 @@ Pcb *Scheduler::popQueue(int queue) {
 
 bool Scheduler::empty() {
   // check if scheduler queues are empty //
-  if (readyQueue.empty() && newQueue.empty() && pRunningPcb == NULL &&
-      waitingQueue.empty()) {
+  if (newQueue.empty() && pRunningPcb == NULL && readyQueue0.empty() &&
+      readyQueue1.empty() && readyQueue2.empty() && waitingQueue.empty()) {
     return true;
   }
   return false;

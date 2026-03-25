@@ -216,21 +216,26 @@ void ErrorHandler::printGannt(Pcb &process, int globalStart, int globalEnd) {
 
   int j = 0;
   printf("\n");
+  int label = globalStart;
   for (int i = globalStart; i <= globalEnd; i++) {
+    // COLUMNS
+    if (i % 20 == 0 && i != 0) {
+      std::cout << "|" << label << " -- " << (label += 20) - 1 << std::endl;
+    }
     if (j < size && process.cpuTimeSlices[j] == i) {
       if (i == process.pTerminationTime) {
-        std::cout << "\033[33m" << i << " " << "\033[0m";
+        std::cout << "\033[33m" << "#" << " " << "\033[0m";
       } else {
-        std::cout << "\033[31m" << i << " " << "\033[0m";
+        std::cout << "\033[31m" << "#" << " " << "\033[0m";
       }
       j++;
 
     } else {
       if (i == process.pArrivalTime) {
-        std::cout << "\033[34m" << i << " " << "\033[0m";
+        std::cout << "\033[34m" << "#" << " " << "\033[0m";
       } else {
 
-        printf("%d ", i);
+        printf("# ");
       }
     }
   }

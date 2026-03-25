@@ -13,6 +13,9 @@ public:
 
   static const u_int8_t NEW = 1;
   static const u_int8_t READY = 2;
+  static const u_int8_t READY0 = 200;
+  static const u_int8_t READY1 = 211;
+  static const u_int8_t READY2 = 222;
   static const u_int8_t RUNNING = 3;
   static const u_int8_t WAITING = 4;
   static const u_int8_t TERMINATED = 5;
@@ -43,13 +46,15 @@ public:
 
   int firstComeFirstServe();
   int roundRobin(int quantum);
-  int multiLevelFeedbackQueue();
+  int multiLevelFeedbackQueue(int quantum, int scaler = 2);
 
 private:
-  std::queue<Pcb *> priorityQueue1;
   std::queue<Pcb *> newQueue;
-  std::deque<Pcb *> readyQueue;
   std::queue<Pcb *> waitingQueue;
+
+  std::deque<Pcb *> readyQueue0;
+  std::deque<Pcb *> readyQueue1;
+  std::deque<Pcb *> readyQueue2;
 
   bool verbosityFlag = false;
 

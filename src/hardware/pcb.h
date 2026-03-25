@@ -9,6 +9,9 @@ public:
   std::string name;
   std::vector<int> cpuTimeSlices = {};
 
+  int pPriority = 0;
+  int pQuantumCount = 0;
+
   int pId = -1;
   int pState = 0;
   int pLoadAddress;
@@ -61,14 +64,32 @@ public:
   }
 
   void updateState(int newState) {
-    // printf("[PCB][PRC %d]: %d --> ", pId, pState);
+    //   printf("[PCB][PRC %d]: %d --> ", pId, pState);
     pState = newState;
-    // printf("%d\n", pState);
+    //  printf("%d\n", pState);
   }
   void captureTimeSlice(int clockImage) {
     calculateWait(clockImage);
     cpuTimeSlices.push_back(clockImage);
   }
+
+  void promotePriority() {
+    if (pPriority < 2)
+      pPriority++;
+    std::cout << name << " got a promotion to priority " << pPriority
+              << std::endl;
+    return;
+  }
+  void demotePriority() {
+    if (pPriority > 0)
+      pPriority--;
+    std::cout << name << " got a demotion to priority " << pPriority
+              << std::endl;
+    return;
+  }
+  void incrementQuatumCount() { pQuantumCount++; }
+  void decrementQuantumCount() { pQuantumCount--; }
+  void resetQuantumCount() { pQuantumCount = 0; }
 
   void calculateWait(int clockImage) {
     int lastTimeSlice;

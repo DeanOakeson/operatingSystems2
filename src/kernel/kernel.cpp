@@ -47,7 +47,7 @@ Kernel::kernelExecuteProgram(std::multimap<int, std::string> argMap) {
       argMap.erase(arrival);
     }
 
-    scheduler.roundRobin(3);
+    scheduler.multiLevelFeedbackQueue(3);
   }
   auto end = std::chrono::high_resolution_clock::now();
   auto duration =
@@ -106,7 +106,7 @@ int Kernel::kernelMemDump(std::string filePath) {
   if (returnCode == 0) {
     return 0;
   }
-  // IF MEMDUMP FAILS PUSH ERROR ONTO LIST
+
   errorHandler.errorList.push_back(returnCode);
   return 1;
 }
