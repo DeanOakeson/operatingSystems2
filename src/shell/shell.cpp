@@ -26,6 +26,7 @@ void Shell::initPath() {
   functionMap["exec"] = &Shell::shellExecute;
   functionMap["gannt"] = &Shell::shellGannt;
   functionMap["-v"] = &Shell::shellVerbose;
+  functionMap["test"] = &Shell::shellTest;
 }
 
 //////////////////////////////////////
@@ -259,5 +260,31 @@ int Shell::shellMemDump(std::vector<std::string> argList) {
     printf("[SH]::mdmp - too many arguments\n");
     return 1;
   }
+  return 0;
+}
+
+int Shell::shellTest(std::vector<std::string> argList) {
+  std::cout << "running tests....\n";
+  int countOffset = 0;
+  std::string command1 = "-v";
+  std::string command2 = "";
+  for (int i = 0; i < 10; i++) {
+    if (i % 2 == 0) {
+      command2.append(" ../asm/count1.osx ");
+      command2.append(std::to_string(countOffset));
+    } else if (i % 3 == 0) {
+      command2.append(" ../asm/count2.osx ");
+      command2.append(std::to_string(countOffset));
+    } else {
+      command2.append(" ../asm/count.osx ");
+      command2.append(std::to_string(countOffset));
+    }
+    countOffset += 200;
+  }
+
+  std::cout << command2;
+  //  shellVerbose(commandStringToArrayOfStrings(command1));
+  shellExecute(commandStringToArrayOfStrings(command2));
+
   return 0;
 }

@@ -34,7 +34,7 @@ Kernel::kernelExecuteProgram(std::multimap<int, std::string> argMap) {
   int returnCode;
   int clockImage = machine.clock;
 
-  while (!argMap.empty() || !scheduler.empty()) {
+  while (!argMap.empty() || !scheduler.allQueuesEmpty()) {
     // Drain all programs whose arrival time has been reached
     while (!argMap.empty() &&
            argMap.begin()->first + clockImage <= machine.clock) {
@@ -47,8 +47,16 @@ Kernel::kernelExecuteProgram(std::multimap<int, std::string> argMap) {
       argMap.erase(arrival);
     }
 
-    scheduler.multiLevelFeedbackQueue(3);
+    switch (schedulerAlgo) {
+    case (FCFS):
+      scheduler.firstComeFirstServe();
+    case (RR):
+      scheduler.roundRobin(schedulerQuantum);
+    case (MLFQ):
+      scheduler.multiLevelFeedbackQueue(schedulerQuantum, mlfqRatio);
+    }
   }
+
   auto end = std::chrono::high_resolution_clock::now();
   auto duration =
       std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
@@ -89,7 +97,7 @@ int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
 
 int Kernel::kernelRun() {
   int returnCode;
-  while (!scheduler.empty()) {
+  while (!scheduler.allQueuesEmpty()) {
     returnCode = scheduler.roundRobin(3);
   }
   if (!scheduler.terminatedQueue.empty()) {

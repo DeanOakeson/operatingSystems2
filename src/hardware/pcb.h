@@ -76,19 +76,27 @@ public:
   void promotePriority() {
     if (pPriority < 2)
       pPriority++;
-    std::cout << name << " got a promotion to priority " << pPriority
-              << std::endl;
+    pQuantumCount = 0;
     return;
   }
   void demotePriority() {
     if (pPriority > 0)
       pPriority--;
-    std::cout << name << " got a demotion to priority " << pPriority
-              << std::endl;
+    pQuantumCount = 0;
     return;
   }
-  void incrementQuatumCount() { pQuantumCount++; }
-  void decrementQuantumCount() { pQuantumCount--; }
+  void incrementQuatumCount() {
+    pQuantumCount++;
+    if (pQuantumCount == 10) {
+      promotePriority();
+    }
+  }
+  void decrementQuantumCount() {
+    pQuantumCount--;
+    if (pQuantumCount > -1) {
+      demotePriority();
+    }
+  }
   void resetQuantumCount() { pQuantumCount = 0; }
 
   void calculateWait(int clockImage) {

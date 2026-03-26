@@ -20,6 +20,8 @@ public:
   std::string filePath = "";
   std::vector<int> errorList = {};
 
+  std::multimap<int, std::string> colorMap;
+
   ErrorHandler(VirtualMachine &machine);
   void setVerbosityFlag();
   void logTerminatedProcesses(std::queue<Pcb *> &terminatedQueue);
@@ -29,11 +31,11 @@ public:
   void coreDump(ProcessLog &processLog);
   int memDumpAll();
   int memDump(std::string filePath);
-  void printGannt(Pcb &process, int globalStart, int globalEnd);
+  void printPrcGannt(Pcb &process, int globalStart, int globalEnd);
+  void printLogGannt(ProcessLog &processLog, int globalStart, int globalEnd);
 
 private:
   int cpuLogCount = 0;
-  ;
   bool verbosityFlag;
   std::vector<ProcessLog *> cpuLogs = {};
 };

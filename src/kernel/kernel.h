@@ -14,6 +14,13 @@ public:
   static const u_int8_t WAITING = 4;
   static const u_int8_t TERMINATED = 5;
 
+  static const u_int8_t FCFS = 6;
+  static const u_int8_t RR = 7;
+  static const u_int8_t MLFQ = 8;
+
+  int mlfqRatio = 5;
+  int schedulerQuantum = 3;
+
   ErrorHandler errorHandler;
   Loader loader;
   Scheduler scheduler;
@@ -49,5 +56,6 @@ public:
 
 private:
   bool verbosityFlag = false;
+  int schedulerAlgo = MLFQ;
 };
 #endif

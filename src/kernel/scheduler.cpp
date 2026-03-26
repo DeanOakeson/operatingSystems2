@@ -30,7 +30,7 @@ int Scheduler::firstComeFirstServe() {
   }
 
   // if running queue is empty process prep
-  if (pRunningPcb == NULL && !readyQueue0.empty()) {
+  if (pRunningPcb == NULL && !readyQueuesEmpty()) {
     pRunningPcb = popQueue(READY);
     pRunningPcb->updateState(RUNNING);
     clearCpu();
@@ -89,7 +89,7 @@ int Scheduler::roundRobin(int quantum) {
   }
 
   // if running queue is empty process prep
-  if (pRunningPcb == NULL && !readyQueue0.empty()) {
+  if (pRunningPcb == NULL && !allQueuesEmpty()) {
     pRunningPcb = popQueue(READY);
     clearCpu();
     contextToCpu(*pRunningPcb);
@@ -147,16 +147,14 @@ int Scheduler::roundRobin(int quantum) {
 }
 
 int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
-
   int returnCode = 0;
   int quantum0 = quantum;
-  int quantum1 = 6;
+  int quantum1 = quantum * scaler;
   int quantum2 = quantum * 1000;
   int quantumSet;
 
   // SEND A NEW PCB TO READY
   while (!newQueue.empty()) {
-    printf("pushing new\n");
     queuePcb(*popQueue(NEW), READY);
   }
 
@@ -165,27 +163,8 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
   //////////////////////
 
   // if running queue is empty process prep
-  // BAD LOGIC HERE
-  if (pRunningPcb == NULL && !readyQueue0.empty()) {
-    printf("popping from ready 0\n");
-    pRunningPcb = popQueue(READY0);
-    clearCpu();
-    contextToCpu(*pRunningPcb);
-  }
-
-  // take something from queue 1 if 0 is empty
-  else if (pRunningPcb == NULL && readyQueue0.empty() && !readyQueue1.empty()) {
-    printf("popping from ready 1\n");
-    pRunningPcb = popQueue(READY1);
-    clearCpu();
-    contextToCpu(*pRunningPcb);
-  }
-
-  // take process from queue 2 if 1 and 0 are empty
-  else if (pRunningPcb == NULL && readyQueue0.empty() && readyQueue1.empty() &&
-           !readyQueue2.empty()) {
-    printf("popping from ready 2\n");
-    pRunningPcb = popQueue(READY2);
+  if (pRunningPcb == NULL && !readyQueuesEmpty()) {
+    pRunningPcb = popQueue(READY);
     clearCpu();
     contextToCpu(*pRunningPcb);
   }
@@ -206,12 +185,12 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
       break;
     }
   }
-  if (quantumClock % quantumSet == 0 && !readyQueue0.empty()) {
-    printf("quantum set to %d\n", quantumSet);
+
+  if (quantumClock % quantumSet == 0 && !readyQueuesEmpty()) {
     pRunningPcb->incrementQuatumCount();
     contextToPcb(*pRunningPcb);
     queuePcb(*pRunningPcb, READY);
-    pRunningPcb = popQueue(READY); // fix this logic here
+    pRunningPcb = popQueue(READY);
     pRunningPcb->updateState(RUNNING);
     contextToCpu(*pRunningPcb);
   }
@@ -221,11 +200,6 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
     returnCode = machine.fetchDecodeExecute(*pRunningPcb);
     pRunningPcb->captureTimeSlice(machine.clock);
     quantumClock += 1;
-    if (pRunningPcb->pQuantumCount >= 5) {
-      pRunningPcb->promotePriority();
-      pRunningPcb->pQuantumCount = 0;
-    }
-
     if (verbosityFlag == true) {
     }
   } else {
@@ -241,15 +215,17 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
     clearCpu();
     interruptServiceRoutine(*pRunningPcb, returnCode);
     pRunningPcb->decrementQuantumCount();
-    if (pRunningPcb->pQuantumCount < 0) {
-      pRunningPcb->demotePriority();
-    }
     pRunningPcb = NULL;
     return returnCode;
   }
 
   // process termination
   if (returnCode == 10) {
+    if (verbosityFlag == true) {
+      std::cout << "readyQueue0 = " << readyQueue0.size() << "|";
+      std::cout << "readyQueue1 = " << readyQueue1.size() << "|";
+      std::cout << "readyQueue2 = " << readyQueue0.size() << "|" << std::endl;
+    }
     contextToPcb(*pRunningPcb);
     queuePcb(*pRunningPcb, TERMINATED);
     deallocateMemory(*pRunningPcb);
@@ -298,7 +274,7 @@ void Scheduler::queuePcb(Pcb &process, int queue) {
   // place pcb into scheduling queues //
   switch (queue) {
   case (NEW):
-    newQueue.push(&process);
+    newQueue.push_back(&process);
     break;
   case (READY):
     if (process.pPriority == 0) {
@@ -314,7 +290,7 @@ void Scheduler::queuePcb(Pcb &process, int queue) {
       break;
     }
   case (WAITING):
-    waitingQueue.push(&process);
+    waitingQueue.push_back(&process);
     break;
   case (TERMINATED):
     terminatedQueue.push(&process);
@@ -325,41 +301,41 @@ void Scheduler::queuePcb(Pcb &process, int queue) {
 
 Pcb *Scheduler::popQueue(int queue) {
 
-  Pcb *pPcb;
+  std::deque<Pcb *> *readyQueues[] = {&readyQueue0, &readyQueue1, &readyQueue2};
+  Pcb *pPcb = NULL;
   switch (queue) {
   case (NEW):
     pPcb = newQueue.front();
-    newQueue.pop();
+    newQueue.pop_front();
     return pPcb;
   case (READY):
-    pPcb = readyQueue0.front();
-    readyQueue0.pop_front();
-    return pPcb;
-  case (READY0):
-    pPcb = readyQueue0.front();
-    readyQueue0.pop_front();
-    return pPcb;
-  case (READY1):
-    pPcb = readyQueue1.front();
-    readyQueue1.pop_front();
-    return pPcb;
-  case (READY2):
-    pPcb = readyQueue2.front();
-    readyQueue2.pop_front();
-    return pPcb;
+    for (auto *deq : readyQueues)
+      if (!deq->empty()) {
+        pPcb = deq->front();
+        deq->pop_front();
+        break;
+      }
+    break;
   case (WAITING):
     pPcb = waitingQueue.front();
-    waitingQueue.pop();
+    waitingQueue.pop_front();
     return pPcb;
   case (TERMINATED):
     pPcb = terminatedQueue.front();
     terminatedQueue.pop();
     return pPcb;
   }
-  return NULL;
+  return pPcb;
 }
 
-bool Scheduler::empty() {
+bool ::Scheduler::readyQueuesEmpty() {
+  if (readyQueue0.empty() && readyQueue1.empty() && readyQueue2.empty()) {
+    return true;
+  }
+  return false;
+}
+
+bool Scheduler::allQueuesEmpty() {
   // check if scheduler queues are empty //
   if (newQueue.empty() && pRunningPcb == NULL && readyQueue0.empty() &&
       readyQueue1.empty() && readyQueue2.empty() && waitingQueue.empty()) {

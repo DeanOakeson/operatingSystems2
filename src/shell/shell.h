@@ -57,6 +57,8 @@ public:
   int shellCoreDump(std::vector<std::string> argList);
 
   int shellExit(std::vector<std::string> argList);
+
+  int shellTest(std::vector<std::string> argList);
 };
 
 #endif

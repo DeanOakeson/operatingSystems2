@@ -42,19 +42,18 @@ public:
 
   void queuePcb(Pcb &process, int queue);
   Pcb *popQueue(int queue);
-  bool empty();
+
+  bool readyQueuesEmpty();
+  bool allQueuesEmpty();
 
   int firstComeFirstServe();
   int roundRobin(int quantum);
   int multiLevelFeedbackQueue(int quantum, int scaler = 2);
 
 private:
-  std::queue<Pcb *> newQueue;
-  std::queue<Pcb *> waitingQueue;
-
-  std::deque<Pcb *> readyQueue0;
-  std::deque<Pcb *> readyQueue1;
-  std::deque<Pcb *> readyQueue2;
+  std::deque<Pcb *> newQueue;
+  std::deque<Pcb *> waitingQueue;
+  std::deque<Pcb *> readyQueue0, readyQueue1, readyQueue2;
 
   bool verbosityFlag = false;
 
