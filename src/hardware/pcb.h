@@ -77,14 +77,14 @@ public:
     if (pPriority > 0)
       pPriority--;
     pQuantumCount = 0;
-    std::cout << name << "has been promoted" << pPriority << "\n";
+    //    std::cout << name << "has been promoted" << pPriority << "\n";
     return;
   }
   void demotePriority() {
     if (pPriority < 2)
       pPriority++;
     pQuantumCount = 0;
-    std::cout << name << "has been demoted" << pPriority << "\n";
+    //   std::cout << name << "has been demoted" << pPriority << "\n";
     return;
   }
   void incrementQuatumCount() {

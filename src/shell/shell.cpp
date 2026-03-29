@@ -283,38 +283,25 @@ int Shell::shellMemDump(std::vector<std::string> argList) {
 // 1:3 [  ] [  ] [  ]
 // 1:4 [  ] [  ] [  ]
 
-int Shell::shellTest(std::vector<std::string> argList) {
-  std::cout << "running tests....\n";
-  int countOffset = 0;
-  std::string command1 = "-v";
-  std::string command2 = "";
-  for (int i = 0; i < 10; i++) {
-    if (i % 2 == 0) {
-      command2.append(" ../asm/count1.osx ");
-      command2.append(std::to_string(countOffset));
-    } else if (i % 3 == 0) {
-      command2.append(" ../asm/count2.osx ");
-      command2.append(std::to_string(countOffset));
-    } else {
-      command2.append(" ../asm/count.osx ");
-      command2.append(std::to_string(countOffset));
-    }
-    countOffset += 200;
-  }
-
-  std::cout << command2;
-  //  shellVerbose(commandStringToArrayOfStrings(command1));
-  shellExecute(commandStringToArrayOfStrings(command2));
-
-  return 0;
-}
-
 int Shell::shellSetScheduler(std::vector<std::string> argList) {
   int quantum = 5;
   int ratio = 3;
 
   if (argList.size() == 1) {
-    std::cout << "[SH]::sets - no argument provided" << std::endl;
+    switch (kernel.schedulerAlgo) {
+    case FCFS:
+      std::cout << "[SH]::sets - current set algo = FCFS " << std::endl;
+      break;
+    case RR:
+      std::cout << "[SH]::sets - current set algo = RR, quantum = "
+                << kernel.schedulerQuantum << std::endl;
+      break;
+    case MLFQ:
+      std::cout << "[SH]::sets - current set algo = MLFQ, quantum = "
+                << kernel.schedulerQuantum << ", ratio = " << kernel.mlfqRatio
+                << std::endl;
+      break;
+    }
     return 1;
   }
 
@@ -338,12 +325,187 @@ int Shell::shellSetScheduler(std::vector<std::string> argList) {
   }
 
   int returnCode = kernel.kernelSetScheduler(argList[1], quantum, ratio);
-  if (returnCode == 1) {
+  switch (returnCode) {
+  case FAILURE:
     std::cout << "[SH]::sets - invalid use" << std::endl
               << "'sets 'algo' 'quant' 'ratio'" << std::endl;
-    return 1;
+    return FAILURE;
+  case FCFS:
+    std::cout << "[SH]::sets - scheduler set to " << argList[1] << std::endl;
+    break;
+  case RR:
+    std::cout << "[SH]::sets - scheduler set to " << argList[1]
+              << " quantum = " << quantum << std::endl;
+    break;
+  case MLFQ:
+    std::cout << "[SH]::sets - scheduler set to " << argList[1]
+              << " quantum = " << quantum << " ,ratio = " << ratio << std::endl;
+    break;
   }
-  // std::cout << "[SH]::sets - scheduler set to " << argList[1] << std::endl;
+  return SUCCESS;
+}
+
+int Shell::shellTest(std::vector<std::string> argList) {
+  std::cout << "running tests....\n";
+  int countOffset = 0;
+  std::string smIo = "";
+  for (int i = 0; i < 12; i++) {
+    smIo.append(" ../m3/smIo/");
+    smIo.append(std::to_string(i));
+    smIo.append(".osx ");
+    smIo.append(std::to_string(countOffset));
+    countOffset += 50;
+  }
+
+  std::cout << smIo;
+
+  shellVerbose(commandStringToArrayOfStrings("-v"));
+
+  // smIo.csv
+
+  // 1:2
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 2"));
+  shellExecute(commandStringToArrayOfStrings(smIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 2"));
+  shellExecute(commandStringToArrayOfStrings(smIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 2"));
+  shellExecute(commandStringToArrayOfStrings(smIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
+
+  // 1:3
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 3"));
+  shellExecute(commandStringToArrayOfStrings(smIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 3"));
+  shellExecute(commandStringToArrayOfStrings(smIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 3"));
+  shellExecute(commandStringToArrayOfStrings(smIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
+
+  // 1:4
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 4"));
+  shellExecute(commandStringToArrayOfStrings(smIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 4"));
+  shellExecute(commandStringToArrayOfStrings(smIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 4"));
+  shellExecute(commandStringToArrayOfStrings(smIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
+
+  // mdIo.csv
+  countOffset = 0;
+  std::string mdIo = "";
+  for (int i = 0; i < 12; i++) {
+    mdIo.append(" ../m3/mdIo/");
+    mdIo.append(std::to_string(i));
+    mdIo.append(".osx ");
+    mdIo.append(std::to_string(countOffset));
+    countOffset += 50;
+  }
+
+  std::cout << mdIo;
+
+  // 1:2
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 2"));
+  shellExecute(commandStringToArrayOfStrings(mdIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 2"));
+  shellExecute(commandStringToArrayOfStrings(mdIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 2"));
+  shellExecute(commandStringToArrayOfStrings(mdIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
+
+  // 1:3
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 3"));
+  shellExecute(commandStringToArrayOfStrings(mdIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 3"));
+  shellExecute(commandStringToArrayOfStrings(mdIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 3"));
+  shellExecute(commandStringToArrayOfStrings(mdIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
+
+  // 1:4
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 4"));
+  shellExecute(commandStringToArrayOfStrings(mdIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 4"));
+  shellExecute(commandStringToArrayOfStrings(mdIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 4"));
+  shellExecute(commandStringToArrayOfStrings(mdIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
+
+  // lgIo.csv
+  countOffset = 0;
+  std::string lgIo = "";
+  for (int i = 0; i < 12; i++) {
+    lgIo.append(" ../m3/lgIo/");
+    lgIo.append(std::to_string(i));
+    lgIo.append(".osx ");
+    lgIo.append(std::to_string(countOffset));
+    countOffset += 50;
+  }
+
+  std::cout << lgIo;
+
+  // 1:2
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 2"));
+  shellExecute(commandStringToArrayOfStrings(lgIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 2"));
+  shellExecute(commandStringToArrayOfStrings(lgIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 2"));
+  shellExecute(commandStringToArrayOfStrings(lgIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
+
+  // 1:3
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 3"));
+  shellExecute(commandStringToArrayOfStrings(lgIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 3"));
+  shellExecute(commandStringToArrayOfStrings(lgIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 3"));
+  shellExecute(commandStringToArrayOfStrings(lgIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
+
+  // 1:4
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 4"));
+  shellExecute(commandStringToArrayOfStrings(lgIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 4"));
+  shellExecute(commandStringToArrayOfStrings(lgIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
+
+  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 4"));
+  shellExecute(commandStringToArrayOfStrings(lgIo));
+  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
+
   return 0;
 }
 
@@ -364,4 +526,5 @@ int Shell::shellWriteOut(std::vector<std::string> argList) {
       return 1;
     }
   }
+  return 0;
 }

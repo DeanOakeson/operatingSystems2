@@ -11,6 +11,9 @@
 class Kernel {
 public:
   Kernel(VirtualMachine &machine);
+  int schedulerAlgo = MLFQ;
+  int mlfqRatio = 3;
+  int schedulerQuantum = 5;
 
   /////////////////////////
   // PROGRAM INTERACTION //
@@ -61,10 +64,6 @@ private:
   VirtualMachine &machine;
 
   bool verbosityFlag = false;
-  int schedulerAlgo = MLFQ;
-  int mlfqRatio = 3;
-  int schedulerQuantum = 5;
-
   std::vector<int *> schedulingParams = {&schedulerAlgo, &schedulerQuantum,
                                          &mlfqRatio};
 };

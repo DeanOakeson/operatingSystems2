@@ -194,7 +194,9 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
     quantumClock = 1;
     pRunningPcb->incrementQuatumCount();
     contextToPcb(*pRunningPcb);
-    pRunningPcb->demotePriority();
+    if (pRunningPcb->pQuantumCount >= 5) {
+      pRunningPcb->demotePriority();
+    }
     queuePcb(*pRunningPcb, READY);
     pRunningPcb = popQueue(READY);
     pRunningPcb->updateState(RUNNING);

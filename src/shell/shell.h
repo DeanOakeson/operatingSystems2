@@ -5,6 +5,12 @@
 
 class Shell {
 public:
+  static const u_int8_t SUCCESS = 0;
+  static const u_int8_t FAILURE = 1;
+  static const u_int8_t FCFS = 6;
+  static const u_int8_t RR = 7;
+  static const u_int8_t MLFQ = 8;
+
   Shell(Kernel &kernel);
   Kernel &kernel;
   bool verbosityFlag = false;

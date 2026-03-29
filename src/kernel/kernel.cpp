@@ -17,18 +17,18 @@ int Kernel::kernelSetScheduler(std::string arg, int quantum, int ratio) {
   if (arg == "fcfs") {
     schedulerAlgo = FCFS;
     algo = FCFS;
-    return 0;
+    return FCFS;
   }
   if (arg == "mlfq") {
     schedulerAlgo = MLFQ;
     schedulerQuantum = quantum;
     mlfqRatio = ratio;
-    return 0;
+    return MLFQ;
   }
   if (arg == "rr") {
     schedulerAlgo = RR;
     schedulerQuantum = quantum;
-    return 0;
+    return RR;
   }
 
   errorHandler.errorList.push_back(1);
@@ -181,7 +181,7 @@ int Kernel::kernelWriteOut(std::string fileName, int index) {
     std::ofstream file;
 
     // quantum,ratio ,wait,response,turnaround
-    file.open("smCpu.csv", std::ios::app);
+    file.open(fileName, std::ios::app);
     if (!file) {
       std::cout << "Error opening file!" << std::endl;
       return 1;
@@ -195,7 +195,6 @@ int Kernel::kernelWriteOut(std::string fileName, int index) {
     file.close();
   }
   errorHandler.errorList.push_back(303);
-  free(pPrcLog);
   return 0;
 }
 
