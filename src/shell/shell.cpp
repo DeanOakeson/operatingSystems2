@@ -11,6 +11,8 @@ int Shell::shellVerbose(std::vector<std::string> argList) {
   }
   verbosityFlag = true;
 
+  std::cout << "[SH]::verb - verbose flag set to '" << verbosityFlag << "'\n";
+
   return 0;
 }
 
@@ -20,13 +22,15 @@ void Shell::initPath() {
   functionMap["exit"] = &Shell::shellExit;
   functionMap["help"] = &Shell::shellHelp;
   functionMap["clear"] = &Shell::shellClear;
-  functionMap["coredump"] = &Shell::shellCoreDump;
-  functionMap["errordump"] = &Shell::shellErrorDump;
-  functionMap["memdump"] = &Shell::shellMemDump;
+  functionMap["cdmp"] = &Shell::shellCoreDump;
+  functionMap["edmp"] = &Shell::shellErrorDump;
+  functionMap["mdmp"] = &Shell::shellMemDump;
   functionMap["exec"] = &Shell::shellExecute;
-  functionMap["gannt"] = &Shell::shellGannt;
+  functionMap["gant"] = &Shell::shellGannt;
   functionMap["-v"] = &Shell::shellVerbose;
   functionMap["test"] = &Shell::shellTest;
+  functionMap["sets"] = &Shell::shellSetScheduler;
+  functionMap["wout"] = &Shell::shellWriteOut;
 }
 
 //////////////////////////////////////
@@ -263,6 +267,22 @@ int Shell::shellMemDump(std::vector<std::string> argList) {
   return 0;
 }
 
+// List of Graphs
+//
+//          wait    res    ta
+// Sm IO -- [  ]   [  ]   [  ]
+// Md IO -- [  ]   [  ]   [  ]
+// Lg IO -- [  ]   [  ]   [  ]
+// Sm CPU - [  ]   [  ]   [  ]
+// Md CPU - [  ]   [  ]   [  ]
+// Lg CPU - [  ]   [  ]   [  ]
+//
+// Graph data points
+//       2    4    6
+// 1:2 [  ] [  ] [  ]
+// 1:3 [  ] [  ] [  ]
+// 1:4 [  ] [  ] [  ]
+
 int Shell::shellTest(std::vector<std::string> argList) {
   std::cout << "running tests....\n";
   int countOffset = 0;
@@ -287,4 +307,61 @@ int Shell::shellTest(std::vector<std::string> argList) {
   shellExecute(commandStringToArrayOfStrings(command2));
 
   return 0;
+}
+
+int Shell::shellSetScheduler(std::vector<std::string> argList) {
+  int quantum = 5;
+  int ratio = 3;
+
+  if (argList.size() == 1) {
+    std::cout << "[SH]::sets - no argument provided" << std::endl;
+    return 1;
+  }
+
+  if (argList.size() >= 3) {
+    try {
+      quantum = stoi(argList[2]);
+    } catch (std::invalid_argument) {
+      std::cout << "[SH]::sets - invalid use" << std::endl;
+      return 1;
+    }
+  }
+
+  if (argList.size() >= 4) {
+    try {
+      quantum = stoi(argList[2]);
+      ratio = stoi(argList[3]);
+    } catch (std::invalid_argument) {
+      std::cout << "[SH]::sets - invalid use" << std::endl;
+      return 1;
+    }
+  }
+
+  int returnCode = kernel.kernelSetScheduler(argList[1], quantum, ratio);
+  if (returnCode == 1) {
+    std::cout << "[SH]::sets - invalid use" << std::endl
+              << "'sets 'algo' 'quant' 'ratio'" << std::endl;
+    return 1;
+  }
+  // std::cout << "[SH]::sets - scheduler set to " << argList[1] << std::endl;
+  return 0;
+}
+
+int Shell::shellWriteOut(std::vector<std::string> argList) {
+  switch (argList.size()) {
+  case 1:
+    std::cout << "[SH]::wout - invalid use" << std::endl;
+    return 1;
+  case 2:
+    kernel.kernelWriteOut(argList[1]);
+    return 1;
+  case 3:
+    try {
+      kernel.kernelWriteOut(argList[1], stoi(argList[2]));
+      return 0;
+    } catch (std::invalid_argument) {
+      std::cout << "[SH]::wout - invalid use" << std::endl;
+      return 1;
+    }
+  }
 }

@@ -14,6 +14,7 @@ void Scheduler::setVerbosityFlag() {
   verbosityFlag = true;
   return;
 }
+
 // ----------------
 // Scheduling algos
 // ----------------
@@ -53,6 +54,7 @@ int Scheduler::firstComeFirstServe() {
     queuePcb(*pRunningPcb, WAITING);
     clearCpu();
     interruptServiceRoutine(*pRunningPcb, returnCode);
+    queuePcb(*popQueue(WAITING), READY);
     pRunningPcb = NULL;
     return returnCode;
   }
@@ -125,6 +127,7 @@ int Scheduler::roundRobin(int quantum) {
     queuePcb(*pRunningPcb, WAITING);
     clearCpu();
     interruptServiceRoutine(*pRunningPcb, returnCode);
+    queuePcb(*popQueue(WAITING), READY);
     pRunningPcb = NULL;
     return returnCode;
   }
@@ -186,9 +189,12 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
     }
   }
 
-  if (quantumClock % quantumSet == 0 && !readyQueuesEmpty()) {
+  if (pRunningPcb != NULL && quantumClock % quantumSet == 0 &&
+      !readyQueuesEmpty()) {
+    quantumClock = 1;
     pRunningPcb->incrementQuatumCount();
     contextToPcb(*pRunningPcb);
+    pRunningPcb->demotePriority();
     queuePcb(*pRunningPcb, READY);
     pRunningPcb = popQueue(READY);
     pRunningPcb->updateState(RUNNING);
@@ -214,7 +220,8 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
     queuePcb(*pRunningPcb, WAITING);
     clearCpu();
     interruptServiceRoutine(*pRunningPcb, returnCode);
-    pRunningPcb->decrementQuantumCount();
+    pRunningPcb->promotePriority();
+    queuePcb(*popQueue(WAITING), READY);
     pRunningPcb = NULL;
     return returnCode;
   }
@@ -224,7 +231,7 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
     if (verbosityFlag == true) {
       std::cout << "readyQueue0 = " << readyQueue0.size() << "|";
       std::cout << "readyQueue1 = " << readyQueue1.size() << "|";
-      std::cout << "readyQueue2 = " << readyQueue0.size() << "|" << std::endl;
+      std::cout << "readyQueue2 = " << readyQueue2.size() << "|" << std::endl;
     }
     contextToPcb(*pRunningPcb);
     queuePcb(*pRunningPcb, TERMINATED);
@@ -266,7 +273,6 @@ Pcb *Scheduler::getPcb(std::string filePath) {
            "program\n");
     return NULL;
   }
-
   return machine.ram.vMemory[index];
 }
 
@@ -286,9 +292,10 @@ void Scheduler::queuePcb(Pcb &process, int queue) {
       break;
     }
     if (process.pPriority == 2) {
-      readyQueue0.push_back(&process);
+      readyQueue2.push_back(&process);
       break;
     }
+    break;
   case (WAITING):
     waitingQueue.push_back(&process);
     break;
@@ -448,7 +455,6 @@ void Scheduler::interruptServiceRoutine(Pcb &process, int returnCode) {
       break;
     }
 
-    queuePcb(*popQueue(WAITING), READY);
     break;
   case HALT:
     if (verbosityFlag == true) {
@@ -456,28 +462,25 @@ void Scheduler::interruptServiceRoutine(Pcb &process, int returnCode) {
     }
     queuePcb(*popQueue(WAITING), TERMINATED);
     deallocateMemory(*pRunningPcb);
-    pRunningPcb->calculateResponse();
-    pRunningPcb->calculateTurnAround();
+    process.calculateResponse();
+    process.calculateTurnAround();
     return;
   case FORK: {
     if (verbosityFlag == true) {
       printf("[SC]::insr - fork\n");
     }
     isrVFork(process);
-    queuePcb(*popQueue(WAITING), READY);
     break;
   }
   case WAIT:
     if (verbosityFlag == true) {
       printf("[SC]::insr - wait\n");
     }
-    queuePcb(*popQueue(WAITING), READY);
     break;
   case INPUT:
     if (verbosityFlag == true) {
       printf("[SC]::insr - input\n");
     }
-    queuePcb(*popQueue(WAITING), READY);
     break;
   }
 
@@ -509,8 +512,17 @@ int Scheduler::isrInputChar() {}
 int Scheduler::isrPrintString(Pcb &process) {
   // STRING PRINT
   process.Reg[0] += 1;
+  int debugAddr = process.Reg[0];
   while (machine.ram.mem[process.Reg[0]][0] != 34) {
+    if (process.Reg[0] >= 10 * 1024) { // whatever your array bound is
+      printf("[ERROR] isrPrintString walked off end of memory!\n");
+      return 1;
+    }
     switch (machine.ram.mem[process.Reg[0]][0]) {
+    case 10:
+      printf("\n");
+      process.Reg[0] += 1;
+      break;
     case 92: //'\' = newline char
       printf("\n");
       process.Reg[0] += 1;

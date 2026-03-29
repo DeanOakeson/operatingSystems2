@@ -21,7 +21,9 @@ ProcessLog *ErrorHandler::getCpuLog(int index) {
   return NULL;
 }
 
-void ErrorHandler::logTerminatedProcesses(std::queue<Pcb *> &terminatedQueue) {
+void ErrorHandler::logTerminatedProcesses(std::queue<Pcb *> &terminatedQueue,
+                                          std::vector<int *> kernelData) {
+
   ProcessLog *newProcessLog = new ProcessLog();
 
   while (!terminatedQueue.empty()) {
@@ -30,9 +32,13 @@ void ErrorHandler::logTerminatedProcesses(std::queue<Pcb *> &terminatedQueue) {
   }
   cpuLogs.push_back(newProcessLog);
   newProcessLog->calculateAverages();
+  newProcessLog->algoUsed = *kernelData[0];
+  newProcessLog->quantum = *kernelData[1];
+  newProcessLog->ratio = *kernelData[2];
   cpuLogCount++;
   if (verbosityFlag == true)
     printf("[EH]::ltep - all proceesses logged succesfully\n");
+  return;
 }
 
 int ErrorHandler::errorDump() {
@@ -105,6 +111,7 @@ int ErrorHandler::memDump(std::string filePath) {
     }
     printf("[ %d ]", machine.ram.mem[j + pPcb->pLoadAddress][0]);
   }
+  free(pPcb);
   return 0;
 }
 
@@ -183,10 +190,8 @@ void ErrorHandler::coreDump(ProcessLog &processLog) {
     for (auto it = processLog.processMap.begin();
          it != processLog.processMap.end(); it++) {
       Pcb *pPcb = it->second;
-
       std::string colorMod = colorMap.find(pPcb->pId)->second;
       regId = 0;
-
       std::cout << colorMod << " " << pPcb->name << "\033[0m" << std::endl
                 << std::endl;
 
@@ -198,28 +203,41 @@ void ErrorHandler::coreDump(ProcessLog &processLog) {
         printf(" NULL\n");
       }
 
-      std::cout << "ARRIVAL TIME ...... = " << pPcb->pArrivalTime << std::endl
-                << "TERMINATION TIME .. = " << pPcb->pTerminationTime
-                << std::endl
-                << "PID ............... = " << pPcb->pId << std::endl
-                << "TURNAROUND ........ = " << pPcb->turnAround << std::endl
-                << "RESPONSE .......... = " << pPcb->response << std::endl
-                << "WAIT .............. = " << pPcb->wait << std::endl
-                << std::endl;
+      std::cout << "PRC arrive ........ [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->pArrivalTime
+                << "]\n"
+                << "PRC terminate ..... [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->pTerminationTime
+                << "]\n"
+                << "PRC id ............ [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->pId << "]\n"
+                << "PRC turnaround .... [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->turnAround
+                << "]\n"
+                << "PRC response ...... [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->response << "]\n"
+                << "PRC wait .......... [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->wait << "]\n\n";
 
-      for (int i = 0; i < 6; i++) {
-        std::cout << "REG#" << regId << " .............. = " << pPcb->Reg[regId]
-                  << std::endl;
-        regId += 1;
-      }
-      std::cout << "REG PC ............. = " << pPcb->PC << std::endl
-                << "REG Z .............. = " << pPcb->Z << std::endl;
+      std::cout << "REG #1 ............ [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->Reg[1] << "]\n"
+                << "REG #2 ............ [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->Reg[2] << "]\n"
+                << "REG #3 ............ [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->Reg[3] << "]\n"
+                << "REG #4 ............ [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->Reg[4] << "]\n"
+                << "REG #5 ............ [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->Reg[5] << "]\n"
+                << "REG #Z ............ [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->Z << "]\n"
+                << "REG PC ............ [" << std::setw(7) << std::setfill(' ')
+                << std::fixed << std::setprecision(1) << pPcb->PC << "]\n";
 
       if (verbosityFlag == true) {
         printPrcGannt(*pPcb, globalStart, globalEnd);
       }
       std::cout << std::endl;
-      free(pPcb);
     }
   }
 
@@ -228,13 +246,25 @@ void ErrorHandler::coreDump(ProcessLog &processLog) {
   std::cout << "\033[1;30;43m" << "  PROCESS LOG #" << processLog.pLogId
             << "\033[0m" << "\n\n";
 
-  std::cout << "LOG ID ................ = " << processLog.pLogId << std::endl
-            << "LOG TURNAROUND ........ = " << processLog.avgTurnAround
-            << std::endl
-            << "LOG RESPONSE .......... = " << processLog.avgResponse
-            << std::endl
-            << "LOG WAIT .............. = " << processLog.avgWait << std::endl
-            << std::endl;
+  std::cout << "LOG id ............ [" << std::setw(7) << std::setfill(' ')
+            << std::fixed << std::setprecision(1) << processLog.pLogId << "]\n"
+            << "LOG turnaround .... [" << std::setw(7) << std::setfill(' ')
+            << std::fixed << std::setprecision(1) << processLog.avgTurnAround
+            << "]\n"
+            << "LOG response ...... [" << std::setw(7) << std::setfill(' ')
+            << std::fixed << std::setprecision(1) << processLog.avgResponse
+            << "]\n"
+            << "LOG wait .......... [" << std::setw(7) << std::setfill(' ')
+            << std::fixed << std::setprecision(1) << processLog.avgWait << "]\n"
+            << "LOG algo .......... [" << std::setw(7) << std::setfill(' ')
+            << std::fixed << std::setprecision(1) << processLog.algoUsed
+            << "]\n"
+            << "LOG quantum ....... [" << std::setw(7) << std::setfill(' ')
+            << std::fixed << std::setprecision(1) << processLog.quantum << "]\n"
+            << "LOG ratio ......... [" << std::setw(7) << std::setfill(' ')
+            << std::fixed << std::setprecision(1) << processLog.ratio << "]\n"
+
+            << "\n\n";
 
   // PRINT LOG GANNT
   printLogGannt(processLog, globalStart, globalEnd);
@@ -242,6 +272,8 @@ void ErrorHandler::coreDump(ProcessLog &processLog) {
 
 void ErrorHandler::printLogGannt(ProcessLog &processLog, int globalStart,
                                  int globalEnd) {
+  // SOMEHTING STRANGE HAPPENS WHEN CALLING COREDUMP A SECOND TIME ON THE SAME
+  // DATA
   int i = 0;
   int newLineCounter = 0;
 

@@ -12,6 +12,29 @@ int Kernel::kernelPrintGanntChart() {
   return 0;
 }
 
+int Kernel::kernelSetScheduler(std::string arg, int quantum, int ratio) {
+  int algo;
+  if (arg == "fcfs") {
+    schedulerAlgo = FCFS;
+    algo = FCFS;
+    return 0;
+  }
+  if (arg == "mlfq") {
+    schedulerAlgo = MLFQ;
+    schedulerQuantum = quantum;
+    mlfqRatio = ratio;
+    return 0;
+  }
+  if (arg == "rr") {
+    schedulerAlgo = RR;
+    schedulerQuantum = quantum;
+    return 0;
+  }
+
+  errorHandler.errorList.push_back(1);
+  return 1;
+}
+
 void Kernel::setVerbosityFlag() {
   if (verbosityFlag == true) {
     verbosityFlag = false;
@@ -50,10 +73,13 @@ Kernel::kernelExecuteProgram(std::multimap<int, std::string> argMap) {
     switch (schedulerAlgo) {
     case (FCFS):
       scheduler.firstComeFirstServe();
+      break;
     case (RR):
       scheduler.roundRobin(schedulerQuantum);
+      break;
     case (MLFQ):
       scheduler.multiLevelFeedbackQueue(schedulerQuantum, mlfqRatio);
+      break;
     }
   }
 
@@ -64,9 +90,12 @@ Kernel::kernelExecuteProgram(std::multimap<int, std::string> argMap) {
   if (verbosityFlag == true) {
     std::cout << "[OS]::exec - cpu runtime = " << duration << "m/s \n";
   }
+
+  // LOGS TERMINATED PROCESS AND USED QUATUM AND RATIO AND SCH ALGO
   if (!scheduler.terminatedQueue.empty()) {
     // push completion time onto process log
-    errorHandler.logTerminatedProcesses(scheduler.terminatedQueue);
+    errorHandler.logTerminatedProcesses(scheduler.terminatedQueue,
+                                        schedulingParams);
   }
   return returnMap;
 }
@@ -101,7 +130,8 @@ int Kernel::kernelRun() {
     returnCode = scheduler.roundRobin(3);
   }
   if (!scheduler.terminatedQueue.empty()) {
-    errorHandler.logTerminatedProcesses(scheduler.terminatedQueue);
+    errorHandler.logTerminatedProcesses(scheduler.terminatedQueue,
+                                        schedulingParams);
   }
   return 0;
 }
@@ -133,13 +163,40 @@ int Kernel::kernelMemDumpAll() {
 }
 
 int Kernel::kernelCoreDump(int index) {
+
   ProcessLog *pPrcLog = errorHandler.getCpuLog(index);
   if (pPrcLog != NULL) {
     errorHandler.coreDump(*pPrcLog);
     return 0;
   }
   errorHandler.errorList.push_back(303);
+  free(pPrcLog);
   return 1;
+}
+
+int Kernel::kernelWriteOut(std::string fileName, int index) {
+  ProcessLog *pPrcLog = errorHandler.getCpuLog(index);
+  if (pPrcLog != NULL) {
+
+    std::ofstream file;
+
+    // quantum,ratio ,wait,response,turnaround
+    file.open("smCpu.csv", std::ios::app);
+    if (!file) {
+      std::cout << "Error opening file!" << std::endl;
+      return 1;
+    }
+    // Append text to the file
+    file << pPrcLog->quantum << "," << pPrcLog->ratio << "," << pPrcLog->avgWait
+         << "," << pPrcLog->avgResponse << "," << pPrcLog->avgTurnAround
+         << std::endl;
+    std::cout << " Text appended successfully !" << std::endl;
+    // Close the file
+    file.close();
+  }
+  errorHandler.errorList.push_back(303);
+  free(pPrcLog);
+  return 0;
 }
 
 int Kernel::kernelErrorDump() {

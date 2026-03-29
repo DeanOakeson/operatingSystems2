@@ -5,27 +5,11 @@
 #include "loader.h"
 #include "scheduler.h"
 #include <chrono>
+#include <fstream>
+#include <iostream>
 
 class Kernel {
 public:
-  static const u_int8_t NEW = 1;
-  static const u_int8_t READY = 2;
-  static const u_int8_t RUNNING = 3;
-  static const u_int8_t WAITING = 4;
-  static const u_int8_t TERMINATED = 5;
-
-  static const u_int8_t FCFS = 6;
-  static const u_int8_t RR = 7;
-  static const u_int8_t MLFQ = 8;
-
-  int mlfqRatio = 5;
-  int schedulerQuantum = 3;
-
-  ErrorHandler errorHandler;
-  Loader loader;
-  Scheduler scheduler;
-  VirtualMachine &machine;
-
   Kernel(VirtualMachine &machine);
 
   /////////////////////////
@@ -35,6 +19,11 @@ public:
   std::multimap<int, std::string>
   kernelExecuteProgram(std::multimap<int, std::string> argMap);
   int kernelRun();
+
+  ///////////////////////////
+  // SCHEDULER INTERACTION //
+  ///////////////////////////
+  int kernelSetScheduler(std::string arg, int quantum = 3, int ratio = 2);
 
   ////////////////////////
   // MEMORY INTERACTION //
@@ -53,9 +42,30 @@ public:
   //////////////
   int kernelPrintGanntChart();
   void setVerbosityFlag();
+  int kernelWriteOut(std::string fileName, int index = -1);
 
 private:
+  static const u_int8_t NEW = 1;
+  static const u_int8_t READY = 2;
+  static const u_int8_t RUNNING = 3;
+  static const u_int8_t WAITING = 4;
+  static const u_int8_t TERMINATED = 5;
+
+  static const u_int8_t FCFS = 6;
+  static const u_int8_t RR = 7;
+  static const u_int8_t MLFQ = 8;
+
+  ErrorHandler errorHandler;
+  Loader loader;
+  Scheduler scheduler;
+  VirtualMachine &machine;
+
   bool verbosityFlag = false;
   int schedulerAlgo = MLFQ;
+  int mlfqRatio = 3;
+  int schedulerQuantum = 5;
+
+  std::vector<int *> schedulingParams = {&schedulerAlgo, &schedulerQuantum,
+                                         &mlfqRatio};
 };
 #endif

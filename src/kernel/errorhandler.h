@@ -3,6 +3,7 @@
 
 #include "../hardware/vm.h"
 #include "processlog.h"
+#include <fstream>
 #include <iostream>
 #include <queue>
 
@@ -24,7 +25,8 @@ public:
 
   ErrorHandler(VirtualMachine &machine);
   void setVerbosityFlag();
-  void logTerminatedProcesses(std::queue<Pcb *> &terminatedQueue);
+  void logTerminatedProcesses(std::queue<Pcb *> &terminatedQueue,
+                              std::vector<int *> kernelData);
   ProcessLog *getCpuLog(int index);
 
   int errorDump();

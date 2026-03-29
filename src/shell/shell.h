@@ -59,6 +59,10 @@ public:
   int shellExit(std::vector<std::string> argList);
 
   int shellTest(std::vector<std::string> argList);
+
+  int shellSetScheduler(std::vector<std::string> argList);
+
+  int shellWriteOut(std::vector<std::string> argList);
 };
 
 #endif

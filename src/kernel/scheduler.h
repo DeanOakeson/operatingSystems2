@@ -13,9 +13,6 @@ public:
 
   static const u_int8_t NEW = 1;
   static const u_int8_t READY = 2;
-  static const u_int8_t READY0 = 200;
-  static const u_int8_t READY1 = 211;
-  static const u_int8_t READY2 = 222;
   static const u_int8_t RUNNING = 3;
   static const u_int8_t WAITING = 4;
   static const u_int8_t TERMINATED = 5;
@@ -48,7 +45,7 @@ public:
 
   int firstComeFirstServe();
   int roundRobin(int quantum);
-  int multiLevelFeedbackQueue(int quantum, int scaler = 2);
+  int multiLevelFeedbackQueue(int quantum, int scaler);
 
 private:
   std::deque<Pcb *> newQueue;
@@ -59,7 +56,7 @@ private:
 
   Pcb *pRunningPcb = NULL;
   int currentIdCount = 0;
-  int quantumClock = 0;
+  int quantumClock = 1;
 
   void deallocateMemory(Pcb &process);
   int contextToCpu(Pcb &process);
