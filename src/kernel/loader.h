@@ -16,12 +16,17 @@ public:
   static const u_int32_t MEM_FSTREAM_ERR_3 = 205;
   static const u_int32_t MEM_DUMP_NO_PROGRAM = 301;
 
+  int currentIdCount = 0;
+
   Loader(VirtualMachine &machine);
 
   std::string filePath;
   std::vector<int> asmHeader;
   std::tuple<int, std::vector<int>> returnVector;
   std::tuple<int, std::vector<int>> loadProgram(std::string FilePath);
+  int allocateMemory(Pcb &process);
+  int allocateSharedMemory(int size);
+  Pcb *createPcb(std::vector<int> asmHeader, std::string filePath);
   void setVerbosityFlag();
 
 private:

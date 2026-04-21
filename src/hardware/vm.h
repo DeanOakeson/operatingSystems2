@@ -17,7 +17,9 @@ public:
   int swiOpCode = 0;
   int clock = 0;
   Ram ram;
+  bool verbosityFlag = false;
 
+  void setVerbosityFlag();
   void idle();
   int fetchDecodeExecute(Pcb &process);
 };

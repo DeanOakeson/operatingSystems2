@@ -5,6 +5,7 @@ src/kernel/CMakeFiles/kernel.dir/scheduler.cpp.o: \
  /home/dean/operatingSystems2/src/kernel/../hardware/vm.h \
  /home/dean/operatingSystems2/src/kernel/../hardware/ram.h \
  /home/dean/operatingSystems2/src/kernel/../hardware/pcb.h \
+ /home/dean/operatingSystems2/src/kernel/../hardware/shm.h \
  /usr/include/x86_64-linux-gnu/c++/15/bits/stdc++.h \
  /usr/include/c++/15/cassert \
  /usr/include/x86_64-linux-gnu/c++/15/bits/c++config.h \

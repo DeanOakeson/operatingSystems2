@@ -12,6 +12,58 @@ int Kernel::kernelPrintGanntChart() {
   return 0;
 }
 
+int Kernel::kernelOpenSharedMemory(int size, std::string pOne,
+                                   std::string pTwo) {
+
+  Pcb *processOne = machine.ram.getPcb(pOne);
+  Pcb *processTwo = machine.ram.getPcb(pTwo);
+
+  if (processOne == NULL || processTwo == NULL) {
+    errorHandler.errorList.push_back(302);
+    if (verbosityFlag == true)
+      std::cout << "[OS]::oshm - ERROR/302 could not find provided processes"
+                << std::endl;
+    return -1;
+  }
+
+  // if shared mem exists deallocate it and renew it with this shared mem
+  if (processOne->sharedMemory != NULL) {
+    scheduler.deallocateShMemory(*processOne);
+    if (verbosityFlag == true)
+      std::cout << "[OS]::oshm - closed shared memory on pId:"
+                << processOne->pId << std::endl;
+  }
+  if (processTwo->sharedMemory != NULL) {
+    scheduler.deallocateShMemory(*processTwo);
+    if (verbosityFlag == true)
+      std::cout << "[OS]::oshm - closed shared memory on pId:"
+                << processTwo->pId << std::endl;
+  }
+
+  // memid is pidOne concat with pidTwo ie pid = 1 and pid = 2 memid = 12;
+
+  int memId =
+      stoi(std::to_string(processOne->pId) + std::to_string(processTwo->pId));
+
+  int address = loader.allocateSharedMemory(size);
+  if (address == -1) {
+    errorHandler.errorList.push_back(204);
+    if (verbosityFlag == true)
+      std::cout << "[OS]::oshm - ERROR/204 failed to allocate shared memory"
+                << std::endl;
+    return 1;
+  }
+
+  // create new shared memory and put it on the vector;
+  Shm *newSharedMemory = processOne->openSharedMemory(memId, size * 6, address);
+
+  if (verbosityFlag == true)
+    std::cout << "[OS]::oshm - shm initialized " << processOne->pId
+              << std::endl;
+  processTwo->linkSharedMemory(newSharedMemory);
+  return address;
+}
+
 int Kernel::kernelSetScheduler(std::string arg, int quantum, int ratio) {
   int algo;
   if (arg == "fcfs") {
@@ -41,6 +93,7 @@ void Kernel::setVerbosityFlag() {
     scheduler.setVerbosityFlag();
     errorHandler.setVerbosityFlag();
     loader.setVerbosityFlag();
+    machine.setVerbosityFlag();
     return;
   }
 
@@ -48,6 +101,7 @@ void Kernel::setVerbosityFlag() {
   scheduler.setVerbosityFlag();
   errorHandler.setVerbosityFlag();
   loader.setVerbosityFlag();
+  machine.setVerbosityFlag();
 }
 
 std::multimap<int, std::string>
@@ -113,8 +167,8 @@ int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
   // IF LOAD SUCCEDED THEN CREATE A PCB ALLOCATE MEMORY AND LOAD IT INTO
   // SCHEDULING QUEUES
   if (returnCode == 0) {
-    Pcb *pPcb = scheduler.createPcb(asmHeader, filePath);
-    scheduler.allocateMemory(*pPcb);
+    Pcb *pPcb = loader.createPcb(asmHeader, filePath);
+    loader.allocateMemory(*pPcb);
     scheduler.queuePcb(*pPcb, 1);
     return 0;
   }
@@ -124,10 +178,40 @@ int Kernel::kernelLoadProgram(std::string filePath, int arrivalTime) {
   return 1;
 }
 
+int Kernel::kernelInitSemaphore(int value, std::string filePathOne,
+                                std::string filePathTwo) {
+  int newSemId = scheduler.initSemaphore(value);
+  Pcb *processOne = machine.ram.getPcb(filePathOne);
+  Pcb *processTwo = machine.ram.getPcb(filePathTwo);
+  if (processOne == NULL || processTwo == NULL) {
+    errorHandler.errorList.push_back(302);
+    if (verbosityFlag == true)
+      std::cout << "[OS]::insm - ERROR/302 could not find provided processes"
+                << std::endl;
+    return -1;
+  }
+
+  processOne->semId = newSemId;
+  processTwo->semId = newSemId;
+
+  return 0;
+}
+
 int Kernel::kernelRun() {
   int returnCode;
   while (!scheduler.allQueuesEmpty()) {
-    returnCode = scheduler.roundRobin(3);
+
+    switch (schedulerAlgo) {
+    case (FCFS):
+      scheduler.firstComeFirstServe();
+      break;
+    case (RR):
+      scheduler.roundRobin(schedulerQuantum);
+      break;
+    case (MLFQ):
+      scheduler.multiLevelFeedbackQueue(schedulerQuantum, mlfqRatio);
+      break;
+    }
   }
   if (!scheduler.terminatedQueue.empty()) {
     errorHandler.logTerminatedProcesses(scheduler.terminatedQueue,
@@ -136,17 +220,30 @@ int Kernel::kernelRun() {
   return 0;
 }
 
+int Kernel::kernelMemDumpEveryAddress() {
+  int returnCode;
+  returnCode = errorHandler.memDumpEveryAddress();
+
+  // IF MEMDUMP SUCCEEDS RETURN 0;
+  if (returnCode == 1) {
+    errorHandler.errorList.push_back(returnCode);
+    return 1;
+  }
+
+  return 0;
+}
+
 int Kernel::kernelMemDump(std::string filePath) {
   int returnCode;
   returnCode = errorHandler.memDump(filePath);
 
   // IF MEMDUMP SUCCEEDS RETURN 0;
-  if (returnCode == 0) {
-    return 0;
+  if (returnCode == 1) {
+    errorHandler.errorList.push_back(returnCode);
+    return 1;
   }
 
-  errorHandler.errorList.push_back(returnCode);
-  return 1;
+  return 0;
 }
 
 int Kernel::kernelMemDumpAll() {

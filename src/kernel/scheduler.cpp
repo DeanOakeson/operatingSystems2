@@ -1,3 +1,4 @@
+
 #include "scheduler.h"
 // -----------
 // Constructor
@@ -14,6 +15,18 @@ void Scheduler::setVerbosityFlag() {
   verbosityFlag = true;
   return;
 }
+
+int Scheduler::initSemaphore(int value) {
+  Semaphore *newSemaphore = new Semaphore();
+  newSemaphore->value = value;
+  newSemaphore->sId = semIdCounter;
+  // it is inserted at the loaction of the id number
+  semaphoreTable.push_back(newSemaphore);
+  semIdCounter++;
+  return newSemaphore->sId;
+}
+
+// int Scheduler::deconSemaphore(int semId) {}
 
 // ----------------
 // Scheduling algos
@@ -54,7 +67,10 @@ int Scheduler::firstComeFirstServe() {
     queuePcb(*pRunningPcb, WAITING);
     clearCpu();
     interruptServiceRoutine(*pRunningPcb, returnCode);
-    queuePcb(*popQueue(WAITING), READY);
+    if (!waitingQueue.empty()) {
+      popQueue(WAITING);
+      queuePcb(*pRunningPcb, READY);
+    }
     pRunningPcb = NULL;
     return returnCode;
   }
@@ -98,7 +114,8 @@ int Scheduler::roundRobin(int quantum) {
   }
 
   // if quantum is up context swap
-  if (quantumClock % quantum == 0 && !readyQueue0.empty()) {
+  if (quantumClock % quantum == 0 && quantumClock != 0 &&
+      !readyQueue0.empty()) {
     contextToPcb(*pRunningPcb);
     queuePcb(*pRunningPcb, READY);
     pRunningPcb = popQueue(READY);
@@ -116,7 +133,6 @@ int Scheduler::roundRobin(int quantum) {
     }
   } else {
     machine.idle();
-    quantumClock += 1;
 
     return 0;
   }
@@ -127,8 +143,13 @@ int Scheduler::roundRobin(int quantum) {
     queuePcb(*pRunningPcb, WAITING);
     clearCpu();
     interruptServiceRoutine(*pRunningPcb, returnCode);
-    queuePcb(*popQueue(WAITING), READY);
+    if (!waitingQueue.empty()) {
+      popQueue(WAITING);
+      queuePcb(*pRunningPcb, READY);
+    }
     pRunningPcb = NULL;
+    quantumClock = 0;
+
     return returnCode;
   }
 
@@ -140,8 +161,9 @@ int Scheduler::roundRobin(int quantum) {
     pRunningPcb->calculateResponse();
     pRunningPcb->calculateTurnAround();
     if (verbosityFlag == true) {
-      printf("[SC]::roro - %s is terminating\n", pRunningPcb->name.c_str());
+      printf("[SC]::roro - [%s] is terminating\n", pRunningPcb->name.c_str());
     }
+    quantumClock = 0;
     pRunningPcb = NULL;
     return returnCode;
   }
@@ -154,7 +176,7 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
   int quantum0 = quantum;
   int quantum1 = quantum * scaler;
   int quantum2 = quantum * 1000;
-  int quantumSet;
+  int quantumSet = quantum0;
 
   // SEND A NEW PCB TO READY
   while (!newQueue.empty()) {
@@ -170,11 +192,11 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
     pRunningPcb = popQueue(READY);
     clearCpu();
     contextToCpu(*pRunningPcb);
+    quantumClock = 0;
   }
 
   // IMPLEMENT A VARIABALE QUANTUM
   //  if quantum is up context swap
-
   if (pRunningPcb != NULL) {
     switch (pRunningPcb->pPriority) {
     case 0:
@@ -189,9 +211,9 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
     }
   }
 
-  if (pRunningPcb != NULL && quantumClock % quantumSet == 0 &&
-      !readyQueuesEmpty()) {
-    quantumClock = 1;
+  if (pRunningPcb != NULL && quantumClock != 0 &&
+      quantumClock % quantumSet == 0 && !readyQueuesEmpty()) {
+    quantumClock = 0;
     pRunningPcb->incrementQuatumCount();
     contextToPcb(*pRunningPcb);
     if (pRunningPcb->pQuantumCount >= 5) {
@@ -207,9 +229,7 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
   if (pRunningPcb != NULL) {
     returnCode = machine.fetchDecodeExecute(*pRunningPcb);
     pRunningPcb->captureTimeSlice(machine.clock);
-    quantumClock += 1;
-    if (verbosityFlag == true) {
-    }
+    quantumClock++;
   } else {
     machine.idle();
     return 0;
@@ -223,8 +243,12 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
     clearCpu();
     interruptServiceRoutine(*pRunningPcb, returnCode);
     pRunningPcb->promotePriority();
-    queuePcb(*popQueue(WAITING), READY);
+    if (!waitingQueue.empty()) {
+      popQueue(WAITING);
+      queuePcb(*pRunningPcb, READY);
+    }
     pRunningPcb = NULL;
+    quantumClock = 0;
     return returnCode;
   }
 
@@ -244,6 +268,7 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
       printf("[SC]::mlfq - %s is terminating\n", pRunningPcb->name.c_str());
     }
     pRunningPcb = NULL;
+    quantumClock = 0;
     return returnCode;
   }
 
@@ -253,30 +278,6 @@ int Scheduler::multiLevelFeedbackQueue(int quantum, int scaler) {
 // --------------
 // PCB and QUEUE Managment
 // -------------
-
-Pcb *Scheduler::createPcb(std::vector<int> asmHeader, std::string filePath) {
-  Pcb *pPcb = new Pcb(asmHeader, filePath);
-  pPcb->pId = currentIdCount;
-
-  // PUSH ONTO vMEMORY and vMEMORY LOOKUP
-  machine.ram.vMemory.push_back(pPcb);
-  machine.ram.vMemoryLookup[pPcb->name] = machine.ram.vMemory.size() - 1;
-  currentIdCount += 1;
-  return pPcb;
-}
-
-Pcb *Scheduler::getPcb(std::string filePath) {
-  // find pcb using vmem lookup and return ptr to it //
-  int index;
-  try {
-    index = machine.ram.vMemoryLookup.at(filePath);
-  } catch (std::out_of_range) {
-    printf("[SC]::gPcb - ERROR/302 - attempted vMemoryLookup.at() with false "
-           "program\n");
-    return NULL;
-  }
-  return machine.ram.vMemory[index];
-}
 
 void Scheduler::queuePcb(Pcb &process, int queue) {
   // place pcb into scheduling queues //
@@ -356,41 +357,50 @@ bool Scheduler::allQueuesEmpty() {
 //------------------
 // MEMORY MANAGMENT
 //-----------------
+//
+void Scheduler::deallocateShMemory(Pcb &process) {
+  Shm *sharedMemory = process.sharedMemory;
+
+  if (sharedMemory == NULL)
+    return;
+
+  sharedMemory->sLinkedPrcCount--;
+
+  // only free the memory when ALL linked processes are done
+  if (sharedMemory->sLinkedPrcCount <= 0) {
+    for (int i = sharedMemory->sLoadAddress;
+         i <= sharedMemory->sLoadAddress + sharedMemory->sSize; i++) {
+      machine.ram.mem[i][1] = 0;
+    }
+
+    if (verbosityFlag == true)
+      std::cout << "[SH]::dshm - [" << sharedMemory->prcTwo << "] <- / -> ["
+                << sharedMemory->prcTwo << "]addr::[" << std::hex
+                << sharedMemory->sLoadAddress << "] size::["
+                << sharedMemory->sSize << "]" << std::endl;
+  }
+  return;
+}
 
 void Scheduler::deallocateMemory(Pcb &process) {
-
-  // allow addresses to be overwritten flips bit to zero //
+  Shm *sharedMemory = process.sharedMemory;
+  if (sharedMemory != NULL) {
+    deallocateShMemory(process);
+  }
+  // free allocated main memory
   for (int i = process.pLoadAddress; i <= process.pLoadAddress + process.pSize;
        i++) {
     machine.ram.mem[i][1] = 0;
   }
-
   // deallocate from vmem and vmemlookup //
   machine.ram.vMemory.erase(machine.ram.vMemory.begin() +
                             machine.ram.vMemoryLookup.at(process.name));
   machine.ram.vMemoryLookup.erase(process.name);
   if (verbosityFlag == true) {
 
-    printf("[SC]::dalo - %s\n", process.name.c_str());
+    printf("[SC]::dalo - [%s]\n", process.name.c_str());
   }
   process.pTerminationTime = machine.clock;
-}
-
-int Scheduler::allocateMemory(Pcb &process) {
-
-  // creates pcb and flips the memory allocation bits to 1
-
-  // memory allocation //
-  for (int i = process.pLoadAddress; i <= process.pLoadAddress + process.pSize;
-       i++) {
-    machine.ram.mem[i][1] = 1;
-  }
-  if (verbosityFlag == true) {
-    printf("[SC]::allo - pId = %d\n", process.pId);
-    printf("[SC]::allo - pState = %d\n", process.pState);
-  }
-
-  return 0;
 }
 
 // ----------------
@@ -462,11 +472,8 @@ void Scheduler::interruptServiceRoutine(Pcb &process, int returnCode) {
     if (verbosityFlag == true) {
       printf("[SC]::insr - halt\n");
     }
-    queuePcb(*popQueue(WAITING), TERMINATED);
-    deallocateMemory(*pRunningPcb);
-    process.calculateResponse();
-    process.calculateTurnAround();
-    return;
+    isrHalt(process);
+    break;
   case FORK: {
     if (verbosityFlag == true) {
       printf("[SC]::insr - fork\n");
@@ -484,8 +491,35 @@ void Scheduler::interruptServiceRoutine(Pcb &process, int returnCode) {
       printf("[SC]::insr - input\n");
     }
     break;
-  }
 
+  case RET_SMRP:
+    if (verbosityFlag == true) {
+      printf("[SC]::insr - return shared memory ptr\n");
+    }
+    isrReturnSharedMemPtr(process);
+    break;
+  case PRINT_INT:
+    if (verbosityFlag == true) {
+      printf("[SC]::insr - print int\n");
+    }
+    isrPrintInt(process);
+    break;
+  case SEM_AQ:
+    if (verbosityFlag == true) {
+      printf("[SC]::insr - semaphore aquire\n");
+    }
+    isrSemaphoreAquire(process);
+    break;
+  case SEM_RE:
+    if (verbosityFlag == true) {
+      printf("[SC]::insr - semaphore signal\n");
+    }
+    isrSemaphoreRelease(process);
+    break;
+  case SEM_WAIT:
+    isrSemaphoreWait(process);
+    break;
+  }
   return;
 }
 
@@ -498,23 +532,30 @@ int Scheduler::isrVFork(Pcb &process) {
   machine.ram.vMemory.push_back(child);
   machine.ram.vMemoryLookup[child->name] = machine.ram.vMemory.size() - 1;
   child->pArrivalTime = machine.clock;
-  currentIdCount += 1;
+  prcIdCounter += 1;
   // sets z to 1 to indicate that it is the child program
   child->Z = 1;
   queuePcb(*child, READY);
   return 0;
 }
 
-int Scheduler::isrWait(Pcb &process) {}
+int Scheduler::isrHalt(Pcb &process) {
+  std::cout << "halting " << process.name << std::endl;
+  queuePcb(*popQueue(WAITING), TERMINATED);
+  std::cout << "popQueue " << process.name << std::endl;
+  deallocateMemory(*pRunningPcb);
+  std::cout << "deallocateMemory " << process.name << std::endl;
+  process.calculateResponse();
+  std::cout << "calcResponse " << process.name << std::endl;
+  process.calculateTurnAround();
+  std::cout << "calcTurnAround " << process.name << std::endl;
 
-int Scheduler::isrRandomNumberGen() {}
-
-int Scheduler::isrInputChar() {}
+  return 0;
+}
 
 int Scheduler::isrPrintString(Pcb &process) {
   // STRING PRINT
   process.Reg[0] += 1;
-  int debugAddr = process.Reg[0];
   while (machine.ram.mem[process.Reg[0]][0] != 34) {
     if (process.Reg[0] >= 10 * 1024) { // whatever your array bound is
       printf("[ERROR] isrPrintString walked off end of memory!\n");
@@ -557,3 +598,62 @@ int Scheduler::isrPrintChar(Pcb &process) {
   }
   return 0;
 }
+
+int Scheduler::isrPrintInt(Pcb &process) {
+  std::cout << std::dec << process.Reg[0];
+  return 0;
+}
+
+int Scheduler::isrReturnSharedMemPtr(Pcb &process) {
+  if (process.sharedMemory == NULL) {
+    isrHalt(process);
+    std::cout << "[ISR] - early cpu termination due do a SWI 26 with no opened "
+                 "shared memory";
+    return 100;
+  }
+
+  if (verbosityFlag == true)
+    std::cout << "[SWI4] R[0] <-- [" << process.sharedMemory->sLoadAddress
+              << "]" << std::endl;
+  process.Reg[0] = process.sharedMemory->sLoadAddress;
+  return 0;
+}
+
+int Scheduler::isrSemaphoreAquire(Pcb &process) {
+  if (process.semId < 0 || process.semId >= (int)semaphoreTable.size()) {
+    std::cout << "[ISR]::sem - invalid semId: " << process.semId << "\n";
+    return 1;
+  }
+  Semaphore *pSemaphore = semaphoreTable[process.semId];
+  if (pSemaphore == NULL) {
+    std::cout << "[ISR]::sem - null semaphore at semId: " << process.semId
+              << "\n";
+    return 1;
+  }
+
+  if (pSemaphore->value == 0) {
+    pSemaphore->blockQueue.push_back(popQueue(WAITING));
+    process.updateState(WAITING);
+  } else {
+    pSemaphore->value--;
+  }
+  return 0;
+};
+
+int Scheduler::isrSemaphoreRelease(Pcb &process) {
+  Semaphore *pSemaphore = semaphoreTable[process.semId];
+
+  pSemaphore->value++;
+  if (!pSemaphore->blockQueue.empty()) {
+    queuePcb(*pSemaphore->blockQueue.front(), READY);
+    pSemaphore->blockQueue.pop_front();
+  }
+  return 0;
+};
+
+int Scheduler::isrSemaphoreWait(Pcb &process) {
+  Semaphore *pSemaphore = semaphoreTable[process.semId];
+  pSemaphore->blockQueue.push_back(popQueue(WAITING));
+  process.updateState(WAITING);
+  return 0;
+};

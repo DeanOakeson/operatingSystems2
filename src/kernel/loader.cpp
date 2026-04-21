@@ -102,3 +102,76 @@ bool Loader::verifyMemoryIsUnoccupied(std::vector<int> asmHeader) {
   }
   return true;
 }
+
+int Loader::allocateMemory(Pcb &process) {
+
+  // memory allocation //
+  for (int i = process.pLoadAddress; i <= process.pLoadAddress + process.pSize;
+       i++) {
+    machine.ram.mem[i][1] = 1;
+  }
+  if (verbosityFlag == true) {
+    printf("[LD]::allo - pId = %d\n", process.pId);
+    printf("[LD]::allo - pState = %d\n", process.pState);
+  }
+
+  return 0;
+}
+
+int Loader::allocateSharedMemory(int size) {
+  // finds and allocates a space in memory large enough for shared mempory
+  size = size * 6; // translate to memspace
+  int location = 0;
+  int count = 0; // iterate through mem
+
+  for (int i = 0; i <= machine.ram.capacity; i++) {
+    // std::cout << i << "[" << static_cast<int>(machine.ram.mem[i][1]) << "]"
+    //           << std::endl;
+    // location is initizialed if count == 0
+    if (count == 0) {
+      location = i;
+    }
+    // IF a count is successfully reached then allocate
+    if (count >= size) {
+      break;
+    }
+
+    // if the memory marker bit is 0 then count up
+    if (static_cast<int>(machine.ram.mem[i][1]) == 0) {
+      count += 1;
+      continue;
+    }
+    // if memory marker bit is 1 then it is occupied
+    if (static_cast<int>(machine.ram.mem[i][1]) == 1) {
+      count = 0;
+      continue;
+    }
+
+    // if i == capacity
+    if (verbosityFlag == true) {
+      std::cout
+          << "[LD]::ashm - could not find a space to allocate shared memory"
+          << std::endl;
+    }
+    return -1;
+  }
+  // allocate found memory
+  for (int j = location; j <= location + size; j++) {
+    machine.ram.mem[j][1] = 1;
+  }
+
+  return location;
+}
+Pcb *Loader::createPcb(std::vector<int> asmHeader, std::string filePath) {
+  Pcb *pPcb = new Pcb(asmHeader, filePath);
+  pPcb->pId = currentIdCount;
+
+  // PUSH ONTO vMEMORY and vMEMORY LOOKUP
+  machine.ram.vMemory.push_back(pPcb);
+  machine.ram.vMemoryLookup[pPcb->name] = machine.ram.vMemory.size() - 1;
+  currentIdCount += 1;
+  if (verbosityFlag == true) {
+    std::cout << "[LD]::cpcb - pcb" << pPcb->pId << " created" << std::endl;
+  }
+  return pPcb;
+}

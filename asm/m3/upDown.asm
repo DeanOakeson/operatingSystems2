@@ -1,0 +1,36 @@
+.WORD 10
+.WORD 1000
+PRINT .BYTE '"'
+      .BYTE 'u'
+      .BYTE 'p'
+      .BYTE 'D'
+      .BYTE 'o'
+      .BYTE 'w'
+      .BYTE 'n'
+      .BYTE '\'
+      .BYTE '"'
+
+;UP
+MVI R2 10
+MVI R3 1
+LOOPO CMP R1 R2
+BEQ DOWN
+ADD R1 R1 R3
+B LOOPO
+
+
+;DOWN
+DOWN MVI R1 0
+MVI R2 50
+
+;SWI LOOP
+LOOPT ADR R0 PRINT
+SWI 1
+ADD R1 R1 R3
+CMP R1 R2
+BEQ EXIT
+B LOOPT
+
+
+EXIT SWI 10
+

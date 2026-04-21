@@ -11,6 +11,7 @@ add_library(hardware STATIC
     vm.h
     ram.h
     pcb.h
+    shm.h
 )
 
 target_include_directories(hardware PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -9,13 +9,15 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/dean/operatingSystems2/src/main.cpp" "CMakeFiles/dos.dir/src/main.cpp.o" "gcc" "CMakeFiles/dos.dir/src/main.cpp.o.d"
+  "" "dos" "gcc" "CMakeFiles/dos.dir/link.d"
   )
 
-# Targets to which this target links.
-set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/dean/operatingSystems2/build/src/shell/CMakeFiles/shell.dir/DependInfo.cmake"
-  "/home/dean/operatingSystems2/build/src/kernel/CMakeFiles/kernel.dir/DependInfo.cmake"
-  "/home/dean/operatingSystems2/build/src/hardware/CMakeFiles/hardware.dir/DependInfo.cmake"
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
+  )
+
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.

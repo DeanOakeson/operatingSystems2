@@ -31,6 +31,8 @@ void Shell::initPath() {
   functionMap["test"] = &Shell::shellTest;
   functionMap["sets"] = &Shell::shellSetScheduler;
   functionMap["wout"] = &Shell::shellWriteOut;
+  functionMap["oshm"] = &Shell::shellOpenSharedMemory;
+  functionMap["insm"] = &Shell::shellInitSemaphore;
 }
 
 //////////////////////////////////////
@@ -116,26 +118,22 @@ int Shell::shellLoad(std::vector<std::string> argList) {
 
   switch (argList.size()) {
   case 1:
-    printf("[SH]::load -- no file provided\n");
+    printf("[SH]::load - no file provided\n");
     return 1;
-  case 2:
+  default:
     // load ...
-    returnCode = kernel.kernelLoadProgram(argList[1]);
-    if (returnCode == 1) {
-      printf("[SH]::load -- attemted load failed\n");
+    auto it = argList.begin();
+    it++;
+    for (auto it = argList.begin() + 1; it != argList.end(); it++) {
+      returnCode = kernel.kernelLoadProgram(*it);
+      if (returnCode == 1) {
+        std::cout << "[SH]::load - attemted load failed " << *it << std::endl;
+        continue;
+      }
+      std::cout << "[SH]::load - [" << *it << "] loaded" << std::endl;
     }
-    return 0;
-  case 3:
-    // load -v ...
-    returnCode = kernel.kernelLoadProgram(argList[2]);
-    if (returnCode == 1) {
-      printf("[SH]::load -- attemted load failed\n");
-    }
-    kernel.kernelMemDump(argList[2]);
     return 0;
   }
-  printf("[SH]::load -- too many arguments\n");
-  return 1;
 }
 
 int Shell::shellErrorDump(std::vector<std::string> argList) {
@@ -144,11 +142,11 @@ int Shell::shellErrorDump(std::vector<std::string> argList) {
   case 1:
     returnCode = kernel.kernelErrorDump();
     if (returnCode == 1) {
-      printf("[SH]::edmp -- no logged errors\n");
+      printf("[SH]::edmp - no logged errors\n");
     }
     return 0;
   }
-  printf("[SH]::load -- too many arguments\n");
+  printf("[SH]::load - too many arguments\n");
   return 1;
 }
 
@@ -170,7 +168,7 @@ int Shell::shellRun(std::vector<std::string> argList) {
     printf("[SH]::run %s is not a valid argument\n", argList[1].c_str());
     return 1;
   }
-  printf("[SH]::run -- not valid usage\n");
+  printf("[SH]::run - not valid usage\n");
   return 1;
 }
 
@@ -183,7 +181,7 @@ int Shell::shellExecute(std::vector<std::string> argList) {
   // If no arrival time follows a program, default to 0
 
   if (argList.size() == 1) {
-    printf("[SH]::exec -- no file provided\n");
+    printf("[SH]::exec - no file provided\n");
   }
 
   int i = 1; // skip the command name
@@ -197,7 +195,7 @@ int Shell::shellExecute(std::vector<std::string> argList) {
       try {
         arrivalTime = stoi(argList[i]);
         i++; // consume the number
-      } catch (std::invalid_argument &) {
+      } catch (const std::invalid_argument &) {
         arrivalTime = 0; // next arg is another program, not a time
       }
     }
@@ -248,40 +246,33 @@ int Shell::shellCoreDump(std::vector<std::string> argList) {
 }
 
 int Shell::shellMemDump(std::vector<std::string> argList) {
+  int returnCode = 0;
 
   switch (argList.size()) {
     // memdump //
   case 1:
-    kernel.kernelMemDumpAll();
-    return 0;
+    returnCode = kernel.kernelMemDumpAll();
+    break;
   case 2:
     // memdump ../path/to/file //
-    kernel.kernelMemDump(argList[1]);
-    return 0;
+    if (argList[1] == "-a") {
+      kernel.kernelMemDumpEveryAddress();
+    }
+    returnCode = kernel.kernelMemDump(argList[1]);
+    break;
   }
   // too many arguments //
   if (argList.size() > 2) {
     printf("[SH]::mdmp - too many arguments\n");
     return 1;
   }
+
+  // getPcb did not return anything
+  if (returnCode == 204) {
+    std::cout << "[SH]::mdmp - " << argList[1] << " was not found";
+  }
   return 0;
 }
-
-// List of Graphs
-//
-//          wait    res    ta
-// Sm IO -- [  ]   [  ]   [  ]
-// Md IO -- [  ]   [  ]   [  ]
-// Lg IO -- [  ]   [  ]   [  ]
-// Sm CPU - [  ]   [  ]   [  ]
-// Md CPU - [  ]   [  ]   [  ]
-// Lg CPU - [  ]   [  ]   [  ]
-//
-// Graph data points
-//       2    4    6
-// 1:2 [  ] [  ] [  ]
-// 1:3 [  ] [  ] [  ]
-// 1:4 [  ] [  ] [  ]
 
 int Shell::shellSetScheduler(std::vector<std::string> argList) {
   int quantum = 5;
@@ -290,16 +281,16 @@ int Shell::shellSetScheduler(std::vector<std::string> argList) {
   if (argList.size() == 1) {
     switch (kernel.schedulerAlgo) {
     case FCFS:
-      std::cout << "[SH]::sets - current set algo = FCFS " << std::endl;
+      std::cout << "[SH]::sets - current set algo [FCFS] " << std::endl;
       break;
     case RR:
-      std::cout << "[SH]::sets - current set algo = RR, quantum = "
-                << kernel.schedulerQuantum << std::endl;
+      std::cout << "[SH]::sets - current set algo [RR], quantum ["
+                << kernel.schedulerQuantum << "]" << std::endl;
       break;
     case MLFQ:
-      std::cout << "[SH]::sets - current set algo = MLFQ, quantum = "
-                << kernel.schedulerQuantum << ", ratio = " << kernel.mlfqRatio
-                << std::endl;
+      std::cout << "[SH]::sets - current set algo [MLFQ], quantum ["
+                << kernel.schedulerQuantum << "], ratio [" << kernel.mlfqRatio
+                << "]" << std::endl;
       break;
     }
     return 1;
@@ -308,7 +299,7 @@ int Shell::shellSetScheduler(std::vector<std::string> argList) {
   if (argList.size() >= 3) {
     try {
       quantum = stoi(argList[2]);
-    } catch (std::invalid_argument) {
+    } catch (const std::invalid_argument &) {
       std::cout << "[SH]::sets - invalid use" << std::endl;
       return 1;
     }
@@ -318,7 +309,7 @@ int Shell::shellSetScheduler(std::vector<std::string> argList) {
     try {
       quantum = stoi(argList[2]);
       ratio = stoi(argList[3]);
-    } catch (std::invalid_argument) {
+    } catch (const std::invalid_argument &) {
       std::cout << "[SH]::sets - invalid use" << std::endl;
       return 1;
     }
@@ -331,182 +322,19 @@ int Shell::shellSetScheduler(std::vector<std::string> argList) {
               << "'sets 'algo' 'quant' 'ratio'" << std::endl;
     return FAILURE;
   case FCFS:
-    std::cout << "[SH]::sets - scheduler set to " << argList[1] << std::endl;
+    std::cout << "[SH]::sets - scheduler set to " << "[FCFS]" << std::endl;
     break;
   case RR:
-    std::cout << "[SH]::sets - scheduler set to " << argList[1]
-              << " quantum = " << quantum << std::endl;
+    std::cout << "[SH]::sets - scheduler set to " << "[RR],"
+              << " quantum [" << quantum << "]," << std::endl;
     break;
   case MLFQ:
-    std::cout << "[SH]::sets - scheduler set to " << argList[1]
-              << " quantum = " << quantum << " ,ratio = " << ratio << std::endl;
+    std::cout << "[SH]::sets - scheduler set to " << "[MLFQ]"
+              << ", quantum [" << quantum << "], ratio [" << ratio << "]"
+              << std::endl;
     break;
   }
   return SUCCESS;
-}
-
-int Shell::shellTest(std::vector<std::string> argList) {
-  std::cout << "running tests....\n";
-  int countOffset = 0;
-  std::string smIo = "";
-  for (int i = 0; i < 12; i++) {
-    smIo.append(" ../m3/smIo/");
-    smIo.append(std::to_string(i));
-    smIo.append(".osx ");
-    smIo.append(std::to_string(countOffset));
-    countOffset += 50;
-  }
-
-  std::cout << smIo;
-
-  shellVerbose(commandStringToArrayOfStrings("-v"));
-
-  // smIo.csv
-
-  // 1:2
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 2"));
-  shellExecute(commandStringToArrayOfStrings(smIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 2"));
-  shellExecute(commandStringToArrayOfStrings(smIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 2"));
-  shellExecute(commandStringToArrayOfStrings(smIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
-
-  // 1:3
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 3"));
-  shellExecute(commandStringToArrayOfStrings(smIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 3"));
-  shellExecute(commandStringToArrayOfStrings(smIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 3"));
-  shellExecute(commandStringToArrayOfStrings(smIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
-
-  // 1:4
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 4"));
-  shellExecute(commandStringToArrayOfStrings(smIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 4"));
-  shellExecute(commandStringToArrayOfStrings(smIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 4"));
-  shellExecute(commandStringToArrayOfStrings(smIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout smIo.csv"));
-
-  // mdIo.csv
-  countOffset = 0;
-  std::string mdIo = "";
-  for (int i = 0; i < 12; i++) {
-    mdIo.append(" ../m3/mdIo/");
-    mdIo.append(std::to_string(i));
-    mdIo.append(".osx ");
-    mdIo.append(std::to_string(countOffset));
-    countOffset += 50;
-  }
-
-  std::cout << mdIo;
-
-  // 1:2
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 2"));
-  shellExecute(commandStringToArrayOfStrings(mdIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 2"));
-  shellExecute(commandStringToArrayOfStrings(mdIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 2"));
-  shellExecute(commandStringToArrayOfStrings(mdIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
-
-  // 1:3
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 3"));
-  shellExecute(commandStringToArrayOfStrings(mdIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 3"));
-  shellExecute(commandStringToArrayOfStrings(mdIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 3"));
-  shellExecute(commandStringToArrayOfStrings(mdIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
-
-  // 1:4
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 4"));
-  shellExecute(commandStringToArrayOfStrings(mdIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 4"));
-  shellExecute(commandStringToArrayOfStrings(mdIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 4"));
-  shellExecute(commandStringToArrayOfStrings(mdIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout mdIo.csv"));
-
-  // lgIo.csv
-  countOffset = 0;
-  std::string lgIo = "";
-  for (int i = 0; i < 12; i++) {
-    lgIo.append(" ../m3/lgIo/");
-    lgIo.append(std::to_string(i));
-    lgIo.append(".osx ");
-    lgIo.append(std::to_string(countOffset));
-    countOffset += 50;
-  }
-
-  std::cout << lgIo;
-
-  // 1:2
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 2"));
-  shellExecute(commandStringToArrayOfStrings(lgIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 2"));
-  shellExecute(commandStringToArrayOfStrings(lgIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 2"));
-  shellExecute(commandStringToArrayOfStrings(lgIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
-
-  // 1:3
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 3"));
-  shellExecute(commandStringToArrayOfStrings(lgIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 3"));
-  shellExecute(commandStringToArrayOfStrings(lgIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 3"));
-  shellExecute(commandStringToArrayOfStrings(lgIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
-
-  // 1:4
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 2 4"));
-  shellExecute(commandStringToArrayOfStrings(lgIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 4 4"));
-  shellExecute(commandStringToArrayOfStrings(lgIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
-
-  shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 8 4"));
-  shellExecute(commandStringToArrayOfStrings(lgIo));
-  shellWriteOut(commandStringToArrayOfStrings("wout lgIo.csv"));
-
-  return 0;
 }
 
 int Shell::shellWriteOut(std::vector<std::string> argList) {
@@ -521,10 +349,137 @@ int Shell::shellWriteOut(std::vector<std::string> argList) {
     try {
       kernel.kernelWriteOut(argList[1], stoi(argList[2]));
       return 0;
-    } catch (std::invalid_argument) {
+    } catch (const std::invalid_argument &) {
       std::cout << "[SH]::wout - invalid use" << std::endl;
       return 1;
     }
+  }
+  return 0;
+}
+
+int Shell::shellInitSemaphore(std::vector<std::string> argList) {
+  int size = 1;
+  if (argList.size() < 4) {
+    std::cout
+        << "[SH]::insm - invalid use provide: insm 'sem value' 'loaded prcOne' "
+           "'loaded prcTwo'"
+        << std::endl;
+    return 1;
+  }
+  std::string pTwo = argList[3];
+  std::string pOne = argList[2];
+
+  try {
+    size = stoi(argList[1]);
+  } catch (const std::invalid_argument &) {
+    std::cout << "[SH]::oshm - invalid use provide: oshm size, pName, pName"
+              << std::endl;
+    return 1;
+  }
+
+  int returnCode = kernel.kernelInitSemaphore(size, pOne, pTwo);
+  if (returnCode == -1) {
+    std::cout << "[SH]::oshm - init semaphore failed, check logs\n";
+    return 1;
+  }
+
+  std::cout << "[SH]::insm - new semaphore [" << returnCode << "]" << std::endl;
+  return 0;
+}
+
+int Shell::shellOpenSharedMemory(std::vector<std::string> argList) {
+  // oshm (5, prod.osx, com.osx)
+  // print smid = ??
+  int size = 0;
+
+  if (argList.size() < 4) {
+    std::cout << "[SH]::oshm - invalid use provide: oshm size, pName, pName"
+              << std::endl;
+    return 1;
+  }
+  std::string pOne = argList[3];
+  std::string pTwo = argList[2];
+
+  try {
+    size = stoi(argList[1]);
+  } catch (const std::invalid_argument &) {
+    std::cout << "[SH]::oshm - invalid use provide: oshm size, pName, pName"
+              << std::endl;
+    return 1;
+  }
+
+  int returnCode = kernel.kernelOpenSharedMemory(size, pOne, pTwo);
+
+  if (returnCode == -1) {
+    std::cout << "[SH]::oshm - open shared memory failed, check logs\n";
+    return 1;
+  }
+
+  int address = returnCode;
+
+  std::cout << "[SH]::oshm - [" << pOne << "] <--> [" << pTwo << "] addr::["
+            << std::hex << address << "] size::[" << size << "]" << std::endl;
+
+  return 0;
+}
+
+int Shell::shellTest(std::vector<std::string> argList) {
+
+  if (argList.size() < 2 || argList.size() >= 3) {
+    std::cout << "[SH]::test - invalid use" << std::endl;
+    return 1;
+  }
+
+  // test 1
+  switch (stoi(argList[1])) {
+  case 1: {
+    shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 3 2"));
+    shellExecute(commandStringToArrayOfStrings(
+        "exec ../demo/0.osx ../demo/1.osx 300 ../demo/bouncing.osx 25"));
+    break;
+  }
+  case 2: {
+    shellSetScheduler(commandStringToArrayOfStrings("sets rr 7"));
+
+    shellLoad((commandStringToArrayOfStrings(
+        "load  ../prodCom/prod.osx  ../prodCom/com.osx")));
+
+    shellOpenSharedMemory((commandStringToArrayOfStrings(
+        "oshm 5  ../prodCom/prod.osx ../prodCom/com.osx")));
+    shellInitSemaphore((commandStringToArrayOfStrings(
+        "insm 1  ../prodCom/prod.osx ../prodCom/com.osx")));
+    break;
+  }
+  case 3: {
+
+    int countOffset = 0;
+    std::cout << "running tests....\n";
+    std::string smCpu = "exec";
+    for (int i = 0; i < 6; i++) {
+      smCpu.append(" ../m3/smCpu/");
+      smCpu.append(std::to_string(i));
+      smCpu.append(".osx ");
+      smCpu.append(std::to_string(countOffset));
+      countOffset += 50;
+    }
+    shellSetScheduler(commandStringToArrayOfStrings("sets mlfq 5 3"));
+    shellExecute(commandStringToArrayOfStrings(smCpu));
+    break;
+  }
+  case 4: {
+    int countOffset = 0;
+    std::cout << "running tests....\n";
+    std::string smCpu = "exec";
+    for (int i = 0; i < 6; i++) {
+      smCpu.append(" ../m3/smCpu/");
+      smCpu.append(std::to_string(i));
+      smCpu.append(".osx ");
+      smCpu.append(std::to_string(countOffset));
+      countOffset += 50;
+    }
+    shellSetScheduler(commandStringToArrayOfStrings("sets rr 7"));
+    shellExecute(commandStringToArrayOfStrings(smCpu));
+  }
   }
   return 0;
 }

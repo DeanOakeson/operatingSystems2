@@ -50,6 +50,10 @@ public:
 
   int shellMemDump(std::vector<std::string> argList);
 
+  int shellInitSemaphore(std::vector<std::string> argList);
+
+  int shellOpenSharedMemory(std::vector<std::string> argList);
+
   /////////////////////////////////////
   // VIRTUAL MACHINE CONTROL PROGRAMS//
   /////////////////////////////////////

@@ -1,6 +1,7 @@
 #ifndef PCB_H
 #define PCB_H
 
+#include "shm.h"
 #include <bits/stdc++.h>
 
 class Pcb {
@@ -11,10 +12,10 @@ public:
 
   int pPriority = 0;
   int pQuantumCount = 0;
-
   int pId = -1;
+  int semId = -1;
   int pState = 0;
-  int pLoadAddress;
+  int pLoadAddress = 0;
   int pEndAddress = 0;
   int pFirstInstruction = 0;
   int pSize = 0;
@@ -26,6 +27,8 @@ public:
   int response = 0;
   int turnAround = 0;
 
+  // shared mempointer
+  Shm *sharedMemory = NULL;
   Pcb *pChild = NULL;
 
   // ---------
@@ -42,32 +45,28 @@ public:
 
   // DEFAULT
   Pcb()
-      : pLoadAddress{0}, pEndAddress{0}, pFirstInstruction{0}, pId{0}, PC{0},
-        name{"default"} {}
+      : name{"default"}, pId{0}, pLoadAddress{0}, pEndAddress{0},
+        pFirstInstruction{0}, PC{0} {}
 
   // CONSTRUCTOR
   Pcb(std::vector<int> asmHeader, std::string filePath)
-      : pLoadAddress{asmHeader[0]}, pEndAddress{asmHeader[0] + (asmHeader[1])},
-        pSize{asmHeader[1]}, pFirstInstruction{asmHeader[2]}, pId{0},
-        pArrivalTime{asmHeader[3]}, PC{pFirstInstruction + pLoadAddress},
-        name{filePath} {}
+      : name{filePath}, pId{0}, pLoadAddress{asmHeader[0]},
+        pEndAddress{asmHeader[0] + (asmHeader[1])},
+        pFirstInstruction{asmHeader[2]}, pSize{asmHeader[1]},
+        pArrivalTime{asmHeader[3]}, PC{pFirstInstruction + pLoadAddress} {}
 
   // COPY CONSTRUCTOR FOR FORK
   Pcb(const Pcb &pcb)
-      : pLoadAddress{pcb.pLoadAddress}, pEndAddress{pcb.pEndAddress},
-        pSize{pcb.pSize}, pFirstInstruction{pcb.pFirstInstruction},
-        pId{pcb.pId + 1}, PC{pcb.PC}, name{pcb.name + ".child"}, wait{0},
-        response{0}, turnAround{0} {}
+      : name{pcb.name + ".child"}, pId{pcb.pId + 1},
+        pLoadAddress{pcb.pLoadAddress}, pEndAddress{pcb.pEndAddress},
+        pFirstInstruction{pcb.pFirstInstruction}, pSize{pcb.pSize}, wait{0},
+        response{0}, turnAround{0}, PC{pcb.PC} {}
 
   std::size_t operator()(const Pcb &pcb) const {
     return std::hash<int>()(pcb.pId);
   }
 
-  void updateState(int newState) {
-    //   printf("[PCB][PRC %d]: %d --> ", pId, pState);
-    pState = newState;
-    //  printf("%d\n", pState);
-  }
+  void updateState(int newState) { pState = newState; }
   void captureTimeSlice(int clockImage) {
     calculateWait(clockImage);
     cpuTimeSlices.push_back(clockImage);
@@ -77,30 +76,17 @@ public:
     if (pPriority > 0)
       pPriority--;
     pQuantumCount = 0;
-    //    std::cout << name << "has been promoted" << pPriority << "\n";
     return;
   }
   void demotePriority() {
     if (pPriority < 2)
       pPriority++;
     pQuantumCount = 0;
-    //   std::cout << name << "has been demoted" << pPriority << "\n";
     return;
   }
-  void incrementQuatumCount() {
-    pQuantumCount++;
-    if (pQuantumCount == 10) {
-      promotePriority();
-    }
-  }
-  void decrementQuantumCount() {
-    pQuantumCount--;
-    if (pQuantumCount > -1) {
-      demotePriority();
-    }
-  }
+  void incrementQuatumCount() { pQuantumCount++; }
+  void decrementQuantumCount() { pQuantumCount--; }
   void resetQuantumCount() { pQuantumCount = 0; }
-
   void calculateWait(int clockImage) {
     int lastTimeSlice;
     if (cpuTimeSlices.empty()) {
@@ -118,6 +104,20 @@ public:
 
   void calculateResponse() { response = cpuTimeSlices[0] - pArrivalTime; }
   void calculateTurnAround() { turnAround = pTerminationTime - pArrivalTime; }
+
+  Shm *openSharedMemory(int memId, int size, int address) {
+    Shm *newSharedMemory = new Shm(memId, size, address, name);
+    sharedMemory = newSharedMemory;
+    sharedMemory->prcOne = name;
+    sharedMemory->sLinkedPrcCount++;
+    return newSharedMemory;
+  }
+
+  void linkSharedMemory(Shm *newSharedMemory) {
+    sharedMemory = newSharedMemory;
+    sharedMemory->prcTwo = name;
+    sharedMemory->sLinkedPrcCount++;
+  }
 };
 
 #endif

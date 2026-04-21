@@ -8,3 +8,7 @@ VAL .WORD 42
 ; Code section - instructions second
 ; Get the address of VAL and store it in R2
 ADR R2 VAL
+
+
+
+

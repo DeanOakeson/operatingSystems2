@@ -34,6 +34,10 @@ public:
   int kernelMemDump(std::string filePath);
   int kernelErrorDump();
   int kernelMemDumpAll();
+  int kernelMemDumpEveryAddress();
+  int kernelOpenSharedMemory(int size, std::string pOne, std::string pTwo);
+  int kernelInitSemaphore(int size, std::string filePathOne,
+                          std::string filePathTwo);
 
   /////////////////////
   // CPU INTERACTION //

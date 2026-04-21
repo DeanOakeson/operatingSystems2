@@ -38,16 +38,25 @@ static const u_int8_t SWI = 20;
 ////////////////////
 // CPU OPERATIONS //
 ////////////////////
+void VirtualMachine::setVerbosityFlag() {
+  if (verbosityFlag == true) {
+    verbosityFlag = false;
+    return;
+  }
+
+  verbosityFlag = true;
+  return;
+}
 
 void VirtualMachine::idle() { clock++; }
 
 int VirtualMachine::fetchDecodeExecute(Pcb &process) {
   int opcode;
+  uint8_t byteArray[4];
 
   // WEIRD VARIABLES THAT WOULD BE GOOD TO GET RID OF
   int strValue;
   int strAddress;
-
   int loadValue;
   int loadAddress;
   // printf("[VM] PC -- %d\n", PC);
@@ -62,12 +71,16 @@ int VirtualMachine::fetchDecodeExecute(Pcb &process) {
   switch (opcode) {
   // ARITHMATIC //
   case ADD: // ADDS Reg<1> <-- Reg<2> + Reg<3>
-    // printf("[VM] ADDING -- R[%d]\n", ram.mem[PC + 1][0]);
     Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]] + Reg[ram.mem[PC + 3][0]];
+    if (verbosityFlag == true) {
+      std::cout << "[ADD] R[" << ram.mem[PC + 1][0] << "] <-- "
+                << Reg[ram.mem[PC + 2][0]] << "+" << Reg[ram.mem[PC + 3][0]]
+                << "\n";
+    }
     break;
   case SUB: // SUB Reg<1> <-- Reg<2> - Reg<3>
     // printf("[VM] SUBTRACTING -- R[%d]\n", ram.mem[PC + 1][0]);
-    Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]] + Reg[ram.mem[PC + 3][0]];
+    Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]] - Reg[ram.mem[PC + 3][0]];
     break;
   case MUL: // MUL Reg<1> <-- Reg<2> * Reg<3>
     // printf("[VM] MULTIPLYING -- R[%d]\n", ram.mem[PC + 1][0]);
@@ -81,13 +94,18 @@ int VirtualMachine::fetchDecodeExecute(Pcb &process) {
     Reg[ram.mem[PC + 1][0]] = Reg[ram.mem[PC + 2][0]];
     break;
   case MVI: // MOVE IMM Reg<1> <-- Reg<2> | Reg<3> |
-    // printf("[VM] MVI -- R[%d]\n", ram.mem[PC + 1][0]);
-    Reg[ram.mem[PC + 1][0]] = (int32_t)((uint32_t)ram.mem[PC + 5][0] << 24 |
-                                        (uint32_t)ram.mem[PC + 4][0] << 16 |
-                                        (uint32_t)ram.mem[PC + 3][0] << 8 |
-                                        (uint32_t)ram.mem[PC + 2][0]);
+    strValue = (int32_t)((uint32_t)ram.mem[PC + 5][0] << 24 |
+                         (uint32_t)ram.mem[PC + 4][0] << 16 |
+                         (uint32_t)ram.mem[PC + 3][0] << 8 |
+                         (uint32_t)ram.mem[PC + 2][0]);
+
+    Reg[ram.mem[PC + 1][0]] = strValue;
+
+    if (verbosityFlag == true)
+      std::cout << "[MVI] R[" << std::to_string(ram.mem[PC + 1][0]) << "] <--"
+                << strValue << "\n";
     break;
-  case ADR:
+  case ADR: // <reg1> <-- address(<label>)
     byteOffset = (int32_t)(uint32_t)ram.mem[PC + 5][0] << 24 |
                  (uint32_t)ram.mem[PC + 4][0] << 16 |
                  (uint32_t)ram.mem[PC + 3][0] << 8 |
@@ -95,33 +113,62 @@ int VirtualMachine::fetchDecodeExecute(Pcb &process) {
 
     Reg[ram.mem[PC + 1][0]] = byteOffset + process.pLoadAddress;
 
-    // printf("[ADR] [REG : %d] = %d\n", ram.mem[PC + 1][0],
-    //        byteOffset + process.pLoadAddress);
+    if (verbosityFlag == true)
+      std::cout << "[ADR] R[" << std::to_string(ram.mem[PC + 1][0]) << "] <-- ["
+                << std::hex << byteOffset + process.pLoadAddress << "]\n";
 
     break;
 
-  case STR: // memory[<reg2>] <reg1>
+  case STR: // memory[<reg2>] <- <reg1>
     strValue = Reg[ram.mem[PC + 1][0]];
-    strAddress = ram.mem[Reg[ram.mem[PC + 2][0]]][0];
-    ram.mem[strAddress][0] = strValue;
-    // printf("ADDRESS:[%d] = %d\n", strAddress, strValue);
+    strAddress = Reg[ram.mem[PC + 2][0]];
+
+    byteArray[0] = (strValue >> 0) & 0xFF;
+    byteArray[1] = (strValue >> 8) & 0xFF;
+    byteArray[2] = (strValue >> 16) & 0xFF;
+    byteArray[3] = (strValue >> 24) & 0xFF;
+
+    for (int i = 0; i < 4; i++) {
+      if (ram.mem[strAddress + i][1] == 1)
+        ram.mem[strAddress + i][0] = byteArray[i];
+      else {
+        std::cout << "[VM]::str - pId::" << std::to_string(process.pId)
+                  << " segfault\n";
+        return 10;
+      }
+    }
+    if (verbosityFlag == true)
+      std::cout << process.pId << "[STR] [" << std::hex << strAddress
+                << "] <-- " << strValue << std::endl;
     break;
-  case STRB:
+  case STRB: // memory[<reg 2>] <-byte(memory[<reg1>])
     break;
   case LDR: // IDK IF THIS WORKS <reg1> <--memory[<reg2>]
-    loadAddress = ram.mem[Reg[PC + 2]][0];
-    loadValue = (int32_t)(uint32_t)ram.mem[loadAddress + 3][0] << 24 |
-                (uint32_t)ram.mem[loadAddress + 2][0] << 16 |
-                (uint32_t)ram.mem[loadAddress + 1][0] << 8 |
-                (uint32_t)ram.mem[loadAddress][0];
-    Reg[PC + 1] = loadValue;
-    break;
-  case LDRB: // <reg1> <-- byte(memory[<reg2>]
 
+    loadAddress = Reg[ram.mem[PC + 2][0]];
+    loadValue = (int32_t)(((uint32_t)ram.mem[loadAddress + 3][0] << 24 |
+                           (uint32_t)ram.mem[loadAddress + 2][0] << 16 |
+                           (uint32_t)ram.mem[loadAddress + 1][0] << 8 |
+                           (uint32_t)ram.mem[loadAddress][0]));
+    if (ram.mem[loadAddress][1] == 0) {
+      std::cout << process.pId << "[VM]::ldr - pName::[" << process.name
+                << "] addr::[" << std::hex << loadAddress << "] - segfault\n";
+      return 10;
+    }
+
+    Reg[ram.mem[PC + 1][0]] = loadValue;
+
+    if (verbosityFlag == true)
+      std::cout << process.pId << "[LDR] R["
+                << std::to_string(ram.mem[PC + 1][0]) << "] <-- [" << loadValue
+                << "]\n";
+    break;
+
+  case LDRB: // <reg1> <-- byte(memory[<reg2>]
     loadValue = ram.mem[Reg[ram.mem[PC + 2][0]]][0];
     Reg[ram.mem[PC + 1][0]] = loadValue;
     // printf("[LDRB] ---> %d\n", loadValue);
-    // printf("[LDRB][REG %d] = %d\n", PC + 1, Reg[0]);
+    //
     break;
   // BRANCH //
   case B: // BRANCH
@@ -208,23 +255,67 @@ int VirtualMachine::fetchDecodeExecute(Pcb &process) {
                            (uint32_t)ram.mem[PC + 2][0] << 8 |
                            (uint32_t)ram.mem[PC + 1][0]));
     switch (swiOpCode) {
+    case 0: // PRINT INT
+      PC += 6;
+      clock++;
+      if (verbosityFlag == true)
+        std::cout << process.pId << "[SWI] 0\n";
+      return 20;
+
     case 1: // PRINT
       PC += 6;
       clock++;
+      if (verbosityFlag == true)
+        std::cout << process.pId << "[SWI] 1\n";
       return 21;
+
     case 2: // INPUT
       PC += 6;
       clock++;
-      // printf("[VM] Returning 22\n");
+      if (verbosityFlag == true)
+        std::cout << process.pId << "[SWI] 2\n";
       return 22;
+
     case 3: // FORK
       PC += 6;
       clock++;
-      // printf("[VM] Returning 23\n");
+      if (verbosityFlag == true)
+        std::cout << process.pId << "[SWI] 3\n";
       return 23;
+
+    case 4: // RETURN SHARED MEMORY POINTER
+      PC += 6;
+      clock++;
+      if (verbosityFlag == true)
+        std::cout << process.pId << "[SWI] 4\n";
+      return 24;
+
+    case 5: // AQUIRE SEMAPHORE
+      PC += 6;
+      clock++;
+      if (verbosityFlag == true)
+        std::cout << process.pId << "[SWI] 5\n";
+      return 25;
+
+    case 6: // RELEASE SEMAPHORE
+      PC += 6;
+      clock++;
+      if (verbosityFlag == true)
+        std::cout << process.pId << "[SWI] 6\n";
+      return 26;
+
+    case 7: // WAIT SEMAPHORE
+      PC += 6;
+      clock++;
+      if (verbosityFlag == true)
+        std::cout << process.pId << "[SWI] 7\n";
+      return 27;
+
     case 10: // HALT
       PC += 6;
       clock++;
+      if (verbosityFlag == true)
+        std::cout << process.pId << "[SWI] 10\n";
       return 10;
     }
   }
@@ -233,9 +324,9 @@ int VirtualMachine::fetchDecodeExecute(Pcb &process) {
     PC += 6;
   }
 
-  if (PC >= process.pSize + process.pLoadAddress) {
-    return 10;
-  }
-
+  // if (PC > process.pSize + process.pLoadAddress) {
+  //   return 10;
+  // }
+  //
   return 0;
 }

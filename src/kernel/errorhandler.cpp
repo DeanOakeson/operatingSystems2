@@ -50,71 +50,104 @@ int ErrorHandler::errorDump() {
   for (const int &i : errorList) {
     switch (i) {
     case CPU_EARLY_TERMINATION:
-      printf("[LD]::ldpr -100 --cpu early termination\n");
+      std::cout << " [LD]:: ldpr -100 --cpu early termination--" << std::endl;
       break;
     case MEM_OVERFLOW:
-      printf("[LD]::ldpr -201 --memory overflow--\n");
+      std::cout << "[LD]::ldpr -201 --memory overflow----" << std::endl;
       break;
     case MEM_OVERWRITE:
-      printf("[LD]::ldpr -202 --attempted memory overwrite--\n");
+      std::cout << "[LD]::ldpr -202 --attempted memory overwrite" << std::endl;
+      break;
+    case NOT_SUFFICIENT_MEM:
+      std::cout
+          << "[LD]::ashm 204 --not enough memory to allocate shared memory"
+          << std::endl;
       break;
     case LOAD_FILE_NOT_FOUND:
-      printf("[LD]::ldpr -200 --file not found--\n");
+      std::cout << "[LD]::ldpr -200 --file not found--" << std::endl;
       break;
     case MEM_DUMP_NO_PROGRAM:
-      printf("[EH]::mdmp -301 --attempted memDump() no loaded program--\n");
+      std::cout << "[EH]::mdmp -301 --attempted memDump() no loaded program"
+                << std::endl;
       break;
-    case MEM_DUMP_FALSE_PROGRAM:
-      printf("[EH]::mdmp -302 --attempted memDump() with false program--\n");
+    case FALSE_PROGRAM_LOOKUP:
+      std::cout << "[VM]::gpcb -302 --attempted getPcb() with false program "
+                << std::endl;
       break;
     case CORE_DUMP_NO_PRCLOG:
-      printf("[EH]::cdmp -303 --attempted coreDump() no process log\n");
+      std::cout << " [EH]::cdmp -303 --attempted coreDump() no process log"
+                << std::endl;
     }
+  }
+  return 0;
+}
+
+int ErrorHandler::memDumpEveryAddress() {
+  u_long ratio = 8;
+  u_long offset = 6;
+  for (u_long i = 0; i < MEM_SIZE_KB / ratio; i += offset) {
+    // ADDRESS
+    std::cout << "[" << std::hex << std::setw(4) << std::setfill('0') << i
+              << "]: ";
+    // HEX bytes - row 1
+    for (u_long j = 0; j < offset; j++) {
+      if (i + j < MEM_SIZE_KB / 2)
+        std::cout << std::hex << std::setw(2)
+                  << static_cast<int>(machine.ram.mem[i + j][0]) << " "
+                  << static_cast<int>(machine.ram.mem[i + j][1]) << " ";
+      else
+        std::cout << "   ";
+    }
+    std::cout << "\n";
   }
   return 0;
 }
 
 int ErrorHandler::memDump(std::string filePath) {
-
-  int index;
-
-  try {
-    index = machine.ram.vMemoryLookup.at(filePath);
-  } catch (std::out_of_range) {
-    if (verbosityFlag == true) {
-      printf("[EH]::mdmp -302 --attempted vMemoryLookup.at() with false "
-             "program\n");
-    }
-    return 302;
+  int offset = 6;
+  Pcb *pPcb = machine.ram.getPcb(filePath);
+  if (pPcb == NULL) {
+    return 204;
   }
 
-  Pcb *pPcb = machine.ram.vMemory[index];
-  int fileEnd = pPcb->pLoadAddress + pPcb->pSize - 1;
-
-  // CHECK IF THERE ARE ANY PCBS LOADED IN VMEM
-  if (machine.ram.vMemory.size() == 0) {
-    if (verbosityFlag == true) {
-      printf("[EH]::mdmp -301 --attempted memDump() with no loaded program\n");
+  Shm *pShm = pPcb->sharedMemory;
+  std::cout << "MEMORY LOCATIONS: " << pPcb->name << std::endl;
+  for (int i = pPcb->pLoadAddress; i < pPcb->pEndAddress; i += offset) {
+    // ADDRESS
+    std::cout << "[" << std::hex << std::setw(4) << std::setfill('0') << i
+              << "]: ";
+    // HEX bytes - row 1
+    for (int j = 0; j < offset; j++) {
+      if (i + j < pPcb->pEndAddress)
+        std::cout << std::hex << std::setw(2)
+                  << static_cast<int>(machine.ram.mem[i + j][0]) << " "
+                  << static_cast<int>(machine.ram.mem[i + j][1]) << " ";
+      else
+        std::cout << "   ";
     }
-    return 301; // 1 memDump means no load
+    std::cout << std::dec << "\n";
   }
-
-  printf("\n[EH]::mdmp \n===========\nSPACE::[ %d - "
-         "%d ]\nPROGRAM::[ %s ]\n",
-         pPcb->pLoadAddress, pPcb->pLoadAddress + pPcb->pSize,
-         filePath.c_str());
-
-  for (int j = 0; (j + pPcb->pLoadAddress) <= fileEnd; j++) {
-    if (j % 6 == 0) {
-      printf("\nADDRESS::[ %d - %d ] -- ", j + pPcb->pLoadAddress,
-             j + pPcb->pLoadAddress + 6);
+  if (pShm != NULL) {
+    std::cout << std::setw(4) << std::setfill('_')
+              << "SHARED MEMORY: " << pShm->sId << std::endl;
+    for (int i = pShm->sLoadAddress; i < pShm->sEndAddress; i += offset) {
+      // ADDRESS
+      std::cout << "[" << std::hex << std::setw(4) << std::setfill('0') << i
+                << "]: ";
+      // HEX bytes - row 1
+      for (int j = 0; j < offset; j++) {
+        if (i + j < pShm->sEndAddress)
+          std::cout << std::hex << std::setw(2)
+                    << static_cast<int>(machine.ram.mem[i + j][0]) << " "
+                    << static_cast<int>(machine.ram.mem[i + j][1]) << " ";
+        else
+          std::cout << "   ";
+      }
+      std::cout << "\n";
     }
-    printf("[ %d ]", machine.ram.mem[j + pPcb->pLoadAddress][0]);
   }
-  free(pPcb);
   return 0;
 }
-
 int ErrorHandler::memDumpAll() {
 
   // CHECK IF THERE ARE ANY PCBS LOADED IN VMEM
@@ -125,34 +158,20 @@ int ErrorHandler::memDumpAll() {
     }
     return 301; // 1 memDump means no load
   }
+
   printf("\n[EH]::mdma \n===========\n");
-
+  Pcb *pPcb;
   // this iterates over the actual vMemory not the hash
-  for (int i = 0; i < machine.ram.vMemory.size(); i++) {
-    int pFirstInstruction = machine.ram.vMemory[i]->pFirstInstruction;
-    int pLoadAddress = machine.ram.vMemory[i]->pLoadAddress;
-    int pSize = machine.ram.vMemory[i]->pSize;
-    std::string fileName = machine.ram.vMemory[i]->name;
-
-    int fileEnd = pLoadAddress + pSize - 1;
-
-    printf("\nSPACE::[ %d - %d ]\nPROGRAM::[ %s ]\n", pLoadAddress,
-           pLoadAddress + pSize, fileName.c_str());
-
-    for (int j = 0; (j + pLoadAddress) <= fileEnd; j++) {
-      if (j % 6 == 0) {
-        printf("\nADDRESS::[ %d - %d ] -- ", j + pLoadAddress,
-               j + pLoadAddress + 6);
-      }
-      printf("[ %d ]", machine.ram.mem[j + pLoadAddress][0]);
-    }
-    printf("\n");
+  for (auto it = machine.ram.vMemory.begin(); it != machine.ram.vMemory.end();
+       it++) {
+    pPcb = *it;
+    memDump(pPcb->name);
   }
+
   return 0;
 }
 
 void ErrorHandler::coreDump(ProcessLog &processLog) {
-  int regId = 0;
   int globalEnd = 0;
   int colorInt = 41; // START OF COLOR GAMMUT
   int globalStart = INT_MAX;
@@ -191,7 +210,6 @@ void ErrorHandler::coreDump(ProcessLog &processLog) {
          it != processLog.processMap.end(); it++) {
       Pcb *pPcb = it->second;
       std::string colorMod = colorMap.find(pPcb->pId)->second;
-      regId = 0;
       std::cout << colorMod << " " << pPcb->name << "\033[0m" << std::endl
                 << std::endl;
 
@@ -274,7 +292,6 @@ void ErrorHandler::printLogGannt(ProcessLog &processLog, int globalStart,
                                  int globalEnd) {
   // SOMEHTING STRANGE HAPPENS WHEN CALLING COREDUMP A SECOND TIME ON THE SAME
   // DATA
-  int i = 0;
   int newLineCounter = 0;
 
   std::string currentColor;
@@ -282,7 +299,10 @@ void ErrorHandler::printLogGannt(ProcessLog &processLog, int globalStart,
   int label = globalStart;
   for (int i = globalStart; i <= globalEnd; i++) {
     if (newLineCounter % 40 == 0 && newLineCounter != 0) {
-      std::cout << "|" << label << " -- " << (label += 20) - 1 << std::endl;
+      // update the label to be at divsor of 10
+      std::cout << "|" << label << " -- ";
+      label += 20;
+      std::cout << label - 1 << std::endl;
     }
 
     newLineCounter++;
@@ -299,19 +319,7 @@ void ErrorHandler::printLogGannt(ProcessLog &processLog, int globalStart,
 
 void ErrorHandler::printPrcGannt(Pcb &process, int globalStart, int globalEnd) {
 
-  int start = process.cpuTimeSlices[0];
-  int end = process.cpuTimeSlices.back();
   int size = process.cpuTimeSlices.size();
-
-  // int j = 0;
-  // for (int i = globalStart; i <= globalEnd; i++) {
-  //   if (j < size && process.cpuTimeSlices[j] == i) {
-  //     printf("# ");
-  //     j++;
-  //   } else {
-  //     printf("_ ");
-  //   }
-  // }
 
   int j = 0;
   printf("\n");
@@ -321,7 +329,9 @@ void ErrorHandler::printPrcGannt(Pcb &process, int globalStart, int globalEnd) {
   for (int i = globalStart; i <= globalEnd; i++) {
     // COLUMNS
     if (newLineCounter % 40 == 0 && newLineCounter != 0) {
-      std::cout << "|" << label << " -- " << (label += 20) - 1 << std::endl;
+      std::cout << "|" << label << " -- ";
+      label = label + 20;
+      std::cout << label - 1 << std::endl;
     }
     newLineCounter++;
     if (j < size && process.cpuTimeSlices[j] == i) {

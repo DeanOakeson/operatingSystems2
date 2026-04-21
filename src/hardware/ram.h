@@ -1,16 +1,23 @@
 #include "pcb.h"
+#include "shm.h"
 
-#define MEM_SIZE_KB 12 * 1024 // 12 KB
+#define MEM_SIZE_KB 12 * 1024 // 2 KB -- 12/6 = 2KB
 
 class Ram {
 public:
-  std::array<unsigned char, 2> mem[MEM_SIZE_KB];
+  int capacity = MEM_SIZE_KB;
+  std::array<unsigned char, 2> mem[MEM_SIZE_KB] = {};
   // VMEM LOOKUP TABLE// name : index in vMemory
   std::unordered_map<std::string, int> vMemoryLookup;
   std::vector<Pcb *> vMemory;
 
-  Pcb *pcbLookup(std::string name) {
-    Pcb *pPcb = vMemory[vMemoryLookup.at(name)];
-    return pPcb;
+  Pcb *getPcb(std::string name) {
+    try {
+      int index = vMemoryLookup.at(name);
+      return vMemory[index];
+
+    } catch (const std::out_of_range &e) {
+      return NULL;
+    }
   }
 };
